@@ -112,6 +112,7 @@ async function buildCtx(): Promise<Ctx> {
   const settByShow = new Map(allSettlements.map((s) => [s.showId, s]));
   const expByShow = new Map<string, number>();
   for (const e of allExpenses) {
+    if (e.absorbedByVenue) continue; // only count expenses billed to the artist
     expByShow.set(e.showId, (expByShow.get(e.showId) ?? 0) + e.amount);
   }
   const artistById = new Map(allArtists.map((a) => [a.id, a]));

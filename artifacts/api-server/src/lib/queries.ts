@@ -77,7 +77,7 @@ export async function getAllShows() {
       ...r,
       isUnsupportedDeal: isUnsupportedDeal(r.deal),
       isDisputed: isDisputedSettlement(r.settlement),
-      tense: (r.show.date > today ? "upcoming" : "past") as "past" | "upcoming",
+      tense: (r.show.date > today ? "upcoming" : r.show.date === today ? "today" : "past") as "past" | "today" | "upcoming",
       switchStatus: switchStatusByShowId.get(r.show.id) ?? null,
       guaranteeSuggestion: guaranteeByShowId.get(r.show.id) ?? null,
       expenseCategories: Array.from(
@@ -894,7 +894,9 @@ export async function getReports() {
     (sum, s) => sum + (s.totalToArtist ?? 0), 0);
 
   const showCount = pastShowIds.size;
-  const settledCount = pastShowIds.size;
+  const settledCount = allShowsRows.filter(
+    (s) => s.date <= today && (s.status === "settled" || s.status === "closed"),
+  ).length;
   const dealsWithBonuses = pastDeals.filter((d) => d.bonusesJson).length;
 
   let totalRecoupValue = 0;
