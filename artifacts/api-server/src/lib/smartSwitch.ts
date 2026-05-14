@@ -241,38 +241,16 @@ export async function generateSuggestion(
       // OR returned a low-confidence (C/D) suggestion.
     }
 
-    // Conservative fallback (active only when SGP returned tier C/D):
-    // anchor the flat to the contract guarantee instead of the cell mean.
-    // Rationale: at low SGP confidence we don't know how THIS artist + agent
-    // will behave on settlement night, so the safest move is to mirror the
-    // number on the signed contract — a known dollar figure both sides
-    // already agreed to — and drop the percentage clause that drives
-    // recoup-line arithmetic.
-    //
-    // Reality check the booker should be aware of (and that the basis
-    // string surfaces): across the venue's 137 historical vs/$1–5K
-    // settlements, the percentage clause out-paid the guarantee 87.6%
-    // of the time, with mean overshoot ~$2,338/show. So this fallback is
-    // a CONSERVATIVE floor — predictable for the venue, but the agent may
-    // push back because the artist historically gets more than the
-    // guarantee on most nights. The data-driven path (sgp_engine, used
-    // when SGP returns tier A/B above) is the one that emits a confident
-    // single number; this branch only fires when that data isn't there.
+    // Conservative fallback (SGP returned tier C/D): anchor to the contract
+    // guarantee rather than a cell mean. The basis string warns the booker
+    // that the percentage historically out-pays the guarantee at this venue,
+    // so the agent may push back on freezing the upside.
     if (
       bucket === "$1–5K" &&
       deal.guaranteeAmount != null &&
       deal.guaranteeAmount > 0
     ) {
-      // Match the contract guarantee EXACTLY (no $50 rounding) — the
-      // suggestion is anchored to the real number on the contract, not a
-      // synthesized average.
       const flat = deal.guaranteeAmount;
-      // Tier is pinned to A for the single narrow claim being made: "the
-      // flat equals the contract number." That number is certain. The
-      // broader question "will the artist actually walk with just the
-      // guarantee?" has a different answer (no, 87.6% of the time); the
-      // basis string below makes that distinction explicit so the
-      // confidence label is not mistaken for a payout prediction.
       const tier: ConfidenceTier = "A";
       const dealName = deal.dealType === "vs" ? "vs" : "percentage-of-net";
       return {

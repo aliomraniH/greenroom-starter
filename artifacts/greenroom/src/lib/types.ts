@@ -134,7 +134,7 @@ export type Recoup = {
   status: "agreed" | "disputed" | "withdrawn";
 };
 
-export type ShowTense = "past" | "upcoming";
+export type ShowTense = "past" | "today" | "upcoming";
 
 export interface ShowListRow {
   show: Show;
