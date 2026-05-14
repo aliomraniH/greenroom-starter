@@ -3,7 +3,7 @@ import { and, eq, lt } from "drizzle-orm";
 import { db } from "../db";
 import {
   deals, settlements, shows, expenses, switchSuggestions,
-  type Deal,
+  type Deal, type Show, type Artist,
 } from "../db/schema";
 import { classifyAnalyticsSizeBucket as classifySizeBucket } from "./queries";
 import { generateGuarantee } from "./smartGuarantee";
@@ -188,6 +188,7 @@ export async function generateSuggestion(
   deal: Deal,
   artistShowsAtVenue = 0,
   showId?: string,
+  preloaded?: { show: Show; deal: Deal; artist: Artist | null },
 ): Promise<GeneratedSuggestion | null> {
   const stats = await getCellStats();
   const bucket = classifySizeBucket(deal);
@@ -208,7 +209,7 @@ export async function generateSuggestion(
     // guarantee winner). This unifies "Smart Switch flat" and "Smart
     // Guaranteed Price" into one number for $1–5K vs / % of net deals.
     if (showId) {
-      const sgp = await generateGuarantee(showId, { allowPast: true });
+      const sgp = await generateGuarantee(showId, { allowPast: true, preloaded });
       if (sgp.suggestion) {
         const g = sgp.suggestion;
         const sgpTier = g.confidenceTier as ConfidenceTier;
