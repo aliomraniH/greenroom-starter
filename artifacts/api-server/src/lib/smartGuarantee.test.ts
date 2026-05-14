@@ -660,7 +660,7 @@ describe("Insurance tier assignment", () => {
     expect(r.suggestion?.insuranceTier).toBe(3);
   });
 
-  it("returns tier 2 for healthy A/B confidence with comfortable cushion", async () => {
+  it("returns tier 1 for tier-A confidence with comfortable cushion (>=$1,500)", async () => {
     for (let i = 0; i < 3; i += 1) {
       await addPastShow({
         daysBack: 30 + i,
@@ -668,9 +668,28 @@ describe("Insurance tier assignment", () => {
         expenseTotal: 500,
       });
     }
-    // payout = 0.5 * 10000 = 5000; cushion = 9000 - 500 - 5000 = 3500 ≥ 500.
+    // payout = 0.5 * 10000 = 5000; cushion = 9000 - 500 - 5000 = 3500 ≥ 1500 → tier 1.
     const id = await addUpcomingShow({
       deal: { dealType: "percentage_of_gross", guaranteeAmount: 1000, percentage: 0.5 },
+    });
+    const r = await generateGuarantee(id);
+    expect(r.suggestion?.confidenceTier).toBe("A");
+    expect(r.suggestion?.insuranceTier).toBe(1);
+  });
+
+  it("returns tier 2 for tier-A confidence with thin cushion ($500–$1,499)", async () => {
+    for (let i = 0; i < 3; i += 1) {
+      await addPastShow({
+        daysBack: 30 + i,
+        settlement: { status: "signed", grossBoxOffice: 5000, totalToArtist: 2500 },
+        expenseTotal: 500,
+      });
+    }
+    // Expected gross 5000, fees 500, expense 500 (capped),
+    // net base 4000, payout = 0.85 * 4000 = 3400.
+    // cushion = 5000 * 0.9 - 500 - 3400 = 600 → 500 ≤ cushion < 1500 → tier 2.
+    const id = await addUpcomingShow({
+      deal: { dealType: "percentage_of_net", guaranteeAmount: 1000, percentage: 0.85 },
     });
     const r = await generateGuarantee(id);
     expect(r.suggestion?.confidenceTier).toBe("A");
