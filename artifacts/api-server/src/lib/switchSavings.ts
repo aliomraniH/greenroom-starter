@@ -191,15 +191,20 @@ export async function getSwitchSavings(opts: { months?: number; topN?: number } 
     return r.deal.dealType === "vs" || r.deal.dealType === "percentage_of_net" || r.deal.dealType === "door";
   });
 
-  // Pre-fetch expenses + prior-show index in parallel (no per-candidate queries).
-  const [allExpenses, priorIndex] = await Promise.all([
+  // Pre-fetch expenses + prior-show index + artist roster in parallel.
+  // The artist roster is bulk-loaded once so the per-candidate
+  // generateGuarantee call (via generateSuggestion) can be handed its
+  // preloaded show/deal/artist instead of issuing 3 per-row DB queries.
+  const [allExpenses, priorIndex, allArtists] = await Promise.all([
     db.select().from(expenses),
     buildPriorShowIndex(),
+    db.select().from(artists),
   ]);
   const expByShow = new Map<string, number>();
   for (const e of allExpenses) {
     expByShow.set(e.showId, (expByShow.get(e.showId) ?? 0) + e.amount);
   }
+  const artistById = new Map(allArtists.map((a) => [a.id, a]));
 
   const items: SavingsItem[] = [];
   for (const r of candidates) {
@@ -210,7 +215,11 @@ export async function getSwitchSavings(opts: { months?: number; topN?: number } 
       priorIndex.get(`${show.artistId}::${show.venueId}`),
       show.date,
     );
-    const generated = await generateSuggestion(deal, artistN, show.id);
+    const generated = await generateSuggestion(deal, artistN, show.id, {
+      show,
+      deal,
+      artist: artistById.get(show.artistId) ?? null,
+    });
     if (!generated) continue;
 
     const actualPayout = settlement.totalToArtist!;
@@ -308,14 +317,6 @@ export async function getSwitchSavings(opts: { months?: number; topN?: number } 
   const totalMinutes = items.reduce((a, b) => a + b.minutesSaved, 0);
 
   // Vs-percentage-clause coverage: across every settled `vs` deal in the
-  // window (not just the top-N or even the candidate set above), how many
-  // had the percentage clause out-pay the guarantee? "Never fired" =
-  // actualToArtist <= guaranteeAmount, meaning the venue paid the
-  // guarantee floor and the artist's percentage upside never produced
-  // anything extra. This is the strongest single Phase-2 evidence point
-  // — it answers "could we just cap at the guarantee with no economic
-  // change?" directly from data.
-  // Vs-percentage-clause coverage: across every settled `vs` deal in the
   // $1–5K bucket in the window, how many had the percentage clause
   // out-pay the guarantee? Scoped to $1–5K because that is the only
   // bucket where Smart Switch's guarantee-amount fallback applies — the
@@ -386,10 +387,11 @@ export async function getSwitchProjectedGrid(
     return (PROJECTED_DEAL_TYPES as readonly string[]).includes(r.deal.dealType);
   });
 
-  const [allExpenses, priorIndex, attention] = await Promise.all([
+  const [allExpenses, priorIndex, attention, allArtists] = await Promise.all([
     db.select().from(expenses),
     buildPriorShowIndex(),
     getNeedsAttention(),
+    db.select().from(artists),
   ]);
   const expByShow = new Map<string, number>();
   for (const e of allExpenses) {
@@ -397,6 +399,7 @@ export async function getSwitchProjectedGrid(
   }
   const attentionByShow = new Set<string>();
   for (const a of attention) attentionByShow.add(a.showId);
+  const artistById = new Map(allArtists.map((a) => [a.id, a]));
 
   type Acc = {
     count: number;
@@ -447,7 +450,11 @@ export async function getSwitchProjectedGrid(
         priorIndex.get(`${show.artistId}::${show.venueId}`),
         show.date,
       );
-      const generated = await generateSuggestion(deal, artistN, show.id);
+      const generated = await generateSuggestion(deal, artistN, show.id, {
+        show,
+        deal,
+        artist: artistById.get(show.artistId) ?? null,
+      });
       if (!generated) continue;
       if (generated.shape === "flat") {
         projectedPayout = generated.suggestedFlat ?? 0;
