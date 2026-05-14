@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { db } from "../db";
 import {
   shows, artists, agents, deals, settlements, expenses, venues,
-  guaranteeSuggestions, type Deal,
+  guaranteeSuggestions, type Deal, type Show, type Artist,
 } from "../db/schema";
 import { classifySizeBucket } from "./queries";
 
@@ -308,7 +308,7 @@ function computeConfidenceTier(
   return "D";
 }
 
-function computeInsuranceTier(
+export function computeInsuranceTier(
   dealType: Deal["dealType"],
   tier: ConfidenceTier,
   suggestedPrice: number,
@@ -321,6 +321,10 @@ function computeInsuranceTier(
   const cushion = expectedGross * (1 - TICKETING_FEE_RATE) - expenseEstimate - suggestedPrice;
   if (cushion < 500) return 3;
   if (tier === "C") return 3;
+  // Tier 1 is the high-confidence, healthy-cushion case: non-door deal,
+  // tier-A historical comparables, and ≥$1,500 of headroom between
+  // expected gross-net-of-fees-and-expenses and the suggested price.
+  if (tier === "A" && cushion >= 1500) return 1;
   return 2;
 }
 
@@ -331,24 +335,41 @@ export type GeneratedGuarantee = Omit<
 
 export async function generateGuarantee(
   showId: string,
-  opts: { allowPast?: boolean } = {},
+  opts: {
+    allowPast?: boolean;
+    // Pre-loaded rows let callers (getSwitchSavings, getSwitchProjectedGrid)
+    // batch-fetch shows/deals/artists once and avoid the 3 per-candidate
+    // DB round-trips this function would otherwise issue.
+    preloaded?: { show: Show; deal: Deal; artist: Artist | null };
+  } = {},
 ): Promise<{ suggestion: GeneratedGuarantee | null; reason?: string }> {
-  const showRows = await db.select().from(shows).where(eq(shows.id, showId));
-  const show = showRows[0];
+  let show: Show | undefined;
+  let deal: Deal | undefined;
+  let artist: Artist | null;
+
+  if (opts.preloaded) {
+    show = opts.preloaded.show;
+    deal = opts.preloaded.deal;
+    artist = opts.preloaded.artist;
+  } else {
+    const showRows = await db.select().from(shows).where(eq(shows.id, showId));
+    show = showRows[0];
+    if (!show) return { suggestion: null, reason: "no_show" };
+    const dealRows = await db.select().from(deals).where(eq(deals.showId, showId));
+    deal = dealRows[0];
+    if (!deal) return { suggestion: null, reason: "no_deal" };
+    const artistRows = await db.select().from(artists).where(eq(artists.id, show.artistId));
+    artist = artistRows[0] ?? null;
+  }
+
   if (!show) return { suggestion: null, reason: "no_show" };
   if (!opts.allowPast && show.date < todayDateString()) {
     return { suggestion: null, reason: "show_already_past" };
   }
-
-  const dealRows = await db.select().from(deals).where(eq(deals.showId, showId));
-  const deal = dealRows[0];
   if (!deal) return { suggestion: null, reason: "no_deal" };
   if (deal.dealType === "flat") {
     return { suggestion: null, reason: "flat_deal_no_recommendation" };
   }
-
-  const artistRows = await db.select().from(artists).where(eq(artists.id, show.artistId));
-  const artist = artistRows[0] ?? null;
   const agentId = artist?.agentId ?? null;
   const genre = artist?.genre ?? null;
 
