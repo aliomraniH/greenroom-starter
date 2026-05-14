@@ -1,6 +1,9 @@
 # Supporting Document — Drift Report
 
-**Generated:** 2026-05-14
+**Generated:** 2026-05-14 (regenerated after the May 14 batch-fetch
+optimization in `switchSavings.ts` — the OUTPUT of every endpoint is
+unchanged, but the report was re-verified against the live API to
+confirm that.)
 **Source of truth:** Live API at this commit
 **Audit target:** `exports/greenroom-supporting-document.{html,pdf}`
 
@@ -84,22 +87,31 @@ Endpoints used: `GET /api/reports`, `GET /api/deal-analysis`
 
 - **Doc text:** "11/64 (17.2%) of settled vs / $1–5K deals had the
   percentage clause never out-pay the guarantee."
-- **Live value:** **17/133 (12.78%)** across the broader vs scan.
-- **Why it changed:** `vsPercentageFiredStats` was re-scoped — the
-  denominator widened from "$1–5K only" to "all settled vs deals," so the
-  rate dropped even though the absolute count of `never-fired` deals rose
-  from 11 to 17. The complement statistic ("clause out-pays the guarantee")
-  consequently changed too.
-- **Endpoint:** `GET /api/insights/switch-savings`, field
-  `vsPercentageFiredStats`.
+- **Live value (default 3-month window):** **3/14 (21.4%)** never-fired.
+- **Live value (24-month window, `?months=24`):** **17/133 (12.78%)**
+  never-fired — matches the previous drift-report value.
+- **Why it changed twice:**
+  1. The `vsPercentageFiredStats` block is now scoped per-call to
+     whatever window the caller asks for. The Insights tab now defaults
+     to **3 months**, so the headline number on screen is the narrow
+     window (3/14), not the wide one (17/133).
+  2. Across the 24-month history, the scope was also widened from
+     "$1–5K guarantee only" to "all settled vs deals," which is what
+     produced the 17/133 figure cited in the previous version of this
+     drift report.
+- **Endpoint:** `GET /api/insights/switch-savings` (default 3 months),
+  field `vsPercentageFiredStats`; pass `?months=24` for the historical
+  figure.
 - **Proposed replacement:**
-  > 17 of 133 (12.8%) settled vs deals had the percentage clause never
-  > out-pay the guarantee. The flat fallback is therefore the right
-  > primary recommendation for the cell.
+  > In the last 3 months, 3 of 14 settled vs deals (21.4%) had the
+  > percentage clause never out-pay the guarantee. Across the full
+  > 24-month history, that rate is 17 / 133 (12.8%). Either way the
+  > flat fallback is the right primary recommendation for the cell.
 - **Knock-on edit:** the line "The percentage clause out-pays the
   guarantee in 86.7% of vs deals (avg = $0 when it doesn't)" should
-  read **87.2%** (= 116/133). The "$0 when it doesn't" half is still
-  accurate (`avgGuaranteeWin = 0`).
+  read **78.6%** (= 11/14) in the 3-month window or **87.2%**
+  (= 116/133) in the 24-month window. The "$0 when it doesn't" half
+  is still accurate (`avgGuaranteeWin = 0`) in both windows.
 
 ### 4. SGP gap distribution (median · p75 · p90)
 
@@ -179,5 +191,29 @@ then cross-reference each row above against the relevant JSON field.
 
 - 7 stable rows (no edit needed).
 - 6 drifted rows (substantive numeric updates).
-- 1 supplementary line (`avgGuaranteeWin` complement: 86.7% → 87.2%).
+- 1 supplementary line (`avgGuaranteeWin` complement: drift report
+  previously said 86.7% → 87.2%; the current default (3-month) window
+  is 78.6% (11/14), and the 24-month window is 87.2% (116/133)).
 - 0 schema changes — only the numbers move.
+
+## Re-verification log (May 14, 2026)
+
+Re-ran the report against the live API after the N+1 batch-fetch fix
+landed in `switchSavings.ts`. The optimization is purely structural
+(pre-fetch artists once instead of per-candidate); it does not change
+any output. Verified each row:
+
+| Row | Status |
+|---|---|
+| 1. switch-grid vs/$1–5K savings ($9,186 / 34) | unchanged ✓ |
+| 2. door total savings ($13,211 / 6 deals in $0–1K) | unchanged ✓ |
+| 3. vsPercentageFiredStats | **drifted again** — see row 3 above. The endpoint is now window-scoped; the headline (3-month default) is 3/14 (21.4%), the 24-month historical is 17/133 (12.78%). |
+| 4. SGP median $870 / p75 $1,569 / p90 $2,575 | unchanged ✓ |
+| 5. SGP $400 coverage 29.5% (46/156) | unchanged ✓ |
+| 6. SGP backtest n=156 | unchanged ✓ |
+
+The only line that needs to change in the supporting doc since the
+last regeneration of this drift report is row 3, and only because the
+Insights tab now defaults to a 3-month window. Adding a window note to
+the doc (or pinning the URL to `?months=24` when citing the historical
+figure) is the durable fix.
