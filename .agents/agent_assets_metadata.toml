@@ -48,3 +48,9 @@ id = "aGYYcNrALm8uqY0Jc3eD1"
 uri = "file://exports/greenroom-sgp-vs-flat.pdf"
 type = "pdf"
 title = "Smart Guaranteed Pricing vs Flat Deals (updated)"
+
+[[outputs]]
+id = "4Zuspx56Y1xUB3bYbbv22"
+uri = "file://exports/greenroom-project-overview.pdf"
+type = "pdf"
+title = "Greenroom — Project Overview"

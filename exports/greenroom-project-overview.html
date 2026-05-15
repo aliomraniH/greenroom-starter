@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Greenroom · Project Overview · What We Built</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1c2426; --dim:#5a6a6e; --softer:#7d8c90;
+    --rule:#dee5e6; --bg:#fafaf7; --paper:#ffffff;
+    --accent:#0e6b5a; --amber:#a96a18; --rose:#8a233a;
+    --sans:'DM Sans', system-ui, sans-serif;
+    --serif:'Lora', Georgia, serif;
+    --mono:'JetBrains Mono', ui-monospace, monospace;
+  }
+  *{ box-sizing:border-box }
+  html,body{ margin:0; padding:0; background:var(--bg); color:var(--ink); font-family:var(--sans); font-size:13px; line-height:1.6; }
+  .page{ max-width:880px; margin:0 auto; padding:48px 56px; background:var(--paper); }
+  .eyebrow{ font-family:var(--mono); font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:var(--accent); margin-bottom:14px; }
+  h1{ font-family:var(--serif); font-weight:600; font-size:34px; line-height:1.15; margin:0 0 14px; }
+  h2{ font-family:var(--serif); font-weight:600; font-size:22px; margin:36px 0 10px; padding-bottom:6px; border-bottom:1px solid var(--rule); }
+  h3{ font-family:var(--serif); font-weight:600; font-size:15.5px; margin:20px 0 6px; }
+  h4{ font-family:var(--mono); font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--dim); margin:16px 0 6px; }
+  p{ margin:0 0 10px; }
+  p.intro{ font-family:var(--serif); font-style:italic; font-size:15px; color:var(--dim); line-height:1.65; max-width:680px; margin-bottom:18px; }
+  code{ font-family:var(--mono); font-size:11.5px; background:#eef2f1; padding:1px 5px; border-radius:3px; color:#163a35; }
+  ul, ol{ padding-left:20px; margin:0 0 12px; }
+  li{ margin-bottom:5px; }
+  table{ width:100%; border-collapse:collapse; margin:12px 0 18px; font-size:12px; }
+  th, td{ text-align:left; padding:7px 9px; border-bottom:1px solid var(--rule); vertical-align:top; }
+  th{ font-family:var(--mono); font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--dim); font-weight:500; }
+  td.mono, .mono{ font-family:var(--mono); font-size:11.5px; }
+  .source-line{ font-family:var(--mono); font-size:10.5px; color:var(--dim); border-top:1px solid var(--rule); padding-top:10px; margin-top:18px; }
+  .callout{ border-left:3px solid var(--accent); background:#f0f7f4; padding:11px 14px; border-radius:0 4px 4px 0; margin:14px 0; font-size:12.5px; }
+  .callout.amber{ border-left-color:var(--amber); background:#fbf3e7; }
+  .grid2{ display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin:10px 0 14px; }
+  .grid3{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px; margin:10px 0 14px; }
+  .card{ border:1px solid var(--rule); border-radius:6px; padding:12px 14px; background:#fdfdfb; }
+  .card h3{ margin-top:0; font-size:14px; }
+  .pill{ display:inline-block; font-family:var(--mono); font-size:10px; padding:2px 7px; border-radius:10px; background:#eef2f1; color:#163a35; margin-right:5px; margin-bottom:3px; }
+  .pill.amber{ background:#fbf3e7; color:#7a4d12; }
+  .pill.rose{ background:#fce8ec; color:#8a233a; }
+  .pill.dim{ background:#f0f0ec; color:#5a6a6e; }
+  hr{ border:none; border-top:1px solid var(--rule); margin:24px 0; }
+  .toc{ font-size:12px; columns:2; column-gap:24px; padding:0; list-style:none; }
+  .toc li{ margin-bottom:4px; }
+  .toc a{ color:var(--ink); text-decoration:none; border-bottom:1px dotted var(--softer); }
+  .stat-strip{ display:grid; grid-template-columns: repeat(4, 1fr); gap:1px; background:var(--rule); border:1px solid var(--rule); border-radius:8px; overflow:hidden; margin:14px 0 20px; }
+  .stat-cell{ background:var(--paper); padding:14px 12px; text-align:center; }
+  .stat-num{ font-family:var(--serif); font-size:24px; font-weight:600; color:var(--accent); }
+  .stat-label{ font-family:var(--mono); font-size:9px; letter-spacing:0.1em; text-transform:uppercase; color:var(--dim); margin-top:4px; }
+  @page{ size:Letter; margin:0.6in 0.55in; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="eyebrow">Greenroom · Project Overview · What We Built · May 2026</div>
+  <h1>Greenroom — Settlement at The Crescent</h1>
+  <p class="intro">A walkthrough of everything that landed on this branch: the product features shipped on top of the upstream <code>greenroom-starter</code>, the engineering they sit on, the demo data they run against, and the deliverable docs they cite.</p>
+  <div class="source-line">All numbers sourced from the live build at commit <code>30ca767</code>. Runs against the artifact's local libsql file at <code>artifacts/api-server/data/greenroom.db</code> with 24 months of seeded settlement history at The Crescent.</div>
+
+  <div class="stat-strip">
+    <div class="stat-cell"><div class="stat-num">7</div><div class="stat-label">App tabs</div></div>
+    <div class="stat-cell"><div class="stat-num">11</div><div class="stat-label">API endpoints</div></div>
+    <div class="stat-cell"><div class="stat-num">5</div><div class="stat-label">Case-study docs</div></div>
+    <div class="stat-cell"><div class="stat-num">15</div><div class="stat-label">Live demo shows</div></div>
+  </div>
+
+  <h2>Contents</h2>
+  <ol class="toc">
+    <li><a href="#context">1. Project context</a></li>
+    <li><a href="#features">2. Product features shipped</a></li>
+    <li><a href="#tabs">3. The seven tabs</a></li>
+    <li><a href="#engines">4. Decision engines (SGP, Smart Switch, Improve-Deal)</a></li>
+    <li><a href="#insights">5. Insights pipeline &amp; Switch-Savings</a></li>
+    <li><a href="#stack">6. Engineering stack &amp; architecture</a></li>
+    <li><a href="#data">7. Data &amp; demo seeding</a></li>
+    <li><a href="#docs">8. Deliverable documents</a></li>
+    <li><a href="#summary">9. What this proves about the case study</a></li>
+  </ol>
+
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <h2 id="context">1. Project context</h2>
+  <p>This branch is a response to the <strong>Greenroom Applied AI PM case study — "Settlement at The Crescent."</strong> The fork started from the public <code>samay-cbh/greenroom-starter</code> dataset (a fictional 250-cap live-music venue, 24 months of settlement history) and adds an opinionated booker-facing dashboard plus three decision engines that act on that history.</p>
+  <p>The thesis: <em>The Crescent's settlement pain is not "we need a better spreadsheet" — it's "the deal types we sign keep producing settlements the wizard can't close cleanly."</em> The work below is built around fixing that, in three phases the in-app product can ship without touching the contract layer.</p>
+
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <h2 id="features">2. Product features shipped</h2>
+  <p>Everything below is live in this build — clickable, persisted, and audit-able. Nothing is mocked.</p>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Smart Switch <span class="pill amber">decision engine</span></h3>
+      <p>Converts an unsupported deal (vs, %-of-net, door) into a flat-equivalent or door-hybrid shape the in-app settle wizard can close. Booker sees a pending suggestion on the show detail page and can <strong>Accept</strong>, <strong>Decline</strong>, or open the audit blob. Provenance is surfaced as a badge.</p>
+      <p><span class="pill">sgp_engine</span><span class="pill">guarantee_amount</span><span class="pill">cell_mean</span><span class="pill">door_hybrid_calc</span><span class="pill">door_dead_pool</span><span class="pill dim">suppressed</span></p>
+    </div>
+    <div class="card">
+      <h3>Smart Guaranteed Price <span class="pill amber">decision engine</span></h3>
+      <p>7-step waterfall that projects a flat number from comparable cell history. Returns A / B / C / D confidence and a full <code>auditJson</code> blob (every input, every source, every winner-step decision). Anchored to the contract guarantee via <code>max(guarantee, percentagePayout)</code>; rounded to nearest $50.</p>
+    </div>
+    <div class="card">
+      <h3>Improve Deal <span class="pill amber">decision engine</span></h3>
+      <p>Caps-only suggestions (expense cap, hospitality cap) on already-supported deals. Defaults are P75 of audit-derived historical flats. Does <em>not</em> convert deal types — that's Smart Switch's job.</p>
+    </div>
+    <div class="card">
+      <h3>Settle wizard</h3>
+      <p>Per-show <code>/shows/:id/settle</code> flow that walks gross box office → expenses → comps → recoups → totalToArtist with live math. Already supports flat and %-of-gross; Smart Switch widens what can be settled here.</p>
+    </div>
+    <div class="card">
+      <h3>Insights — qualitative clusters</h3>
+      <p>Per-cell (dealType × sizeBucket) dominant friction kind plus a top-5 cluster of recurring complaints, generated by a two-stage LLM pipeline (per-settlement summary, then per-cell theme clustering). Cached in-module with a race-safe pending promise.</p>
+    </div>
+    <div class="card">
+      <h3>Insights — Switch-Savings panel</h3>
+      <p>For each past-12-months settled vs/pn/door deal, computes the counterfactual: what would Smart Switch have suggested, what would the payout delta have been, how many recoup-thread minutes saved. Click to expand the per-deal reasoning.</p>
+    </div>
+    <div class="card">
+      <h3>Artist profile <span class="pill">/artists/:id</span></h3>
+      <p>Per-artist history page: all shows at this venue, deal-type mix, settlement disputes, review-tone topics drawn from the LLM enrichment, and a flagged-attention badge. Links back to each show detail.</p>
+    </div>
+    <div class="card">
+      <h3>Settings — runtime LLM swap</h3>
+      <p>Provider radio (Anthropic / OpenAI), per-provider key + model picker, persisted in a <code>settings</code> k/v table. Switching invalidates the Insights cache so the next request re-clusters against the new model. Keys are write-only across the API — the GET response never returns raw key material.</p>
+    </div>
+    <div class="card">
+      <h3>Needs Attention worklist</h3>
+      <p>Four rule kinds: settled-with-no-settlement, closure-phrase-in-notes-but-status-open, disputed-recoups-but-signed, stale-disputed (&gt;30d). Each carries human-readable evidence so the booker can act without context-switching.</p>
+    </div>
+    <div class="card">
+      <h3>Per-show JSON export <span class="pill">/shows/:id/export</span></h3>
+      <p>Full settlement payload plus an LLM-generated deep summary (uses the heavier <code>claude-sonnet-4-6</code> / <code>gpt-4o</code> override). Pasteable into post-mortems or contract reviews.</p>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <h2 id="tabs">3. The seven tabs</h2>
+  <p>The sidebar exposes seven pages. Each one is computed live — no static blobs.</p>
+  <table>
+    <thead><tr><th>Tab</th><th>Route</th><th>What the booker sees</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Shows</strong></td><td><code>/shows</code></td><td>Every past or upcoming show as a card. Filter by deal type, size bucket, attention. Detail page joins artist, agent, agency, venue, deal, settlement, ticket sales, expenses, comps, recoups.</td></tr>
+      <tr><td><strong>Artists</strong></td><td><code>/artists</code> · <code>/artists/:id</code></td><td>Roster grid with show counts, top deal type, review-tone topics, attention badges. Profile page drills into per-artist history.</td></tr>
+      <tr><td><strong>Reports</strong></td><td><code>/reports</code></td><td>KPIs across all past shows: deal-type counts, in-app-tool usage rate, settlement status distribution, dispute rate, totals to artist / gross, comps & recoups.</td></tr>
+      <tr><td><strong>Deal Analysis</strong></td><td><code>/deal-analysis</code></td><td>Quantitative grids: complexity buckets, size buckets, profitability, costs, revenue by deal type, revenue by month (24mo), and the dealType × sizeBucket cross-tab with attention rate per cell.</td></tr>
+      <tr><td><strong>Needs Attention</strong></td><td><code>/needs-attention</code></td><td>Worklist of past shows whose data smells off. Four rule kinds, each with explicit evidence.</td></tr>
+      <tr><td><strong>Insights</strong></td><td><code>/insights</code></td><td>Qualitative companion to Deal Analysis. Same cross-tab grid, but each cell shows the dominant friction kind + top-5 complaint clusters from LLM-enriched settlement notes. Plus the Switch-Savings panel.</td></tr>
+      <tr><td><strong>Settings</strong></td><td><code>/settings</code></td><td>LLM provider/key/model picker. Persisted to the <code>settings</code> table; clears the Insights cache on save.</td></tr>
+    </tbody>
+  </table>
+
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <h2 id="engines">4. Decision engines</h2>
+
+  <h3>Smart Guaranteed Price (SGP)</h3>
+  <p>The math layer. 7-step waterfall:</p>
+  <ol>
+    <li><strong>Cell scan</strong> — Pull all past settled deals in the same <code>(dealType, sizeBucket)</code> cell at this venue.</li>
+    <li><strong>Cell mean</strong> — If the cell has ≥ 8 comparables, use its mean payout.</li>
+    <li><strong>Agent history</strong> — Otherwise, weight by the agent's prior settlements at this venue.</li>
+    <li><strong>Genre fallback</strong> — Otherwise, the corpus-wide genre mean.</li>
+    <li><strong>Percentage projection</strong> — Apply the contract's %-clause to the expected gross.</li>
+    <li><strong>Winner step</strong> — <code>winnerValue = max(guarantee, percentagePayout)</code>. Anchors to the contract guarantee so the suggested flat never underpays the signed number.</li>
+    <li><strong>Round</strong> — <code>roundTo50(winnerValue)</code>. Note: rounds to nearest, so the suggestion can land up to $24 below the contract guarantee on a single rounding hop — sub-$50 noise.</li>
+  </ol>
+
+  <p><strong>Confidence tier</strong> (deterministic, no model):</p>
+  <table class="compact">
+    <thead><tr><th>Tier</th><th>Rule</th><th>UI copy</th></tr></thead>
+    <tbody>
+      <tr><td><strong>A</strong></td><td><code>artistShowCount ≥ 3 AND winnerMargin &gt; 200</code></td><td>"Strong data backing"</td></tr>
+      <tr><td><strong>B</strong></td><td><code>artistShowCount ≥ 1 OR agentShowCount ≥ 3</code></td><td>"Solid data backing"</td></tr>
+      <tr><td><strong>C</strong></td><td><code>agentShowCount ≥ 1 OR hasGenreData</code></td><td>"Genre-anchored"</td></tr>
+      <tr><td><strong>D</strong></td><td>else</td><td>"Thin sample" → Smart Switch falls back to <code>guarantee_amount</code></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Smart Switch (the consumer of SGP)</h3>
+  <p>Decides which suggestion shape to surface, based on deal type, size bucket, and SGP's confidence:</p>
+  <table class="compact">
+    <thead><tr><th>Deal type</th><th>Bucket</th><th>Suggestion</th></tr></thead>
+    <tbody>
+      <tr><td>vs / %-of-net</td><td>$1–5K</td><td>SGP-projected flat (A/B) or conservative <code>guarantee_amount</code> fallback (C/D)</td></tr>
+      <tr><td>door</td><td>any</td><td>Door hybrid: $500 floor + 60% of pool above $1,500 expense cap. Dead-pool case (<code>avail ≤ floor</code>) badged separately.</td></tr>
+      <tr><td>other</td><td>—</td><td>Not eligible — Improve-Deal handles caps; the rest is contract-layer work.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Improve-Deal (caps-only)</h3>
+  <p>For deals the wizard already supports, surfaces P75-historical expense and hospitality caps as structural suggestions. No deal-type conversion — that's Smart Switch's lane. Audit (Apr 2026) showed cap suggestions are flat across gross levels at this venue, so no bucket-scaling.</p>
+
+  <h3>Three different floors — same word, different roles</h3>
+  <p>"Floor" appears in three distinct mechanisms; they are not interchangeable:</p>
+  <table class="compact">
+    <thead><tr><th>Floor</th><th>Where</th><th>Mechanism</th></tr></thead>
+    <tbody>
+      <tr><td>Contract-guarantee floor</td><td>SGP step 7</td><td><code>max(guarantee, percentagePayout)</code> in the winner step</td></tr>
+      <tr><td>Conservative fallback</td><td>Smart Switch (tier C/D)</td><td>Literal copy of <code>deal.guaranteeAmount</code></td></tr>
+      <tr><td>Door hybrid floor</td><td>Smart Switch (constant)</td><td>Fixed $500 artist minimum regardless of walk-up</td></tr>
+    </tbody>
+  </table>
+  <div class="callout amber"><strong>Honest rounding caveat:</strong> Because <code>roundTo50</code> rounds to nearest (not up), the suggested flat can land up to $24 below the contract guarantee. Documented in <code>greenroom-sgp-vs-flat.pdf</code>; closeable with a one-line "round up when guarantee wins" fix.</div>
+
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <h2 id="insights">5. Insights pipeline &amp; Switch-Savings</h2>
+
+  <h3>Two-stage LLM pipeline</h3>
+  <ol>
+    <li><strong>Per-settlement enrichment</strong> (<code>POST /api/insights/enrich</code>). Every settlement with either notes, signoff text, a disputed status, or a disputed recoup is sent to the active LLM as a structured payload; the response is two new columns on the row: <code>positiveSummary</code> and <code>negativeSummary</code> (1–2 sentences each, strict JSON). Concurrency = 8 workers; idempotent.</li>
+    <li><strong>Per-cell clustering</strong> (<code>GET /api/insights</code>). For each <code>(dealType × sizeBucket)</code> cell with a top friction kind, gather every flagged deal's <code>negativeSummary</code> and call the LLM once per cell to cluster into ≤ 5 themes ordered by count.</li>
+  </ol>
+
+  <h3>Switch-Savings backend</h3>
+  <p><code>lib/switchSavings.ts</code> replays the entire Smart Switch engine against the last 12 months of settled vs/pn/door deals. Per deal: actual payout, counterfactual switch payout, money saved, time saved (estimated from notes/signoff/recoup activity), and a structured breakdown for the drill-down UI. Sorted desc, top 10 surfaced. Backed by <code>GET /api/insights/switch-savings</code>.</p>
+
+  <div class="callout"><strong>Single LLM helper.</strong> <code>lib/llm.ts</code> wraps the Anthropic and OpenAI SDKs behind <code>llmGenerateText</code> / <code>llmGenerateJson</code> / <code>llmIsConfigured</code>. Every call site (enrich, cluster, per-show export) goes through it. The Settings tab swaps providers globally with a single save.</div>
+
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <h2 id="stack">6. Engineering stack &amp; architecture</h2>
+  <table>
+    <thead><tr><th>Layer</th><th>Choice</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>Monorepo</td><td>pnpm workspaces, Node 24, TypeScript 5.9</td><td>Multi-artifact pattern (api-server, greenroom web, mockup-sandbox)</td></tr>
+      <tr><td>API</td><td>Express 5, esbuild CJS bundle</td><td>Single-binary handoff, low ceremony</td></tr>
+      <tr><td>Database</td><td>libsql/sqlite + Drizzle ORM, file-backed</td><td>Artifact self-contained; data ships with the repo</td></tr>
+      <tr><td>Migrations</td><td>Boot-time <code>ensureColumn</code> / <code>CREATE TABLE IF NOT EXISTS</code></td><td>No drizzle-kit needed for this artifact's local DB</td></tr>
+      <tr><td>Validation</td><td>Zod (<code>zod/v4</code>), <code>drizzle-zod</code></td><td>Same schemas server-side &amp; client-side</td></tr>
+      <tr><td>API codegen</td><td>Orval from OpenAPI spec</td><td>Type-safe React hooks for the frontend</td></tr>
+      <tr><td>Frontend</td><td>Vite + React + wouter + Tailwind v4 + shadcn/ui + Recharts</td><td>Light, fast, no router bloat</td></tr>
+      <tr><td>LLM</td><td>Provider-agnostic helper, Anthropic + OpenAI SDKs</td><td>Runtime swap via Settings; only one module imports SDKs</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Architecture decisions worth calling out</h3>
+  <ul>
+    <li><strong>Idempotent runtime migrations.</strong> The artifact's DB is a local sqlite file, so schema changes are applied at server boot via small helpers in <code>db/index.ts</code>. No external migration tool required.</li>
+    <li><strong>All LLM access goes through one helper.</strong> <code>lib/llm.ts</code> is the only module that imports the Anthropic or OpenAI SDKs. Settings swaps providers globally with one save.</li>
+    <li><strong>Settings keys are write-only across the API.</strong> Status responses contain <code>{configured, source, model}</code> per provider — never raw key material.</li>
+    <li><strong>Insights is cached in-module with a race-safe pending promise.</strong> First request computes; concurrent requests await the same promise; cache invalidates on server restart, Settings save, or explicit clear.</li>
+    <li><strong>Smart Switch owns flat conversion; Improve-Deal is caps-only.</strong> Audit (Apr 2026) showed "%-deal → flat" is only data-safe in the cells Smart Switch already covers. Improve-Deal therefore emits only structural caps with P75-flat defaults.</li>
+    <li><strong>Provenance enum on switch suggestions.</strong> <code>sgp_engine</code> / <code>guarantee_amount</code> / <code>cell_mean</code> / <code>door_hybrid_calc</code> / <code>door_dead_pool</code> / <code>suppressed</code> — UI badges the source so bookers can demand sample-size discipline. Tier A demotes to B when the historical band is wider than $1,000 (honest range display).</li>
+  </ul>
+
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <h2 id="data">7. Data &amp; demo seeding</h2>
+  <p>The starter dataset is 24 months of synthetic settlement history at The Crescent. On top of it, this branch adds clean upcoming-show fixtures that exercise every decision-engine path, plus a separate seed that gives the SGP demo its full confidence-tier range.</p>
+
+  <h4>Idempotent seed scripts</h4>
+  <table class="compact">
+    <thead><tr><th>Script</th><th>What it seeds</th></tr></thead>
+    <tbody>
+      <tr><td><code>scripts/seedNewDemoProposals.ts</code></td><td>15 upcoming NEW DEMO shows: 6 vs (across $1–5K, $5–15K, $15K+), 4 %-of-net (capped + uncapped), 3 door (across buckets), 2 %-of-gross. Every Smart Switch shape and Improve-Deal cap surface is covered.</td></tr>
+      <tr><td><code>scripts/seedSmartSwitchDemo.ts</code></td><td>2 pre-accepted Smart Switch examples on past shows (one flat, one door-hybrid) so <code>/shows?switched=1</code> has clean reference cases.</td></tr>
+      <tr><td><code>scripts/seedSgpRangeDemo.ts</code></td><td>Reshapes the 5 vs/pn $1–5K NEW DEMO shows so they span tiers <strong>A</strong> (Jordan Wells + 3 synthetic prior shows), <strong>B via agent</strong>, <strong>B via artist</strong>, and two <strong>D</strong> fallbacks — booker sees the full SGP range, not just the conservative fallback.</td></tr>
+      <tr><td><code>scripts/exportSeedsSnapshot.ts</code></td><td>Exports a portable JSON snapshot of every row this fork added on top of the upstream starter (artists, shows, deals, settlements, switch_suggestions, guarantee_suggestions) plus a byte-for-byte copy of <code>greenroom.db</code>.</td></tr>
+      <tr><td><code>scripts/exportCodeReviewBundle.ts</code></td><td>Bundles the dataset + a schema/purpose guide written for an external code-review agent (Claude Code, etc.) so the prototype can be reviewed without running the app.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout"><strong>Idempotency contract.</strong> Every seed script can be re-run safely — they tag their inserts (<code>[NEW DEMO]</code>, <code>[SGP-DEMO-HIST]</code>) and clear prior rows before re-seeding. The SGP-range seed also busts the in-memory SGP context cache and force-regenerates each show's <code>switch_suggestions</code> row.</div>
+
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <h2 id="docs">8. Deliverable documents</h2>
+  <p>Every PDF below lives in <code>exports/</code> and has a matching HTML source. Regenerate with WeasyPrint: <code>HTML('exports/&lt;name&gt;.html').write_pdf('exports/&lt;name&gt;.pdf')</code>.</p>
+  <table>
+    <thead><tr><th>File</th><th>What it is</th></tr></thead>
+    <tbody>
+      <tr><td><code>greenroom-settlement-final.pdf</code></td><td><strong>The final memo.</strong> The consolidated PM deliverable for the case study. Cites this prototype as evidence.</td></tr>
+      <tr><td><code>greenroom-settlement-redesign-v2.pdf</code></td><td><strong>Settlement Redesign v2.1.</strong> The opinionated three-phase argument: simplify deal types Smart Switch covers, layer Improve-Deal caps, then insurance.</td></tr>
+      <tr><td><code>greenroom-supporting-document.pdf</code></td><td><strong>Features, APIs, and Tabs.</strong> Engineering companion mapping every surface to the claim it supplies in the redesign.</td></tr>
+      <tr><td><code>greenroom-insurance-pricing.pdf</code></td><td><strong>Insurance Products 1 &amp; 2 — Suggested Cost &amp; Pricing.</strong> Per-show expected-cost derivation, 12-mo SGP backtest pricing table, tier ladder, bundles, sensitivity bands.</td></tr>
+      <tr><td><code>greenroom-sgp-vs-flat.pdf</code></td><td><strong>SGP vs Flat — Technical reference.</strong> Walks the 7-step waterfall, tier formulas, the three different "floor" mechanisms, and the rounding caveat.</td></tr>
+      <tr><td><code>greenroom-project-overview.pdf</code></td><td><em>This document.</em></td></tr>
+    </tbody>
+  </table>
+
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <h2 id="summary">9. What this proves about the case study</h2>
+  <p>The case-study prompt asks for a settlement redesign at a 250-cap venue. The deliverable on this branch answers in three layers stacked on top of each other:</p>
+  <ol>
+    <li><strong>Diagnose the right problem.</strong> Reports + Deal Analysis + Needs Attention together show the friction isn't "the wizard is slow" — it's "the wizard can't model 38% of the deal types Mariana signs." That's the redesign's opening move.</li>
+    <li><strong>Make the unsupported supportable.</strong> Smart Switch + SGP + Improve-Deal are the in-app levers that move that 38% number down. Each one is shipped, each one is audit-able, each one has a provenance badge so the booker can interrogate it.</li>
+    <li><strong>Show the dollar-and-hour math.</strong> The Switch-Savings panel replays the engine against 12 months of actual settlements. The Insurance Pricing brief takes the next step — what the platform charges for the residual risk the engine can't eliminate.</li>
+  </ol>
+  <p>Each layer is wired to the next: SGP's confidence drives Smart Switch's source enum; Smart Switch's outputs feed the Switch-Savings backtest; the backtest feeds the Insurance Pricing brief's tier ladder. Pull on any thread and the rest of the argument comes with it.</p>
+
+  <div class="source-line">Greenroom · Project Overview · May 2026 · Commit <code>30ca767</code></div>
+
+</div>
+</body>
+</html>
