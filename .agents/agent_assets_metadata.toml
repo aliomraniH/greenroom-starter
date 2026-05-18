@@ -54,3 +54,9 @@ id = "4Zuspx56Y1xUB3bYbbv22"
 uri = "file://exports/greenroom-project-overview.pdf"
 type = "pdf"
 title = "Greenroom — Project Overview"
+
+[[outputs]]
+id = "0UbP96gKqjTyJ09doosQj"
+uri = "file://exports/greenroom-interview-prep.pdf"
+type = "pdf"
+title = "Greenroom — Interview Prep (Samay's voice)"

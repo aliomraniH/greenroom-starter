@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Greenroom · Interview Prep · Questions in Samay's Voice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1c2426; --dim:#5a6a6e; --softer:#7d8c90;
+    --rule:#dee5e6; --bg:#fafaf7; --paper:#ffffff;
+    --accent:#0e6b5a; --amber:#a96a18; --rose:#8a233a; --blue:#1f4a7a;
+    --sans:'DM Sans', system-ui, sans-serif;
+    --serif:'Lora', Georgia, serif;
+    --mono:'JetBrains Mono', ui-monospace, monospace;
+  }
+  *{ box-sizing:border-box }
+  html,body{ margin:0; padding:0; background:var(--bg); color:var(--ink); font-family:var(--sans); font-size:13px; line-height:1.6; }
+  .page{ max-width:880px; margin:0 auto; padding:48px 56px; background:var(--paper); }
+  .eyebrow{ font-family:var(--mono); font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:var(--accent); margin-bottom:14px; }
+  h1{ font-family:var(--serif); font-weight:600; font-size:34px; line-height:1.15; margin:0 0 14px; }
+  h2{ font-family:var(--serif); font-weight:600; font-size:22px; margin:36px 0 6px; padding-bottom:6px; border-bottom:1px solid var(--rule); }
+  h2 .num{ font-family:var(--mono); font-size:13px; color:var(--accent); margin-right:8px; letter-spacing:0.1em; }
+  h3{ font-family:var(--serif); font-weight:600; font-size:15px; margin:18px 0 4px; }
+  p{ margin:0 0 9px; }
+  p.intro{ font-family:var(--serif); font-style:italic; font-size:15px; color:var(--dim); line-height:1.65; max-width:680px; margin-bottom:18px; }
+  p.sect-intro{ font-style:italic; color:var(--dim); font-size:12.5px; margin: 8px 0 14px; }
+  code{ font-family:var(--mono); font-size:11.5px; background:#eef2f1; padding:1px 5px; border-radius:3px; color:#163a35; }
+  ul, ol{ padding-left:20px; margin:0 0 10px; }
+  li{ margin-bottom:4px; }
+  .source-line{ font-family:var(--mono); font-size:10.5px; color:var(--dim); border-top:1px solid var(--rule); padding-top:10px; margin-top:18px; }
+  .q{ border-left:3px solid var(--accent); background:#f7faf8; padding:11px 14px 11px 16px; border-radius:0 5px 5px 0; margin:14px 0; }
+  .q .qn{ font-family:var(--mono); font-size:9.5px; letter-spacing:0.15em; color:var(--accent); text-transform:uppercase; margin-bottom:4px; }
+  .q p{ margin:0 0 6px; }
+  .q .qtext{ font-family:var(--serif); font-size:14px; color:var(--ink); }
+  .q .followup{ font-size:12px; color:var(--dim); padding-left:14px; border-left:2px dotted #c0d4ce; margin-top:8px; }
+  .q .followup b{ font-family:var(--mono); font-size:9.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--accent); font-weight:500; display:block; margin-bottom:3px; }
+  .q .testing{ font-family:var(--mono); font-size:10px; letter-spacing:0.08em; color:var(--softer); text-transform:uppercase; margin-top:8px; padding-top:6px; border-top:1px dashed var(--rule); }
+  .q .testing b{ color:var(--amber); }
+  .q.spicy{ border-left-color:var(--rose); background:#fbf6f6; }
+  .q.spicy .qn{ color:var(--rose); }
+  .q.spicy .followup{ border-left-color:#e8c4c4; }
+  .q.spicy .testing b{ color:var(--rose); }
+  .toc{ font-size:12px; columns:2; column-gap:24px; padding:0; list-style:none; }
+  .toc li{ margin-bottom:4px; }
+  .toc a{ color:var(--ink); text-decoration:none; border-bottom:1px dotted var(--softer); }
+  .callout{ border-left:3px solid var(--blue); background:#eef3f9; padding:11px 14px; border-radius:0 5px 5px 0; margin:14px 0; font-size:12.5px; color:#22344f; }
+  .callout b{ color:#1f4a7a; }
+  .persona{ display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin:14px 0 20px; }
+  .persona-card{ border:1px solid var(--rule); border-radius:6px; padding:12px 14px; background:#fdfdfb; font-size:12.5px; }
+  .persona-card h4{ font-family:var(--mono); font-size:10px; letter-spacing:0.18em; color:var(--accent); margin:0 0 6px; text-transform:uppercase; }
+  @page{ size:Letter; margin:0.6in 0.55in; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="eyebrow">Greenroom · Interview Prep · Case-Study Defense · May 2026</div>
+  <h1>Hard questions, written in the interviewer's voice</h1>
+  <p class="intro">A walkthrough of the case-study interview as if Samay Jhunjhunwalla is on the other side of the table — operator-sharp, marketplace-pragmatic, allergic to clever math that can't survive one booker objection. Each question has a planted follow-up and an explicit "what they're testing" so the prep is actually useful, not just intimidating.</p>
+
+  <div class="persona">
+    <div class="persona-card">
+      <h4>The interviewer, briefly</h4>
+      <p>Samay leads product at Greenroom and writes <em>Creating Value</em> — a Substack about marketplace product judgment. His lens is operator-first: every framework has to survive contact with a real booker on a real Tuesday at 11pm. He reads case studies for <strong>reasoning</strong> over polish.</p>
+    </div>
+    <div class="persona-card">
+      <h4>What he'll probe for</h4>
+      <ul>
+        <li><strong>Diagnosis discipline</strong> — did you frame the right problem, or jump to a fancy solution?</li>
+        <li><strong>Sample-size honesty</strong> — do you know when your data is too thin to act on?</li>
+        <li><strong>Booker trust</strong> — does the UX survive the moment Mariana disagrees with the suggestion?</li>
+        <li><strong>Failure-mode plan</strong> — when the model is wrong, who eats it and how do you know?</li>
+        <li><strong>Roll-forward judgment</strong> — what's Phase 4, and why isn't it Phase 1?</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout"><b>Format note:</b> Each block is one likely interviewer question plus one or two follow-ups. The <code>WHAT THEY'RE TESTING</code> line is the meta — what the question is actually probing under the surface. Use it to calibrate the answer's altitude (data vs judgment vs operational sense).</div>
+
+  <h2>Contents</h2>
+  <ol class="toc">
+    <li><a href="#diag">1. Diagnosis &amp; framing</a></li>
+    <li><a href="#slicing">2. Data slicing &amp; methodology</a></li>
+    <li><a href="#sgp">3. SGP waterfall — step by step</a></li>
+    <li><a href="#switch">4. Smart Switch UX &amp; booker trust</a></li>
+    <li><a href="#improve">5. Improve-Deal &amp; the caps argument</a></li>
+    <li><a href="#insights">6. Insights pipeline &amp; LLM judgment</a></li>
+    <li><a href="#savings">7. Switch-Savings backtest</a></li>
+    <li><a href="#insurance">8. Insurance pricing &amp; platform incentives</a></li>
+    <li><a href="#failure">9. Failure modes &amp; adverse cases</a></li>
+    <li><a href="#rollout">10. Rollout, measurement, Phase 4</a></li>
+  </ol>
+
+  <!-- ─── 1. DIAGNOSIS ────────────────────────────────────────── -->
+  <h2 id="diag"><span class="num">01</span>Diagnosis &amp; framing</h2>
+  <p class="sect-intro">Samay opens here. If the diagnosis is wrong, the rest of the memo doesn't matter — he'll spend 15 minutes here before touching the math.</p>
+
+  <div class="q">
+    <div class="qn">Q1.1 · opening</div>
+    <p class="qtext">Walk me through how you decided "deal type" was the bottleneck and not, say, settlement-night data entry or post-show payment latency. What did you rule out, and on what evidence?</p>
+    <div class="followup"><b>Follow-up</b>If I gave you the same dataset but the wizard could already model door deals, would your diagnosis change? What would be the new bottleneck?</div>
+    <div class="testing"><b>Testing</b> Whether you triaged the universe of failure modes before picking one. Did "wizard can't model 38% of deals" win on evidence or on convenience?</div>
+  </div>
+
+  <div class="q">
+    <div class="qn">Q1.2 · the 38% number</div>
+    <p class="qtext">You quote "38% of deals can't be settled in-app" repeatedly. Walk me through that arithmetic. Is it 38% of deal <em>count</em>, or 38% of <em>gross</em>, or 38% of <em>booker-hours</em>? Which one matters?</p>
+    <div class="followup"><b>Follow-up</b>If 38% by count is actually 12% by gross, does your Phase-1 ranking still hold?</div>
+    <div class="testing"><b>Testing</b> Whether you understand that count, dollar volume, and time spent are three different stories and you picked the right one for the audience.</div>
+  </div>
+
+  <div class="q spicy">
+    <div class="qn">Q1.3 · the unflattering frame</div>
+    <p class="qtext">A skeptic could read this memo and say "you built a calculator that recommends the deal type the wizard <em>happens</em> to support — that's tool-led, not booker-led." What's your response?</p>
+    <div class="followup"><b>Follow-up</b>What's the case where the right answer is "leave the deal as %-of-net and improve the wizard instead"?</div>
+    <div class="testing"><b>Testing</b> Whether you can argue against your own memo. He wants to see if you've stress-tested the framing.</div>
+  </div>
+
+  <!-- ─── 2. SLICING ─────────────────────────────────────────── -->
+  <h2 id="slicing"><span class="num">02</span>Data slicing &amp; methodology</h2>
+  <p class="sect-intro">Samay's an operator — he'll pick a bucket and ask why <em>that</em> one, why those edges, and whether the sample is real.</p>
+
+  <div class="q">
+    <div class="qn">Q2.1 · bucket edges</div>
+    <p class="qtext">Your size buckets are <code>$0–1K · $1–5K · $5–15K · $15K+</code>. Why those edges? They're round numbers but the industry's economics aren't linear. What does your data look like at $4,800 vs $5,200?</p>
+    <div class="followup"><b>Follow-up</b>If I move the $5K edge to $6K, does any of the cross-tab cell logic flip?</div>
+    <div class="testing"><b>Testing</b> Whether your bucket edges are defensive (round numbers because they're readable) or empirical (they sit on natural breaks in the histogram).</div>
+  </div>
+
+  <div class="q">
+    <div class="qn">Q2.2 · the 24-month window</div>
+    <p class="qtext">Why 24 months? COVID is ~24 months back depending on when you count. The Crescent's deal mix in 2024 vs 2025 — same shape, or different?</p>
+    <div class="followup"><b>Follow-up</b>If I gave you only the last 12 months, do your SGP tier counts collapse? Where?</div>
+    <div class="testing"><b>Testing</b> Whether you've considered structural breaks in your training data. Twenty-four months is a choice, not a default.</div>
+  </div>
+
+  <div class="q">
+    <div class="qn">Q2.3 · the $1–5K vs/pn cell</div>
+    <p class="qtext">Your supporting doc says the $1–5K vs/pn cell has n=141 comparables. How many are <em>distinct agents</em>? How many distinct artists? If three agents dominate that cell, is your SGP really learning "venue economics" or "Bob from CAA's negotiating style"?</p>
+    <div class="followup"><b>Follow-up</b>What's the cell concentration ratio that would make you fall back to genre instead of agent?</div>
+    <div class="testing"><b>Testing</b> Sample-size sophistication. Same n=141 can be 50 unique agents or 8 — completely different signal quality.</div>
+  </div>
+
+  <div class="q spicy">
+    <div class="qn">Q2.4 · survivorship bias</div>
+    <p class="qtext">Your dataset is settled shows. What about deals that were proposed and never booked because the booker walked away? Those are missing from the training set — but they're exactly the deals SGP is trying to advise on.</p>
+    <div class="followup"><b>Follow-up</b>How would you instrument Greenroom to start capturing the dead-deal data?</div>
+    <div class="testing"><b>Testing</b> Whether you see the selection bias in "we trained on the deals we agreed to." This is the deepest cut and probably the question he most wants to hear a good answer to.</div>
+  </div>
+
+  <!-- ─── 3. SGP ─────────────────────────────────────────────── -->
+  <h2 id="sgp"><span class="num">03</span>SGP waterfall — step by step</h2>
+  <p class="sect-intro">Each step in the 7-step waterfall is debatable. He'll pick two or three.</p>
+
+  <div class="q">
+    <div class="qn">Q3.1 · the n=8 threshold</div>
+    <p class="qtext">Step 2 fires when the cell has ≥ 8 comparables. Why 8? Why not 5, why not 20?</p>
+    <div class="followup"><b>Follow-up</b>What's the confidence interval on a cell mean from n=8? Would you show that band to Mariana?</div>
+    <div class="testing"><b>Testing</b> Whether you picked the threshold empirically (bootstrapped CI width crosses some line) or by feel.</div>
+  </div>
+
+  <div class="q">
+    <div class="qn">Q3.2 · the agent-history step</div>
+    <p class="qtext">Step 3 weights by the agent's prior settlements at this venue. An agent who has done 3 cheap deals here looks "experienced" — should they?</p>
+    <div class="followup"><b>Follow-up</b>What if the agent has 3 priors but two were disputed? Does that agent get <em>more</em> or <em>less</em> weight than a fresh agent?</div>
+    <div class="testing"><b>Testing</b> Whether "agent familiarity" is the right signal or "agent reliability" is. Different formulas.</div>
+  </div>
+
+  <div class="q">
+    <div class="qn">Q3.3 · the winner step</div>
+    <p class="qtext">Step 6 takes <code>max(guarantee, percentagePayout)</code>. That's pessimistic for the venue — you always pay the larger number. Why isn't this <code>min</code>, or a probability-weighted blend?</p>
+    <div class="followup"><b>Follow-up</b>Show me the case where <code>max</code> systematically over-pays an artist who would have settled for less.</div>
+    <div class="testing"><b>Testing</b> Whether you understand the asymmetric loss function — the venue underpays once and loses a relationship; over-pays and loses a margin point.</div>
+  </div>
+
+  <div class="q spicy">
+    <div class="qn">Q3.4 · the rounding caveat</div>
+    <p class="qtext">You document that <code>roundTo50</code> can land $24 below the contract guarantee. That's a contract breach. Why is this in the memo instead of fixed in the code before the memo went out?</p>
+    <div class="followup"><b>Follow-up</b>What's your process for catching this class of bug before it shows up to a booker?</div>
+    <div class="testing"><b>Testing</b> Honesty discipline. He's not testing whether you'll fix it — he's testing whether you'll defend the choice to disclose it. (Hint: yes, always disclose.)</div>
+  </div>
+
+  <!-- ─── 4. SMART SWITCH ────────────────────────────────────── -->
+  <h2 id="switch"><span class="num">04</span>Smart Switch UX &amp; booker trust</h2>
+
+  <div class="q">
+    <div class="qn">Q4.1 · Mariana at 11pm</div>
+    <p class="qtext">It's settlement night. The Smart Switch suggestion says "convert this %-of-net to a $4,200 flat." Mariana disagrees — she thinks $3,800. Walk me through every UI affordance she has to override, and what data she sees behind that $4,200.</p>
+    <div class="followup"><b>Follow-up</b>If she overrides three times in a row on similar deals, what does the system do?</div>
+    <div class="testing"><b>Testing</b> Whether the suggestion is a decision or a draft. Bookers don't accept decisions; they accept drafts they can edit.</div>
+  </div>
+
+  <div class="q">
+    <div class="qn">Q4.2 · the provenance enum</div>
+    <p class="qtext">You badge each suggestion with <code>sgp_engine</code> / <code>guarantee_amount</code> / <code>cell_mean</code> / etc. Real bookers — do they look at that badge? Or is it engineering hygiene wearing a UI hat?</p>
+    <div class="followup"><b>Follow-up</b>If only 5% of bookers click it, do you keep it? At what cost?</div>
+    <div class="testing"><b>Testing</b> Whether you can defend transparency UX against the "users don't care" objection. (Spoiler: it's not for the modal user, it's for the moment of dispute.)</div>
+  </div>
+
+  <div class="q">
+    <div class="qn">Q4.3 · the door-hybrid floor</div>
+    <p class="qtext">Door hybrid has a fixed $500 artist floor. Why a constant and not a venue-specific calibration? The Crescent is 250-cap; would Bowery Ballroom take the same $500?</p>
+    <div class="followup"><b>Follow-up</b>What's the right input that should set the floor — capacity, average gross, or something else?</div>
+    <div class="testing"><b>Testing</b> Whether you've thought about Phase 4 — multi-venue. The current prototype is one venue; a constant is fine. The product isn't.</div>
+  </div>
+
+  <!-- ─── 5. IMPROVE-DEAL ────────────────────────────────────── -->
+  <h2 id="improve"><span class="num">05</span>Improve-Deal &amp; the caps argument</h2>
+
+  <div class="q">
+    <div class="qn">Q5.1 · why caps-only</div>
+    <p class="qtext">You explicitly scoped Improve-Deal to caps-only. The redesign-v2 doc cites an April audit that said scaling caps by bucket isn't data-safe. Walk me through that audit — what was the test, what was the threshold?</p>
+    <div class="followup"><b>Follow-up</b>If the audit had said caps <em>do</em> scale by gross, would you still draw the Smart-Switch / Improve-Deal boundary in the same place?</div>
+    <div class="testing"><b>Testing</b> Whether the scope boundary is principled or pragmatic. Both are fine, but you have to know which.</div>
+  </div>
+
+  <div class="q">
+    <div class="qn">Q5.2 · P75 as a default</div>
+    <p class="qtext">Cap defaults are P75 of historical flats. P75 is generous to the venue. Why not P50? Why not P90?</p>
+    <div class="followup"><b>Follow-up</b>If you imagine the agent on the other side of the table reading the same memo, where would they push back on P75?</div>
+    <div class="testing"><b>Testing</b> Two-sided marketplace thinking. The venue's "reasonable cap" is the agent's "tight cap."</div>
+  </div>
+
+  <!-- ─── 6. INSIGHTS / LLM ──────────────────────────────────── -->
+  <h2 id="insights"><span class="num">06</span>Insights pipeline &amp; LLM judgment</h2>
+
+  <div class="q">
+    <div class="qn">Q6.1 · two-stage pipeline</div>
+    <p class="qtext">Per-settlement enrichment, then per-cell clustering. Why two stages and not one? You're paying for two LLM calls per insight.</p>
+    <div class="followup"><b>Follow-up</b>What's the cell with the fewest enriched rows that still produces a "top 5 themes" output? Is the output meaningful at n=3?</div>
+    <div class="testing"><b>Testing</b> Whether you can articulate the engineering tradeoff (per-row reusability, idempotency) without hiding behind it.</div>
+  </div>
+
+  <div class="q spicy">
+    <div class="qn">Q6.2 · hallucination at the cell level</div>
+    <p class="qtext">A cell with three flagged deals produces a top-5 cluster. By construction at least two themes are made up. How do you keep that from looking like a confident lie?</p>
+    <div class="followup"><b>Follow-up</b>What's the UX rule — minimum n before you render the themes? Do you render zero, or do you render with a confidence chip?</div>
+    <div class="testing"><b>Testing</b> Whether you've thought about LLM output as a UI surface, not a data artifact. This is where most case studies fail — they trust the LLM too much.</div>
+  </div>
+
+  <div class="q">
+    <div class="qn">Q6.3 · the runtime provider swap</div>
+    <p class="qtext">The Settings tab swaps providers globally and invalidates the Insights cache. Sounds clean. What's the worst-case operational story when the booker swaps from Claude to GPT-4o mid-week?</p>
+    <div class="followup"><b>Follow-up</b>How do you keep historical insights stable when the model behind them changes?</div>
+    <div class="testing"><b>Testing</b> Whether you understand that "stateless LLM call" is a lie at the product level — every insight has a provenance.</div>
+  </div>
+
+  <!-- ─── 7. SWITCH-SAVINGS ──────────────────────────────────── -->
+  <h2 id="savings"><span class="num">07</span>Switch-Savings backtest</h2>
+
+  <div class="q">
+    <div class="qn">Q7.1 · counterfactual fallacy</div>
+    <p class="qtext">Switch-Savings says "if you had used Smart Switch, you would have saved $X." But if Smart Switch had existed, the agent might have negotiated differently. How do you defend the counterfactual?</p>
+    <div class="followup"><b>Follow-up</b>What's the discount you'd apply to the headline savings number to account for agent reaction?</div>
+    <div class="testing"><b>Testing</b> Whether you understand that backtests in two-sided markets are not single-sided simulations.</div>
+  </div>
+
+  <div class="q">
+    <div class="qn">Q7.2 · the time-saved estimate</div>
+    <p class="qtext">"Time saved" is estimated from notes/signoff/recoup activity. Walk me through the formula. Is it minutes-per-recoup-thread? Per word in the signoff? How robust is that to a booker who writes long notes by habit?</p>
+    <div class="followup"><b>Follow-up</b>What's the validation — did you ever have a booker say "yes, that was about 40 minutes"?</div>
+    <div class="testing"><b>Testing</b> Whether your time number is a calibrated estimate or a plausible-looking placeholder.</div>
+  </div>
+
+  <!-- ─── 8. INSURANCE ───────────────────────────────────────── -->
+  <h2 id="insurance"><span class="num">08</span>Insurance pricing &amp; platform incentives</h2>
+
+  <div class="q">
+    <div class="qn">Q8.1 · the 4.32%</div>
+    <p class="qtext">Product 1 prices at 4.32% × $345 = $14.84 per show. Walk me through the 4.32%. Is that loss frequency, claim rate, or expected payout ratio?</p>
+    <div class="followup"><b>Follow-up</b>What's the sensitivity? If 4.32% drifts to 6%, does the product still pencil?</div>
+    <div class="testing"><b>Testing</b> Whether you understand insurance math at first-principles or you're quoting a number from a spreadsheet.</div>
+  </div>
+
+  <div class="q spicy">
+    <div class="qn">Q8.2 · adverse selection</div>
+    <p class="qtext">Bookers who opt into Product 2 are the ones who think they're going to claim. That's adverse selection. How do you price it, and how do you keep healthy bookers from paying for sick ones?</p>
+    <div class="followup"><b>Follow-up</b>Is there a version of this product that's mandatory at the platform level instead of opt-in? What does that mean for the pricing?</div>
+    <div class="testing"><b>Testing</b> Whether you've actually thought like an underwriter, not just a PM with an Excel sheet.</div>
+  </div>
+
+  <div class="q">
+    <div class="qn">Q8.3 · the two-sided discount math</div>
+    <p class="qtext">Your brief includes two-sided discounts for venues that also bring agent volume. Why is that the right structure vs flat pricing? What does it cost the platform when you mis-tier?</p>
+    <div class="followup"><b>Follow-up</b>If Greenroom were a marketplace where agents pick the platform, would your tiering survive contact with the agent side?</div>
+    <div class="testing"><b>Testing</b> Two-sided thinking, again — the Samay specialty.</div>
+  </div>
+
+  <!-- ─── 9. FAILURE MODES ───────────────────────────────────── -->
+  <h2 id="failure"><span class="num">09</span>Failure modes &amp; adverse cases</h2>
+
+  <div class="q">
+    <div class="qn">Q9.1 · the bad suggestion</div>
+    <p class="qtext">Smart Switch suggests a flat that's $800 below what the agent has already verbally agreed to. Mariana accepts the suggestion. Three months later, the agent's annoyed. Who eats the $800? Whose job is it to catch this?</p>
+    <div class="followup"><b>Follow-up</b>What's the leading indicator in the data that this is happening at scale?</div>
+    <div class="testing"><b>Testing</b> Operational ownership. Product can't ship "accept and we'll see" — there has to be a feedback loop.</div>
+  </div>
+
+  <div class="q">
+    <div class="qn">Q9.2 · the gamed agent</div>
+    <p class="qtext">An agent figures out the SGP formula and packs their early deals at the venue to inflate their "history weight." Six months in, SGP suggests $5,200 because that agent has trained the algorithm. How do you detect it?</p>
+    <div class="followup"><b>Follow-up</b>What's the right monitoring metric — agent-level dispersion of suggested-vs-actual?</div>
+    <div class="testing"><b>Testing</b> Adversarial thinking. Do you assume agents are honest, or do you assume agents are optimizers?</div>
+  </div>
+
+  <div class="q">
+    <div class="qn">Q9.3 · the empty-cell case</div>
+    <p class="qtext">A brand-new venue onboards. Day 1, zero history. What does Smart Switch say?</p>
+    <div class="followup"><b>Follow-up</b>How long is the "cold start" phase, and what's the product surface during it?</div>
+    <div class="testing"><b>Testing</b> Whether your product is a static algorithm or a system that grows up.</div>
+  </div>
+
+  <!-- ─── 10. ROLLOUT ────────────────────────────────────────── -->
+  <h2 id="rollout"><span class="num">10</span>Rollout, measurement, Phase 4</h2>
+
+  <div class="q">
+    <div class="qn">Q10.1 · the rollout order</div>
+    <p class="qtext">Your three phases are Smart Switch → Improve-Deal → Insurance. Defend the order. Why not insurance first as a wedge product?</p>
+    <div class="followup"><b>Follow-up</b>What's the bookers-have-trust prerequisite that makes insurance Phase 3 instead of Phase 1?</div>
+    <div class="testing"><b>Testing</b> Whether the order is product-logical (each phase earns the trust the next one spends) or just convenient.</div>
+  </div>
+
+  <div class="q">
+    <div class="qn">Q10.2 · the success metric</div>
+    <p class="qtext">In six months, how do I know Phase 1 worked? Give me one leading and one lagging metric — and tell me the threshold for "kill it."</p>
+    <div class="followup"><b>Follow-up</b>If acceptance rate is 70% but override rate <em>on accepted suggestions</em> is 40%, is that a win or a loss?</div>
+    <div class="testing"><b>Testing</b> Whether your KPI has a teeth — kill-threshold, not just a green check.</div>
+  </div>
+
+  <div class="q">
+    <div class="qn">Q10.3 · Phase 4</div>
+    <p class="qtext">You don't write Phase 4 in the memo. Tell me what it is and why it isn't Phase 1.</p>
+    <div class="followup"><b>Follow-up</b>What's the data you don't have yet that Phase 4 needs?</div>
+    <div class="testing"><b>Testing</b> Whether you have a real roadmap or three phases ending in fog. This is the close — leave with a vision.</div>
+  </div>
+
+  <div class="q spicy">
+    <div class="qn">Q10.4 · the existential one</div>
+    <p class="qtext">If Greenroom never builds any of this — Smart Switch, SGP, insurance — what's the actual cost to The Crescent over a year? Convince me this matters more than the next three things on our roadmap.</p>
+    <div class="followup"><b>Follow-up</b>If I told you the roadmap also includes "agent-side messaging," which one wins and why?</div>
+    <div class="testing"><b>Testing</b> Whether you can sell the work. He runs product — he doesn't just want it to be smart, he wants it to be the right thing to build next.</div>
+  </div>
+
+  <hr style="border:none;border-top:1px solid var(--rule);margin:28px 0;">
+
+  <h2>How to use this in the room</h2>
+  <ul>
+    <li><strong>Open with the diagnosis answer.</strong> If Q1.1 lands, the next 30 minutes are easier. Have the 38%-by-count vs 38%-by-gross numbers in your head before you walk in.</li>
+    <li><strong>Concede early on the rounding caveat (Q3.4).</strong> Don't defend it. He's testing honesty, not engineering. The right answer is "you're right, that's a contract-breach risk, here's the one-line fix and here's why I disclosed it rather than hide it."</li>
+    <li><strong>Don't bluff the insurance math (Q8).</strong> If you don't remember the 4.32% derivation cold, say so and pull it up — the supporting doc has it. Confidence about the wrong number is the worst signal you can send to him.</li>
+    <li><strong>For Q2.4 (survivorship bias)</strong> — name the bias by name. He'll relax visibly.</li>
+    <li><strong>For Q6.2 (LLM cluster honesty)</strong> — say "minimum-n threshold" out loud. That's the answer.</li>
+    <li><strong>Close on Phase 4 (Q10.3).</strong> Have a real one. "Multi-venue SGP calibration" + "agent-side fairness audit" is a defensible pair.</li>
+  </ul>
+
+  <div class="source-line">Greenroom · Interview Prep · May 2026 · Built against the live prototype at commit <code>30ca767</code> + the final memo + the v2.1 redesign + the supporting + the SGP-vs-flat + the insurance pricing brief in <code>exports/</code>.</div>
+
+</div>
+</body>
+</html>

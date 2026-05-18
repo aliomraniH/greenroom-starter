@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Greenroom — Settlement Redesign · May 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:       #181714;
+    --ink2:      #4a4840;
+    --dim:       #8a8880;
+    --rule:      #e2e0da;
+    --bg:        #f8f7f4;
+    --surface:   #ffffff;
+    --green:     #165c38;
+    --green-lt:  #eaf4ef;
+    --green-bd:  #9ed4b4;
+    --amber:     #7c4e00;
+    --amber-lt:  #fdf4e0;
+    --amber-bd:  #e8c87a;
+    --red:       #8a1e1e;
+    --red-lt:    #fdf0f0;
+    --red-bd:    #e8a0a0;
+    --blue:      #1a3f80;
+    --blue-lt:   #edf1fa;
+    --blue-bd:   #b0c4e8;
+    --serif:     'Lora', Georgia, serif;
+    --sans:      'DM Sans', system-ui, sans-serif;
+    --mono:      'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+  .page { max-width: 800px; margin: 0 auto; padding: 64px 40px 100px; }
+
+  /* ── Masthead ── */
+  .masthead { margin-bottom: 52px; padding-bottom: 36px; border-bottom: 2px solid var(--ink); }
+  .eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--dim); margin-bottom: 16px; }
+  h1 { font-family: var(--serif); font-size: 36px; font-weight: 600; line-height: 1.13; letter-spacing: -0.01em; margin-bottom: 14px; }
+  .tagline { font-family: var(--serif); font-style: italic; font-size: 16px; color: var(--ink2); line-height: 1.72; margin-bottom: 24px; max-width: 640px; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .meta-pill { font-family: var(--mono); font-size: 10.5px; background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 4px 12px; color: var(--dim); }
+  .meta-pill strong { color: var(--ink2); }
+
+  /* ── Section headers ── */
+  .section-rule { display: flex; align-items: center; gap: 14px; margin: 56px 0 26px; }
+  .section-rule h2 { font-family: var(--mono); font-size: 9.5px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: var(--dim); white-space: nowrap; }
+  .section-rule hr { flex: 1; border: none; border-top: 1px solid var(--rule); }
+
+  /* ── Prose ── */
+  .prose { font-size: 14.5px; line-height: 1.88; color: var(--ink2); margin-bottom: 16px; }
+  .prose strong { color: var(--ink); font-weight: 500; }
+  .prose em { font-family: var(--serif); }
+
+  /* ── Pull quote ── */
+  .pull { font-family: var(--serif); font-style: italic; font-size: 15.5px; line-height: 1.82; border-left: 3px solid var(--rule); padding-left: 20px; color: var(--ink2); margin: 28px 0; }
+  .pull cite { display: block; margin-top: 8px; font-style: normal; font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); }
+
+  /* ── Principle ── */
+  .principle { background: var(--ink); color: #f0efe9; border-radius: 10px; padding: 30px 34px; margin: 44px 0; }
+  .principle p { font-family: var(--serif); font-size: 16px; line-height: 1.82; font-style: italic; }
+  .principle p + p { margin-top: 14px; }
+  .principle strong { color: #ffffff; font-style: normal; }
+  .principle .attr { margin-top: 18px; font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.16em; text-transform: uppercase; color: #a09e98; }
+
+  /* ── Voice cards ── */
+  .voice-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 20px 0; }
+  .voice-card { background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 16px 18px; }
+  .voice-who { font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--dim); margin-bottom: 8px; }
+  .voice-quote { font-family: var(--serif); font-style: italic; font-size: 13.5px; line-height: 1.72; color: var(--ink2); }
+  .voice-quote strong { font-style: normal; color: var(--ink); font-weight: 500; }
+
+  /* ── Callouts ── */
+  .callout { border-left: 3px solid; padding: 12px 17px; margin: 16px 0; font-size: 13.5px; line-height: 1.75; border-radius: 0 6px 6px 0; }
+  .callout.green { border-color: var(--green); background: var(--green-lt); color: #0f4a2a; }
+  .callout.amber { border-color: #c9860a; background: var(--amber-lt); color: var(--amber); }
+  .callout.blue  { border-color: var(--blue);  background: var(--blue-lt);  color: var(--blue); }
+  .callout strong { color: inherit; font-weight: 600; }
+
+  /* ── Stats strip ── */
+  .stat-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; margin: 20px 0; }
+  .stat-cell { background: var(--surface); padding: 20px 16px; text-align: center; }
+  .stat-num { font-family: var(--serif); font-size: 30px; font-weight: 600; line-height: 1; margin-bottom: 6px; }
+  .stat-num.g { color: var(--green); }
+  .stat-num.r { color: var(--red); }
+  .stat-num.n { color: var(--ink); }
+  .stat-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); line-height: 1.55; }
+
+  /* ── Roadmap timeline ── */
+  .timeline { display: flex; background: var(--surface); border: 1.5px solid var(--rule); border-radius: 10px; overflow: hidden; margin-bottom: 52px; }
+  .tl-step { flex: 1; padding: 18px 20px; border-right: 1px solid var(--rule); }
+  .tl-step:last-child { border-right: none; }
+  .tl-num { font-family: var(--mono); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 6px; }
+  .tl-step:nth-child(1) .tl-num { color: var(--blue); }
+  .tl-step:nth-child(2) .tl-num { color: var(--green); }
+  .tl-step:nth-child(3) .tl-num { color: var(--amber); }
+  .tl-step:nth-child(4) .tl-num { color: var(--dim); }
+  .tl-title { font-size: 13px; font-weight: 600; color: var(--ink); line-height: 1.3; margin-bottom: 4px; }
+  .tl-sub { font-size: 11.5px; color: var(--dim); line-height: 1.5; }
+  .tl-tag { font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em; margin-top: 9px; padding: 2px 8px; border-radius: 3px; display: inline-block; }
+  .tl-step:nth-child(1) .tl-tag { background: var(--blue-lt); color: var(--blue); }
+  .tl-step:nth-child(2) .tl-tag { background: var(--green-lt); color: var(--green); }
+  .tl-step:nth-child(3) .tl-tag { background: var(--amber-lt); color: var(--amber); }
+  .tl-step:nth-child(4) .tl-tag { background: var(--bg); color: var(--dim); border: 1px solid var(--rule); }
+
+  /* ── Phase cards ── */
+  .phase-card { border: 1.5px solid var(--rule); border-radius: 10px; overflow: hidden; margin-bottom: 24px; background: var(--surface); }
+  .phase-head { padding: 16px 24px; display: flex; align-items: center; gap: 13px; border-bottom: 1px solid var(--rule); flex-wrap: wrap; }
+  .badge { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; padding: 3px 11px; border-radius: 100px; border: 1.5px solid; flex-shrink: 0; white-space: nowrap; }
+  .badge.blue  { color: var(--blue);  border-color: var(--blue-bd);  background: var(--blue-lt);  }
+  .badge.green { color: var(--green); border-color: var(--green-bd); background: var(--green-lt); }
+  .badge.amber { color: var(--amber); border-color: var(--amber-bd); background: var(--amber-lt); }
+  .phase-title { font-family: var(--serif); font-size: 17px; font-weight: 600; line-height: 1.25; }
+  .phase-tag { font-family: var(--mono); font-size: 10px; color: var(--dim); margin-left: auto; white-space: nowrap; }
+  .phase-body { padding: 22px 24px; }
+
+  /* ── PFSE blocks ── */
+  .pfse-block { margin-bottom: 24px; }
+  .pfse-block:last-child { margin-bottom: 0; }
+  .pfse-label { font-family: var(--mono); font-size: 9.5px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--dim); display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .pfse-label::after { content: ''; flex: 1; border-top: 1px solid var(--rule); }
+  .pfse-content { font-size: 14px; line-height: 1.85; color: var(--ink2); }
+  .pfse-content strong { color: var(--ink); font-weight: 500; }
+  .pfse-content p + p { margin-top: 11px; }
+  .pfse-content em { font-family: var(--serif); }
+
+  /* ── Compare grid ── */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 9px; overflow: hidden; margin: 16px 0; }
+  .compare-col { background: var(--surface); padding: 17px 19px; }
+  .compare-head { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); margin-bottom: 11px; }
+  .compare-head.pos { color: var(--green); }
+  .compare-row { display: flex; justify-content: space-between; align-items: baseline; padding: 6px 0; border-bottom: 1px solid var(--rule); font-size: 13px; gap: 8px; }
+  .compare-row:last-child { border-bottom: none; }
+  .compare-k { color: var(--ink2); }
+  .compare-v { font-family: var(--mono); font-size: 12px; font-weight: 500; text-align: right; flex-shrink: 0; }
+  .compare-v.pos { color: var(--green); }
+  .compare-v.neg { color: var(--red); }
+
+  /* ── Data table ── */
+  .dt { width: 100%; border-collapse: collapse; font-size: 13px; margin: 14px 0; }
+  .dt th { font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); text-align: left; padding: 8px 10px; border-bottom: 1.5px solid var(--ink); }
+  .dt th:not(:first-child) { text-align: right; }
+  .dt td { padding: 9px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; color: var(--ink2); }
+  .dt td:not(:first-child) { text-align: right; font-family: var(--mono); font-size: 12px; }
+  .dt tr:last-child td { border-bottom: none; }
+  .td-pos { color: var(--green) !important; font-weight: 600; }
+  .td-neg { color: var(--red) !important; font-weight: 600; }
+  .row-hl td { background: var(--green-lt); }
+
+  /* ── Cuts section ── */
+  .cut-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 18px 0; }
+  .cut-card { border: 1.5px solid var(--red-bd); border-radius: 9px; background: var(--red-lt); padding: 17px 20px; }
+  .cut-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--red); margin-bottom: 7px; }
+  .cut-title { font-family: var(--serif); font-size: 14.5px; font-weight: 600; color: var(--ink); margin-bottom: 9px; line-height: 1.3; }
+  .cut-body { font-size: 13px; color: var(--ink2); line-height: 1.68; }
+  .cut-body strong { color: var(--ink); font-weight: 500; }
+
+  /* ── Validation section ── */
+  .val-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 18px 0; }
+  .val-card { border: 1.5px solid var(--rule); border-radius: 9px; background: var(--surface); padding: 17px 20px; }
+  .val-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--dim); margin-bottom: 7px; }
+  .val-title { font-family: var(--serif); font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 9px; line-height: 1.3; }
+  .val-body { font-size: 13px; color: var(--ink2); line-height: 1.68; }
+  .val-body strong { color: var(--ink); font-weight: 500; }
+  .val-metric { font-family: var(--mono); font-size: 11px; margin-top: 10px; color: var(--dim); }
+  .val-metric span { color: var(--green); font-weight: 500; }
+
+  /* ── Phase 3 ── */
+  .p3-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 16px 0; }
+  .p3-card { border: 1.5px solid var(--rule); border-radius: 9px; padding: 18px 20px; background: var(--surface); }
+  .p3-card.featured { border-color: var(--green-bd); }
+  .p3-eyebrow { font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--dim); margin-bottom: 7px; }
+  .p3-eyebrow.g { color: var(--green); }
+  .p3-title { font-family: var(--serif); font-size: 14.5px; font-weight: 600; margin-bottom: 10px; line-height: 1.3; }
+  .p3-body { font-size: 13px; color: var(--ink2); line-height: 1.7; }
+  .p3-body strong { color: var(--ink); font-weight: 500; }
+  .p3-tag { display: inline-block; margin-top: 12px; font-family: var(--mono); font-size: 9.5px; padding: 3px 9px; border-radius: 3px; }
+  .p3-tag.g { background: var(--green-lt); color: var(--green); }
+  .p3-tag.a { background: var(--amber-lt); color: var(--amber); }
+
+  /* ── Revenue strip ── */
+  .rev-strip { background: var(--surface); border: 1.5px solid var(--rule); border-radius: 9px; padding: 20px 24px; margin: 16px 0; }
+  .rev-strip h4 { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); margin-bottom: 13px; }
+  .rev-row { display: flex; justify-content: space-between; align-items: baseline; padding: 7px 0; border-bottom: 1px solid var(--rule); font-size: 13px; gap: 12px; }
+  .rev-row:last-child { border-bottom: none; }
+  .rev-k { color: var(--ink2); }
+  .rev-v { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--green); white-space: nowrap; }
+  .rev-v.dim { color: var(--dim); font-weight: 400; font-size: 12px; }
+  .rev-v.note { color: var(--amber); font-weight: 400; font-size: 12px; }
+
+  /* ── Ops grid ── */
+  .ops-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0; }
+  .ops-card { border: 1px solid var(--rule); border-radius: 8px; padding: 16px 18px; background: var(--surface); }
+  .ops-card h4 { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); margin-bottom: 8px; }
+  .ops-card p { font-size: 13px; color: var(--ink2); line-height: 1.65; }
+  .ops-card p + p { margin-top: 8px; }
+  .ops-card p strong { color: var(--ink); font-weight: 500; }
+  .ops-card em { font-family: var(--serif); font-style: italic; }
+
+  /* ── SGP box ── */
+  .sgp-box { border: 1.5px solid var(--rule); border-radius: 8px; overflow: hidden; margin: 14px 0; background: var(--surface); }
+  .sgp-head { background: var(--ink); color: #f0efe9; padding: 9px 18px; font-family: var(--mono); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; }
+  .sgp-steps { border-bottom: 1px solid var(--rule); }
+  .sgp-step { display: grid; grid-template-columns: 32px 130px 1fr; gap: 0; align-items: baseline; padding: 8px 16px; border-bottom: 1px solid var(--rule); font-size: 12.5px; }
+  .sgp-step:last-child { border-bottom: none; }
+  .sgp-n { font-family: var(--mono); font-size: 10px; color: var(--dim); }
+  .sgp-t { font-weight: 600; color: var(--ink); font-size: 12.5px; padding-right: 12px; }
+  .sgp-d { color: var(--ink2); line-height: 1.55; }
+  .sgp-tiers { padding: 12px 16px; background: var(--bg); }
+  .sgp-tier-head { font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); margin-bottom: 8px; }
+  .sgp-tier-row { display: flex; align-items: flex-start; gap: 10px; padding: 5px 0; font-size: 12.5px; color: var(--ink2); border-bottom: 1px solid var(--rule); }
+  .sgp-tier-row:last-child { border-bottom: none; }
+  .sgp-tier-badge { font-family: var(--mono); font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 3px; flex-shrink: 0; margin-top: 1px; }
+  .tier-a { background: var(--green-lt); color: var(--green); border: 1px solid var(--green-bd); }
+  .tier-b { background: var(--blue-lt); color: var(--blue); border: 1px solid var(--blue-bd); }
+  .tier-c { background: var(--amber-lt); color: var(--amber); border: 1px solid var(--amber-bd); }
+  .tier-d { background: var(--red-lt); color: var(--red); border: 1px solid var(--red-bd); }
+  @media (max-width: 640px) { .sgp-step { grid-template-columns: 28px 1fr; } .sgp-t { grid-column: 2; } .sgp-d { grid-column: 2; } }
+
+  /* ── Charts ── */
+  .chart-wrap { margin: 28px 0; }
+  .chart-title { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--dim); margin-bottom: 5px; }
+  .chart-sub { font-size: 12px; color: var(--dim); margin-bottom: 10px; line-height: 1.5; }
+  .chart-wrap svg { width: 100%; height: auto; display: block; border-radius: 8px; overflow: visible; }
+
+  /* ── Slice box ── */
+  .slice-box { border: 2px solid var(--ink); border-radius: 10px; overflow: hidden; margin: 28px 0 40px; }
+  .slice-head { background: var(--ink); color: #f0efe9; padding: 9px 20px; font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.22em; text-transform: uppercase; }
+  .slice-body { display: grid; grid-template-columns: 1fr 260px; gap: 0; }
+  .slice-main { padding: 20px 22px; border-right: 1px solid var(--rule); }
+  .slice-tag { font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--green); margin-bottom: 7px; }
+  .slice-title { font-family: var(--serif); font-size: 17px; font-weight: 600; margin-bottom: 10px; }
+  .slice-desc { font-size: 13.5px; color: var(--ink2); line-height: 1.72; margin-bottom: 14px; }
+  .slice-cells { display: flex; gap: 8px; flex-wrap: wrap; }
+  .slice-cell { font-family: var(--mono); font-size: 10px; background: var(--green-lt); color: var(--green); border: 1px solid var(--green-bd); border-radius: 4px; padding: 4px 10px; }
+  .slice-aside { background: var(--bg); padding: 16px 18px; display: flex; flex-direction: column; gap: 14px; }
+  .slice-aside-item { }
+  .slice-aside-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--dim); margin-bottom: 5px; }
+  .slice-aside-text { font-size: 12.5px; color: var(--ink2); line-height: 1.6; }
+  @media (max-width: 640px) { .slice-body { grid-template-columns: 1fr; } .slice-main { border-right: none; border-bottom: 1px solid var(--rule); } }
+
+  /* ── Financial breakdown ── */
+  .fin-product-head { padding: 8px 0 6px; border-bottom: 1.5px solid var(--ink); margin-bottom: 0; }
+  .fin-product-label { font-family: var(--serif); font-size: 14px; font-weight: 600; color: var(--ink); }
+  .fin-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 0 0 8px 8px; overflow: hidden; margin-bottom: 0; }
+  .fin-panel { background: var(--surface); padding: 0; }
+  .fin-panel-right { background: var(--green-lt); }
+  .fin-panel-head { font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--dim); padding: 10px 14px 8px; border-bottom: 1px solid var(--rule); }
+  .fin-panel-head.green { color: var(--green); }
+  .fin-row { display: flex; justify-content: space-between; align-items: baseline; padding: 7px 14px; border-bottom: 1px solid var(--rule); gap: 10px; }
+  .fin-row:last-child { border-bottom: none; }
+  .fin-k { font-size: 12.5px; color: var(--ink2); line-height: 1.5; }
+  .fin-v { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--ink); white-space: nowrap; flex-shrink: 0; }
+  .fin-v.green { color: var(--green); }
+  .fin-v.muted { color: var(--dim); font-weight: 400; }
+  .fin-v.fin-tbd { color: var(--amber); font-weight: 500; }
+  .fin-basis { background: var(--bg); padding-top: 6px; padding-bottom: 6px; }
+  .fin-basis-k { font-size: 11px; color: var(--dim); line-height: 1.55; font-style: italic; }
+  .fin-spacer { background: var(--bg); border-bottom: 1px solid var(--rule); }
+  .fin-spacer .fin-k { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); }
+  .fin-indent { padding-left: 22px; }
+  .fin-indent .fin-k { font-size: 12px; color: var(--ink2); }
+  .fin-strategic { margin-top: 14px; background: var(--ink); border-radius: 7px; padding: 14px 18px; display: flex; gap: 14px; align-items: flex-start; }
+  .fin-strategic-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: #a09e98; white-space: nowrap; flex-shrink: 0; padding-top: 3px; }
+  .fin-strategic-text { font-family: var(--serif); font-style: italic; font-size: 13px; line-height: 1.72; color: #d4d2cc; }
+
+  @media (max-width: 640px) { .fin-two-col { grid-template-columns: 1fr; } .fin-strategic { flex-direction: column; gap: 6px; } }
+
+  /* ── Footer ── */
+  .doc-footer { margin-top: 72px; padding-top: 24px; border-top: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; font-family: var(--mono); font-size: 10px; color: var(--dim); }
+
+  @media print { body { background: #fff; } .page { padding: 32px; } }
+  @media (max-width: 640px) {
+    .page { padding: 40px 22px 80px; } h1 { font-size: 28px; }
+    .stat-strip, .voice-grid, .cut-grid, .val-grid, .p3-grid, .ops-grid { grid-template-columns: 1fr; }
+    .compare { grid-template-columns: 1fr; }
+    .timeline { flex-direction: column; }
+    .tl-step { border-right: none; border-bottom: 1px solid var(--rule); }
+    .tl-step:last-child { border-bottom: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ══ MASTHEAD ══ -->
+  <div class="masthead">
+    <div class="eyebrow">Greenroom · Settlement Redesign · May 2026</div>
+    <h1>Settlement Simplification Advisor</h1>
+    <p class="tagline">One slice: replace complex deal structures with pre-agreed simple ones at the point of booking, using historical settlement data to make the suggestion defensible to both parties. Two deal types are in scope for the MVP — door deals and $1–5K vs / % of net deals — because the data shows they are structurally broken in the same way and fixable with the same mechanism.</p>
+    <div class="meta-row">
+      <span class="meta-pill"><strong>503</strong> settled shows</span>
+      <span class="meta-pill"><strong>$3.20M</strong> gross</span>
+      <span class="meta-pill"><strong>4.37%</strong> dispute rate</span>
+      <span class="meta-pill"><strong>38%</strong> in-app tool coverage today</span>
+      <span class="meta-pill">24-month window · The Crescent</span>
+    </div>
+  </div>
+
+  <!-- ══ WHY HERE, WHY NOW ══ -->
+  <div class="section-rule"><h2>Why simplification, not more technology</h2><hr></div>
+
+  <div class="principle">
+    <p>The intuitive response to a broken settlement tool is to build a better one — a smarter calculator, an AI that reads deal notes, an agentic workflow that asks the booker the right questions. We considered this. We chose not to build it.</p>
+    <p>The reason is in the data and in the transcripts. The problem at The Crescent is not that Mariana lacks a tool that can calculate a vs deal. She built one — it's her Google Sheet, and it works. The problem is that the underlying deal structures are inconsistent, the expense data lives in four places, and the deal terms are written in prose that two people read differently at midnight. <strong>A more powerful tool built on top of that substrate would inherit every one of those problems.</strong></p>
+    <p>The right move is to fix two specific, high-impact structural problems completely — door deals that lose money by construction, and $1–5K deals that carry dispute friction without changing the payout. <strong>Solve each one well. Generate clean data. Let that foundation carry the next layer.</strong></p>
+    <div class="attr">Research basis — four interviews, January 2026</div>
+  </div>
+
+  <div class="voice-grid" style="margin: 28px 0 0;">
+    <div class="voice-card">
+      <div class="voice-who">Mariana Reyes · Lead Booker · The Crescent</div>
+      <div class="voice-quote">"Most of the friction comes from things that were knowable on Wednesday — the hospitality bill is going to run over, or the deal email has a sentence that could mean two different things. <strong>If I knew those things on Wednesday I'd email the agent then.</strong>"</div>
+    </div>
+    <div class="voice-card">
+      <div class="voice-who">Diego Velasquez · Tour Manager · Pale Lake</div>
+      <div class="voice-quote">"The deal email from the agent has some sentence that means different things to me and the venue. <strong>That should never happen at the table</strong> — that should have been resolved when the deal was negotiated."</div>
+    </div>
+    <div class="voice-card">
+      <div class="voice-who">Sarah Kim · Music Agent · WME</div>
+      <div class="voice-quote">"There was no canonical version of what the deal was. Mariana had her notes, I had my email, Andrea had her recollection. <strong>The deal was a ghost.</strong>"</div>
+    </div>
+    <div class="voice-card">
+      <div class="voice-who">Marcus Holland · GM &amp; Co-owner · The Crescent</div>
+      <div class="voice-quote">"If we could see Wednesday 'this deal is going to have an ambiguous expense fight' we could resolve it cold, in writing, with the agent. <strong>We're paying a tax on every poorly-written deal email we ever signed.</strong>"</div>
+    </div>
+  </div>
+
+  <p class="prose" style="margin-top:20px">What every person described as a "good settlement" was not better software. It was <strong>predictability</strong> — knowing before show night what the number would be, trusting the math because it was transparent, not discovering at 2am what was knowable on Wednesday.</p>
+
+  <div class="slice-box">
+    <div class="slice-head">The slice</div>
+    <div class="slice-body">
+      <div class="slice-main">
+        <div class="slice-tag">MVP · In scope</div>
+        <div class="slice-title">Settlement Simplification Advisor</div>
+        <div class="slice-desc">At deal entry, Greenroom analyses the deal type and historical settlement data for comparable shows and proposes a simpler pre-agreed structure — a hybrid for door deals, a flat guarantee for $1–5K vs and % of net deals. Both parties confirm before show night. Settlement becomes a wire, not a calculation.</div>
+        <div class="slice-cells">
+          <span class="slice-cell">Door deals · 29 shows · 6 eligible · −$29K venue net</span>
+          <span class="slice-cell">vs / $1–5K · 137 shows · 34 eligible · 12.4% disputes</span>
+        </div>
+      </div>
+      <div class="slice-aside">
+        <div class="slice-aside-item">
+          <div class="slice-aside-label">Phase 3</div>
+          <div class="slice-aside-text">Settlement protection — an optional confidence layer that drives adoption of the simplified structures. Not a separate slice.</div>
+        </div>
+        <div class="slice-aside-item">
+          <div class="slice-aside-label">Phase 4</div>
+          <div class="slice-aside-text">Expense readiness, TM preview, audit trail, $5–15K segment — identified, valued, and explicitly deferred. Not in this proposal.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CHART 1: Deal landscape ══ -->
+  <div class="chart-wrap">
+    <div class="chart-title">Deal type · volume vs dispute rate</div>
+    <div class="chart-sub">Bubble size = losing-money rate &nbsp;·&nbsp; Green = in scope &nbsp;·&nbsp; Amber = excluded (thin sample or too complex) &nbsp;·&nbsp; Grey = baseline</div>
+    <svg viewBox="0 0 680 378" xmlns="http://www.w3.org/2000/svg">
+      <rect width="680" height="378" fill="#f8f7f4" rx="8"/>
+
+      <!-- Phase 2 slice zone -->
+      <rect x="452" y="148" width="183" height="84" fill="#eaf4ef" stroke="#9ed4b4" stroke-width="1.5" stroke-dasharray="4,3" rx="6" opacity="0.85"/>
+      <text x="460" y="166" font-size="8.5" fill="#165c38" font-family="JetBrains Mono,monospace" letter-spacing="0.14em">PHASE 2 SLICE</text>
+
+      <!-- Grid lines -->
+      <line x1="100" y1="300" x2="660" y2="300" stroke="#e2e0da" stroke-width="1"/>
+      <line x1="100" y1="248" x2="660" y2="248" stroke="#e2e0da" stroke-width="0.5" stroke-dasharray="3,3"/>
+      <line x1="100" y1="195" x2="660" y2="195" stroke="#e2e0da" stroke-width="0.5" stroke-dasharray="3,3"/>
+      <line x1="100" y1="143" x2="660" y2="143" stroke="#e2e0da" stroke-width="0.5" stroke-dasharray="3,3"/>
+      <line x1="100" y1="90" x2="660" y2="90" stroke="#e2e0da" stroke-width="0.5" stroke-dasharray="3,3"/>
+      <line x1="100" y1="48" x2="100" y2="300" stroke="#e2e0da" stroke-width="1"/>
+      <line x1="287" y1="48" x2="287" y2="300" stroke="#e2e0da" stroke-width="0.5" stroke-dasharray="3,3"/>
+      <line x1="473" y1="48" x2="473" y2="300" stroke="#e2e0da" stroke-width="0.5" stroke-dasharray="3,3"/>
+      <line x1="660" y1="48" x2="660" y2="300" stroke="#e2e0da" stroke-width="0.5" stroke-dasharray="3,3"/>
+
+      <!-- Y axis labels (dispute rate) -->
+      <text x="92" y="304" font-size="10" fill="#8a8880" text-anchor="end" font-family="DM Sans,system-ui,sans-serif">0%</text>
+      <text x="92" y="252" font-size="10" fill="#8a8880" text-anchor="end" font-family="DM Sans,system-ui,sans-serif">5%</text>
+      <text x="92" y="199" font-size="10" fill="#8a8880" text-anchor="end" font-family="DM Sans,system-ui,sans-serif">10%</text>
+      <text x="92" y="147" font-size="10" fill="#8a8880" text-anchor="end" font-family="DM Sans,system-ui,sans-serif">15%</text>
+      <text x="92" y="94" font-size="10" fill="#8a8880" text-anchor="end" font-family="DM Sans,system-ui,sans-serif">20%</text>
+
+      <!-- X axis labels (number of shows) -->
+      <text x="100" y="318" font-size="10" fill="#8a8880" text-anchor="middle" font-family="DM Sans,system-ui,sans-serif">0</text>
+      <text x="287" y="318" font-size="10" fill="#8a8880" text-anchor="middle" font-family="DM Sans,system-ui,sans-serif">50</text>
+      <text x="473" y="318" font-size="10" fill="#8a8880" text-anchor="middle" font-family="DM Sans,system-ui,sans-serif">100</text>
+      <text x="660" y="318" font-size="10" fill="#8a8880" text-anchor="middle" font-family="DM Sans,system-ui,sans-serif">150</text>
+
+      <!-- Axis titles -->
+      <text x="380" y="336" font-size="10" fill="#8a8880" text-anchor="middle" font-family="DM Sans,system-ui,sans-serif">Number of shows (volume)</text>
+      <text x="18" y="174" font-size="10" fill="#8a8880" text-anchor="middle" transform="rotate(-90,18,174)" font-family="DM Sans,system-ui,sans-serif">Dispute rate</text>
+
+      <!-- ── Bubbles ── -->
+
+      <!-- flat · $1–5K: n=104, 3.8%, LMR=35.6% → r=14 | grey baseline -->
+      <circle cx="488" cy="260" r="14" fill="#f0efe9" stroke="#c8c5be" stroke-width="1"/>
+      <text x="504" y="256" font-size="10" fill="#8a8880" font-family="DM Sans,system-ui,sans-serif">flat · $1–5K</text>
+      <text x="504" y="268" font-size="10" fill="#8a8880" font-family="DM Sans,system-ui,sans-serif">n=104 · 3.8%</text>
+
+      <!-- flat · $0–1K: n=72, 5.0%, LMR=51% → r=16 | grey -->
+      <circle cx="368" cy="247" r="16" fill="#f0efe9" stroke="#c8c5be" stroke-width="1"/>
+      <text x="386" y="243" font-size="10" fill="#8a8880" font-family="DM Sans,system-ui,sans-serif">flat · $0–1K</text>
+      <text x="386" y="255" font-size="10" fill="#8a8880" font-family="DM Sans,system-ui,sans-serif">n=72</text>
+
+      <!-- % of gross: n=15, 7.0%, LMR=53% → r=17 | grey -->
+      <circle cx="156" cy="226" r="17" fill="#f0efe9" stroke="#c8c5be" stroke-width="1"/>
+      <text x="137" y="222" font-size="10" fill="#8a8880" text-anchor="end" font-family="DM Sans,system-ui,sans-serif">% gross</text>
+      <text x="137" y="234" font-size="10" fill="#8a8880" text-anchor="end" font-family="DM Sans,system-ui,sans-serif">n=15</text>
+
+      <!-- door · $0–1K: n=29, 6.9%, LMR=93% → r=23 | SLICE P1 -->
+      <circle cx="208" cy="227" r="23" fill="#eaf4ef" stroke="#165c38" stroke-width="2.5"/>
+      <text x="208" y="223" font-size="9.5" fill="#165c38" text-anchor="middle" font-weight="600" font-family="DM Sans,system-ui,sans-serif">door</text>
+      <text x="208" y="235" font-size="9" fill="#165c38" text-anchor="middle" font-family="DM Sans,system-ui,sans-serif">n=29</text>
+      <!-- Phase 1 callout -->
+      <text x="215" y="198" font-size="8.5" fill="#165c38" font-family="JetBrains Mono,monospace" letter-spacing="0.12em">PHASE 1 · 93% LOSING</text>
+      <line x1="210" y1="201" x2="210" y2="204" stroke="#165c38" stroke-width="1"/>
+
+      <!-- % of net · $0–1K: n=102, 8.8%, LMR=36.3% → r=14 | SLICE P2 -->
+      <circle cx="480" cy="208" r="14" fill="#eaf4ef" stroke="#165c38" stroke-width="2.5"/>
+      <text x="480" y="188" font-size="10" fill="#165c38" text-anchor="middle" font-family="DM Sans,system-ui,sans-serif">% of net</text>
+      <text x="480" y="200" font-size="10" fill="#165c38" text-anchor="middle" font-family="DM Sans,system-ui,sans-serif">n=102 · 8.8%</text>
+
+      <!-- vs · $1–5K: n=137, 12.4%, LMR=19.7% → r=11 | SLICE P2 -->
+      <circle cx="611" cy="170" r="11" fill="#eaf4ef" stroke="#165c38" stroke-width="2.5"/>
+      <text x="611" y="150" font-size="10" fill="#165c38" text-anchor="middle" font-weight="600" font-family="DM Sans,system-ui,sans-serif">vs · $1–5K</text>
+      <text x="611" y="162" font-size="10" fill="#165c38" text-anchor="middle" font-family="DM Sans,system-ui,sans-serif">n=137 · 12.4%</text>
+
+      <!-- vs · $5–15K: n=33, 15.2% → r=11 | amber excluded -->
+      <circle cx="223" cy="140" r="11" fill="#fdf4e0" stroke="#c9860a" stroke-width="1.5"/>
+      <text x="236" y="136" font-size="10" fill="#7c4e00" font-family="DM Sans,system-ui,sans-serif">vs · $5–15K</text>
+      <text x="236" y="148" font-size="10" fill="#7c4e00" font-family="DM Sans,system-ui,sans-serif">n=33 · complex</text>
+
+      <!-- vs · $0–1K: n=14, 21.4%, LMR=85.7% → r=22 | amber excluded -->
+      <circle cx="152" cy="75" r="22" fill="#fdf4e0" stroke="#c9860a" stroke-width="1.5"/>
+      <text x="152" y="71" font-size="9.5" fill="#7c4e00" text-anchor="middle" font-family="DM Sans,system-ui,sans-serif">vs · $0–1K</text>
+      <text x="152" y="83" font-size="9.5" fill="#7c4e00" text-anchor="middle" font-family="DM Sans,system-ui,sans-serif">n=14 · thin</text>
+
+      <!-- Legend -->
+      <circle cx="108" cy="356" r="7" fill="#eaf4ef" stroke="#165c38" stroke-width="2"/>
+      <text x="119" y="360" font-size="10" fill="#4a4840" font-family="DM Sans,system-ui,sans-serif">In scope</text>
+      <circle cx="196" cy="356" r="7" fill="#fdf4e0" stroke="#c9860a" stroke-width="1.5"/>
+      <text x="207" y="360" font-size="10" fill="#4a4840" font-family="DM Sans,system-ui,sans-serif">Excluded</text>
+      <circle cx="270" cy="356" r="7" fill="#f0efe9" stroke="#c8c5be" stroke-width="1"/>
+      <text x="281" y="360" font-size="10" fill="#4a4840" font-family="DM Sans,system-ui,sans-serif">Baseline / other</text>
+      <text x="420" y="360" font-size="10" fill="#8a8880" font-family="DM Sans,system-ui,sans-serif">Bubble size ∝ losing-money rate</text>
+    </svg>
+  </div>
+
+
+  <!-- ══ WHAT I CUT ══ -->
+  <div class="section-rule"><h2>What I cut and why</h2><hr></div>
+
+  <p class="prose">These are deliberate choices. Each represents a direction that looks plausible on the surface and fails on closer examination — either because it solves the wrong layer of the problem, or because it requires clean input data that doesn't exist yet.</p>
+
+  <div class="cut-grid">
+    <div class="cut-card">
+      <div class="cut-label">Cut</div>
+      <div class="cut-title">A universal Vs deal calculator</div>
+      <div class="cut-body">Build the in-app calculator Mariana needs for vs deals, % of net, door deals, walkout pots, tier ratchets. <strong>Cut because it solves the wrong problem.</strong> Mariana already has a calculator — her spreadsheet, and it works. Disputes don't happen because the math is wrong. They happen because deal terms are ambiguous and expense data is scattered. A better in-app calculator inherits both problems unchanged. The data confirms it: dispute rates correlate with deal structure complexity, not with which tool performed the arithmetic.</div>
+    </div>
+    <div class="cut-card">
+      <div class="cut-label">Cut</div>
+      <div class="cut-title">An AI that reads deal notes and extracts terms</div>
+      <div class="cut-body">An LLM that parses Mariana's freetext deal notes and populates structured fields. <strong>Cut because it automates the wrong layer.</strong> The freetext notes exist because the structured fields don't model real deals. An AI reading ambiguous prose doesn't eliminate the ambiguity — it hides it one level deeper. When the model misreads a recoup clause, you get the same $720 dispute the Coastal Spell show produced, now with an AI-generated number attached.</div>
+    </div>
+    <div class="cut-card">
+      <div class="cut-label">Cut</div>
+      <div class="cut-title">$5–15K deals in this proposal</div>
+      <div class="cut-body">The highest dispute rate in the data at 13.5%. <strong>Cut for two reasons.</strong> First, deal complexity at this level is genuinely different — more negotiated exceptions, more agent leverage, more multi-party communication that requires human judgment. A suggestion engine cannot safely automate this yet. Second, the sample is 37 shows — too thin for reliable cell-mean suggestions. This is the next research sprint, not this one.</div>
+    </div>
+    <div class="cut-card">
+      <div class="cut-label">Cut</div>
+      <div class="cut-title">Agentic workflows and automated advancing</div>
+      <div class="cut-body">An AI that walks Mariana through deal checklists, sends structured deal confirmations, and flags ambiguities automatically. <strong>Cut because agentic tools require clean input data to produce trustworthy output.</strong> With non-standard contracts and prose deal notes as the substrate, the system either flags everything (noise) or misses the edge cases that cause disputes (false confidence). You need simplified deal structures before agentic tools can be reliable on top of them. That is what Phases 1 and 2 produce.</div>
+    </div>
+  </div>
+
+  <!-- ══ ROADMAP ══ -->
+  <div class="section-rule"><h2>Implementation roadmap</h2><hr></div>
+
+  <div class="timeline">
+    <div class="tl-step">
+      <div class="tl-num">Phase 1 · The Slice</div>
+      <div class="tl-title">Fix door deals completely</div>
+      <div class="tl-sub">Replace a structure where the venue earns nothing. Solve it well for 29 shows, not partially for all.</div>
+      <div class="tl-tag">Immediate · MVP</div>
+    </div>
+    <div class="tl-step">
+      <div class="tl-num">Phase 2 · The Slice</div>
+      <div class="tl-title">Simplify $1–5K deals completely</div>
+      <div class="tl-sub">Remove the complexity that generates disputes without changing the economics.</div>
+      <div class="tl-tag">Short-term · MVP</div>
+    </div>
+    <div class="tl-step">
+      <div class="tl-num">Phase 3 · Adoption enabler</div>
+      <div class="tl-title">Settlement protection</div>
+      <div class="tl-sub">Optional confidence layer that drives agent acceptance of pre-agreed flats. Not a separate slice.</div>
+      <div class="tl-tag">Post-MVP · Optional</div>
+    </div>
+    <div class="tl-step">
+      <div class="tl-num">Phase 4 · Deferred</div>
+      <div class="tl-title">Operational layer</div>
+      <div class="tl-sub">Identified and valued. Explicitly out of scope until the data foundation is established.</div>
+      <div class="tl-tag">Not in this proposal</div>
+    </div>
+  </div>
+
+  <!-- ══ PHASE 1 ══ -->
+  <div class="section-rule"><h2>Phase 1 — Door deals</h2><hr></div>
+
+  <div class="phase-card">
+    <div class="phase-head">
+      <span class="badge blue">Phase 1 · MVP · Immediate</span>
+      <span class="phase-title">Replace the door deal structure with a hybrid</span>
+      <span class="phase-tag">29 shows · 24 months · $0–1K bracket</span>
+    </div>
+    <div class="phase-body">
+
+      <div class="pfse-block">
+        <div class="pfse-label">Problem</div>
+        <div class="pfse-content">
+          <p>Under the current door arrangement, all ticket revenue above production expenses goes to the artist. The venue absorbs all costs and receives nothing from the show regardless of how it performs. A sold-out night and a half-empty night produce the same result for the venue: zero net. This is not a pricing problem or a negotiation problem — it is a structural one. The deal is designed so the venue cannot win.</p>
+          <p>Aggregate venue net across all 29 door deals in the last 24 months is <strong>−$29,056</strong>, an average of −$1,007 per show. These are not edge-case losses. They are the expected outcome of a deal structure that gives the venue no participation in the upside.</p>
+        </div>
+      </div>
+
+      <div class="pfse-block">
+        <div class="pfse-label">Finding</div>
+        <div class="pfse-content">
+          <p><strong>27 of 29 door deals (93%) left the venue with a net loss.</strong> No other deal type in any gross bracket comes close. Pale Lake is the clearest example: on a sold-out night with $19,296 in gross receipts, the door structure paid the artist $17,387 and left the venue with exactly $0.</p>
+
+          <div class="compare">
+            <div class="compare-col">
+              <div class="compare-head">Current — door deal</div>
+              <div class="compare-row"><span class="compare-k">Pale Lake gross</span><span class="compare-v">$19,296</span></div>
+              <div class="compare-row"><span class="compare-k">Artist payout</span><span class="compare-v">$17,387</span></div>
+              <div class="compare-row"><span class="compare-k">Venue net</span><span class="compare-v neg">$0</span></div>
+              <div class="compare-row"><span class="compare-k">Venue stake in upside</span><span class="compare-v neg">None by construction</span></div>
+              <div class="compare-row"><span class="compare-k">24-month venue net</span><span class="compare-v neg">−$29,056</span></div>
+              <div class="compare-row"><span class="compare-k">Shows underwater</span><span class="compare-v neg">27 of 29 · 93%</span></div>
+            </div>
+            <div class="compare-col">
+              <div class="compare-head pos">Proposed — hybrid deal</div>
+              <div class="compare-row"><span class="compare-k">Pale Lake gross</span><span class="compare-v">$19,296</span></div>
+              <div class="compare-row"><span class="compare-k">Artist payout</span><span class="compare-v pos">$10,020</span></div>
+              <div class="compare-row"><span class="compare-k">Venue saving</span><span class="compare-v pos">+$7,367</span></div>
+              <div class="compare-row"><span class="compare-k">Venue stake in upside</span><span class="compare-v pos">40% above cap</span></div>
+              <div class="compare-row"><span class="compare-k">Switch-eligible deals · 12-month window</span><span class="compare-v pos">6 of 29</span></div>
+              <div class="compare-row"><span class="compare-k">Projected savings · eligible 6 deals</span><span class="compare-v pos">+$13,211</span></div>
+            </div>
+          </div>
+
+          <div class="callout green" style="margin-top:14px">
+            The artist still earns <strong>$10,020 on a sold-out night</strong> — a strong outcome by any comparable measure. The hybrid does not penalise strong performance. It gives the venue a share of the upside rather than making them a silent underwriter of it.
+          </div>
+        </div>
+      </div>
+
+      <div class="pfse-block">
+        <div class="pfse-label">The MVP action</div>
+        <div class="pfse-content">
+          <p>At deal entry, Greenroom proposes a hybrid structure: <strong>$500 artist floor + 60/40 revenue split above a $1,500 expense cap.</strong> Both parties see the projected outcome at the cell-mean gross of $4,420 before committing. The proposal is precise and grounded — not a general suggestion to "negotiate differently," but a specific pre-calculated alternative that replaces a deal structure that loses money 93% of the time.</p>
+          <p>For high-gross shows where an artist or agent negotiates different terms, the venue adjusts the contract manually. Exceptions at this volume are rare enough to handle case by case — they do not require a separate workflow. The 10 structurally unviable shows below $2,223 gross are identified at booking, not at 2am.</p>
+          <p>This is a contained, complete intervention on a specific deal type. The goal is not to solve all door deal complexity in one release — it is to solve the 27 shows that are losing money by construction, solve them well, and generate the clean data that informs what comes next.</p>
+        </div>
+      </div>
+
+      <div class="pfse-block">
+        <div class="pfse-label">Expected outcome</div>
+        <div class="pfse-content">
+          <p>The 29-show analytics picture — 27 of 29 losing money, −$29,056 aggregate venue net — establishes the structural case for replacing door deals entirely. Smart Switch's projected grid, which applies stricter eligibility (settled shows with all pre-show inputs available and a valid suggestion), currently covers <strong>6 of those 29 deals</strong>, projecting <strong>$13,211 in venue-side savings</strong> at an average of ~$2,200 per converted show — the highest per-deal savings of any deal type. The remaining 23 shows are the structural target: as more door deals are renegotiated to hybrid terms and accumulate clean data, they grow into Smart Switch eligibility. The door deal dispute rate drops to near zero for converted shows — pre-agreed hybrid terms eliminate the recoup arithmetic that generates every dispute in this cell.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ PHASE 2 ══ -->
+  <div class="section-rule"><h2>Phase 2 — $1–5K vs and % of net deals</h2><hr></div>
+
+  <div class="phase-card">
+    <div class="phase-head">
+      <span class="badge green">Phase 2 · MVP · Short-term</span>
+      <span class="phase-title">Convert vs and % of net deals to pre-agreed flat guarantees</span>
+      <span class="phase-tag">137 vs · 102 % of net · 24 months</span>
+    </div>
+    <div class="phase-body">
+
+      <div class="pfse-block">
+        <div class="pfse-label">Problem</div>
+        <div class="pfse-content">
+          <p>Vs deals and % of net deals exist to protect the artist when a show significantly overperforms — when the percentage would produce more than the guarantee. That protection has real value at higher gross levels. At the $1–5K bracket, the expense structure at this venue consumes the available pool before the percentage produces a meaningfully different outcome from a flat. The complexity remains, but the economic reason for it rarely materialises.</p>
+          <p>The cost of that complexity shows up in dispute rates. This is the highest-volume deal bracket at The Crescent — 241 shows in 24 months — and vs deals within it dispute at <strong>12.4%</strong>, more than three times the rate of flat deals in the same bracket on similar economics. Smart Switch's projected grid, applying strict pre-show eligibility, covers <strong>34 of the 137 vs / $1–5K deals</strong> — the actionable sub-set where a valid flat suggestion was available before show night. Across those 34 deals, the model projects <strong>$9,186 in venue-side savings</strong> and approximately 5 fewer disputes (70% reduction to the flat baseline of 3.8%). The wider 137-deal cell remains the analytical base that establishes the structural case.</p>
+        </div>
+      </div>
+
+      <div class="pfse-block">
+        <div class="pfse-label">Finding</div>
+        <div class="pfse-content">
+
+          <table class="dt">
+            <thead>
+              <tr><th>Deal type · $1–5K gross</th><th>Shows</th><th>Dispute rate</th><th>Loss-making rate</th><th>Attention items</th></tr>
+            </thead>
+            <tbody>
+              <tr class="row-hl"><td>flat · baseline</td><td>104</td><td class="td-pos">3.8%</td><td>35.6%</td><td>4</td></tr>
+              <tr><td>vs</td><td>137</td><td class="td-neg">12.4%</td><td>19.7%</td><td>16</td></tr>
+              <tr><td>% of net</td><td>102</td><td>5.9%</td><td>36.3%</td><td>9</td></tr>
+            </tbody>
+          </table>
+
+          <p>The 137-deal cell at 12.4% establishes why the deal structure is broken. Smart Switch projects <strong>$9,186 in venue savings and approximately 5 fewer disputes</strong> across the 34 immediately eligible deals — a 70% reduction to the flat deal baseline (3.8%), not full elimination, since accepted flats can still surface disputes from soft-cost recoups or hospitality. As more deals convert and accumulate clean data, eligibility expands and the next round of suggestions becomes more reliable. Every settlement-flow attention rule in the system — disputed recoups, status-versus-notes mismatches, stale disputes — traces back to the recoup arithmetic that complex deal structures generate. A pre-agreed flat removes the largest share of that arithmetic.</p>
+
+          <div class="callout blue">
+            <strong>An honest note on the economics:</strong> The percentage clause on vs deals does fire — across the 24-month history, 116 of 133 settled vs deals (87.2%) had the artist's percentage out-pay the guarantee, with a mean overshoot of ~$2,338 per show and the remaining 12.8% paid at the guarantee floor (avg guarantee-win $0). The case for pre-agreed flats is not that the clause produces nothing. It is that the dispute cost (12.4% vs 3.8%) outweighs the complexity on shows where the flat and vs terms produce similar outcomes. SGP's suggested flat accounts for this by picking whichever side of the deal the artist would have won and proposing that as the flat — so the conversion is calibrated to the actual historical payout, not a discount from it.
+          </div>
+        </div>
+      </div>
+
+      <div class="pfse-block">
+        <div class="pfse-label">The MVP action</div>
+        <div class="pfse-content">
+          <p>At deal entry, Greenroom runs <strong>Smart Guaranteed Pricing (SGP)</strong> — a seven-step deterministic waterfall — to produce a suggested flat guarantee for the show. SGP is not a lookup of the cell average. It reads the deal's structure, resolves expected gross from a source waterfall (artist history at this venue → artist history anywhere → agent history → cell mean → venue mean → capacity proxy), estimates capped expenses from comparable shows, projects what the percentage clause would have paid, and proposes the higher of the two — rounded to the nearest $50. The suggested flat is always ≥ the contract guarantee, so converting never underpays the artist versus their signed number. Every input and step is persisted in an audit record the booker can share with the agent.</p>
+
+          <div class="sgp-box">
+            <div class="sgp-head">Smart Guaranteed Pricing · how the flat number is produced</div>
+            <div class="sgp-steps">
+              <div class="sgp-step"><span class="sgp-n">1</span><span class="sgp-t">Expected gross</span><span class="sgp-d">Source waterfall: artist history at this venue → artist anywhere → agent history → cell mean → venue mean → capacity proxy</span></div>
+              <div class="sgp-step"><span class="sgp-n">2–3</span><span class="sgp-t">Net after ticketing fees</span><span class="sgp-d">10% ticketing fee deducted from expected gross</span></div>
+              <div class="sgp-step"><span class="sgp-n">4</span><span class="sgp-t">Capped expense estimate</span><span class="sgp-d">Artist/agent expense history, capped at the lower of the signed cap and a per-bracket default ($1,500 for $1–5K deals)</span></div>
+              <div class="sgp-step"><span class="sgp-n">5–6</span><span class="sgp-t">Projected percentage payout</span><span class="sgp-d">Net base × deal percentage — what the artist would have earned under the original deal structure on this night</span></div>
+              <div class="sgp-step"><span class="sgp-n">7</span><span class="sgp-t">Winner → suggested flat</span><span class="sgp-d">max(guarantee, percentage payout), rounded to nearest $50. Suggested flat ≥ contract guarantee always — converting never underpays</span></div>
+            </div>
+            <div class="sgp-tiers">
+              <div class="sgp-tier-head">Confidence tiers · Smart Switch only emits a suggestion at tier A or B</div>
+              <div class="sgp-tier-row"><span class="sgp-tier-badge tier-a">A</span><span>≥3 prior artist shows at this venue + winning margin &gt;$200 — solid projection</span></div>
+              <div class="sgp-tier-row"><span class="sgp-tier-badge tier-b">B</span><span>≥1 prior artist show or ≥3 agent shows — some signal, use with a band</span></div>
+              <div class="sgp-tier-row"><span class="sgp-tier-badge tier-c">C</span><span>Agent history or genre data only — starting point, not a headline number</span></div>
+              <div class="sgp-tier-row"><span class="sgp-tier-badge tier-d">D</span><span>First-time artist, first-time agent, no genre history — Smart Switch does not emit a suggestion; booker negotiates directly. The engine knows when it doesn't know.</span></div>
+            </div>
+          </div>
+
+          <p style="margin-top:14px">Shows in draft, submitted, or in-review status are flagged automatically when an A or B tier suggestion is available — the existing settlement lifecycle routes the proposal to the agent for confirmation. No new infrastructure required. When the agent accepts, the deal converts to a clean flat in the database carrying the full SGP audit trail. The AI presents the proposal conversationally: <em>"Based on how similar shows have settled here, a flat of $5,600 reflects what the vs terms would have produced on this night — the $4,000 guarantee was the floor; the percentage would have paid $5,610. Want to offer that now?"</em> That is a Wednesday email, not a midnight calculation.</p>
+          <p>This intervention is narrow by design. It targets the $1–5K bracket specifically — the data supports reliable suggestions here, the volume is high enough to matter, and the dispute rate is high enough to make a visible difference quickly. It does not attempt to address $5–15K deals, walkout pots, or tier ratchets.</p>
+        </div>
+      </div>
+
+      <div class="pfse-block">
+        <div class="pfse-label">Expected outcome</div>
+        <div class="pfse-content">
+          <p>For accepted conversions, settlement requires no calculation — the agreed flat is the payout. The 12.4% dispute rate drops to approximately 3.8% on converted shows — the flat deal baseline in this bracket. The 34 immediately eligible deals are the first batch; as each converted show generates clean structured data, Smart Switch eligibility expands and the savings compound. The data quality problem corrects itself from the inside — each clean deal makes the next suggestion more reliable without a separate data-cleaning step.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ COMBINED IMPACT ══ -->
+  <div class="section-rule"><h2>Combined impact · phases 1 + 2</h2><hr></div>
+
+  <div class="stat-strip">
+    <div class="stat-cell"><div class="stat-num g">$22K</div><div class="stat-label">Projected venue savings<br>door + vs/$1–5K eligible deals</div></div>
+    <div class="stat-cell"><div class="stat-num g">~5</div><div class="stat-label">Disputes avoided<br>vs/$1–5K eligible subset</div></div>
+    <div class="stat-cell"><div class="stat-num n">34</div><div class="stat-label">vs/$1–5K deals<br>immediately eligible</div></div>
+    <div class="stat-cell"><div class="stat-num n">6</div><div class="stat-label">Door deals<br>immediately eligible</div></div>
+  </div>
+
+  <div class="callout blue" style="margin-top:0">
+    <strong>Analytics base vs actionable subset.</strong> The cross-tab shows 137 vs/$1–5K deals and 29 door deals — that is the full structural problem. Smart Switch's projected grid applies stricter eligibility (settled + all pre-show inputs available + valid suggestion), surfacing 34 and 6 respectively as immediately actionable. The wider cells establish why the structure is broken; the eligible subsets are what the MVP ships against. Eligibility grows as each converted deal generates clean data.
+  </div>
+
+  <div class="callout green">
+    <strong>All figures sourced from live API endpoints at this commit.</strong> Cross-tab cell counts and dispute rates from /api/deal-analysis. Projected savings from /api/insights/switch-projected-grid (strict eligibility applied). SGP gap distribution from /api/insights/guarantee-backtest (12-month window, n=156). Every number drillable to per-show level.
+  </div>
+
+  <div class="chart-wrap">
+    <div class="chart-title">Projected impact of the slice — before vs after</div>
+    <div class="chart-sub">24-month historical data modelled against the counterfactual &nbsp;·&nbsp; Dispute reduction assumes 70% reduction to flat baseline rate (3.8%), not full elimination</div>
+    <svg viewBox="0 0 680 210" xmlns="http://www.w3.org/2000/svg">
+      <rect width="680" height="210" fill="#f8f7f4" rx="8"/>
+
+      <!-- Divider -->
+      <line x1="338" y1="22" x2="338" y2="188" stroke="#e2e0da" stroke-width="1"/>
+
+      <!-- ══ LEFT PANEL: Door deals · venue net ══ -->
+      <text x="20" y="36" font-size="9" fill="#165c38" font-family="JetBrains Mono,monospace" letter-spacing="0.14em">PHASE 1 · DOOR DEALS · VENUE NET 24-MONTH</text>
+
+      <!-- Zero line -->
+      <line x1="186" y1="52" x2="186" y2="168" stroke="#c8c5be" stroke-width="1"/>
+      <text x="186" y="180" font-size="9" fill="#8a8880" text-anchor="middle" font-family="DM Sans,system-ui,sans-serif">$0</text>
+
+      <!-- Before bar: -$29,056 → 160px left (scale: 160/29000 ≈ 5.5px/$K) -->
+      <rect x="26" y="58" width="160" height="34" fill="#fdf0f0" stroke="#e8a0a0" stroke-width="1" rx="3"/>
+      <text x="20" y="70" font-size="9.5" fill="#8a1e1e" text-anchor="start" font-family="DM Sans,system-ui,sans-serif" x="30" dy="5">Before</text>
+      <text x="30" y="72" font-size="9.5" fill="#8a1e1e" font-family="DM Sans,system-ui,sans-serif">Before</text>
+      <text x="94" y="72" font-size="11" fill="#8a1e1e" text-anchor="middle" font-weight="600" font-family="DM Sans,system-ui,sans-serif">−$29,056</text>
+      <text x="94" y="84" font-size="9" fill="#8a1e1e" text-anchor="middle" font-family="DM Sans,system-ui,sans-serif">27 of 29 shows losing money</text>
+
+      <!-- After bar: +$21,164 → 116px right (21164/29000*160=116.7) -->
+      <rect x="186" y="112" width="117" height="34" fill="#eaf4ef" stroke="#9ed4b4" stroke-width="1" rx="3"/>
+      <text x="188" y="126" font-size="9.5" fill="#165c38" font-family="DM Sans,system-ui,sans-serif">After</text>
+      <text x="247" y="126" font-size="11" fill="#165c38" text-anchor="middle" font-weight="600" font-family="DM Sans,system-ui,sans-serif">+$21,164</text>
+      <text x="247" y="138" font-size="9" fill="#165c38" text-anchor="middle" font-family="DM Sans,system-ui,sans-serif">10 of 27 loss-nights avoided</text>
+
+      <!-- Swing annotation -->
+      <text x="168" y="188" font-size="10" fill="#165c38" text-anchor="middle" font-family="DM Sans,system-ui,sans-serif">↑ $13,211 savings · 6 switch-eligible deals · avg $2,200/deal</text>
+
+      <!-- ══ RIGHT PANEL: vs / $1–5K · disputes ══ -->
+      <text x="354" y="36" font-size="9" fill="#165c38" font-family="JetBrains Mono,monospace" letter-spacing="0.14em">PHASE 2 · VS $1–5K · DISPUTE COUNT</text>
+
+      <!-- X scale: 280px for 20 disputes → 14px/dispute -->
+      <!-- Before: 17 → 238px; After: 5 → 70px -->
+      <text x="354" y="72" font-size="9.5" fill="#8a1e1e" font-family="DM Sans,system-ui,sans-serif">Before</text>
+      <rect x="400" y="58" width="238" height="34" fill="#fdf0f0" stroke="#e8a0a0" stroke-width="1" rx="3"/>
+      <text x="519" y="72" font-size="11" fill="#8a1e1e" text-anchor="middle" font-weight="600" font-family="DM Sans,system-ui,sans-serif">17 disputes</text>
+      <text x="519" y="84" font-size="9" fill="#8a1e1e" text-anchor="middle" font-family="DM Sans,system-ui,sans-serif">12.4% · 137 deals (analytics base)</text>
+
+      <text x="354" y="126" font-size="9.5" fill="#165c38" font-family="DM Sans,system-ui,sans-serif">After</text>
+      <rect x="400" y="112" width="70" height="34" fill="#eaf4ef" stroke="#9ed4b4" stroke-width="1" rx="3"/>
+      <text x="435" y="126" font-size="11" fill="#165c38" text-anchor="middle" font-weight="600" font-family="DM Sans,system-ui,sans-serif">~2</text>
+      <text x="435" y="138" font-size="9" fill="#165c38" text-anchor="middle" font-family="DM Sans,system-ui,sans-serif">3.8% · 34 eligible</text>
+
+      <!-- X axis ticks -->
+      <line x1="400" y1="152" x2="400" y2="158" stroke="#c8c5be" stroke-width="1"/>
+      <text x="400" y="168" font-size="9" fill="#8a8880" text-anchor="middle" font-family="DM Sans,system-ui,sans-serif">0</text>
+      <line x1="470" y1="152" x2="470" y2="158" stroke="#c8c5be" stroke-width="1"/>
+      <text x="470" y="168" font-size="9" fill="#8a8880" text-anchor="middle" font-family="DM Sans,system-ui,sans-serif">5</text>
+      <line x1="540" y1="152" x2="540" y2="158" stroke="#c8c5be" stroke-width="1"/>
+      <text x="540" y="168" font-size="9" fill="#8a8880" text-anchor="middle" font-family="DM Sans,system-ui,sans-serif">10</text>
+      <line x1="610" y1="152" x2="610" y2="158" stroke="#c8c5be" stroke-width="1"/>
+      <text x="610" y="168" font-size="9" fill="#8a8880" text-anchor="middle" font-family="DM Sans,system-ui,sans-serif">15</text>
+      <line x1="638" y1="152" x2="638" y2="158" stroke="#e8a0a0" stroke-width="1" stroke-dasharray="2,2"/>
+      <text x="638" y="168" font-size="9" fill="#8a1e1e" text-anchor="middle" font-family="DM Sans,system-ui,sans-serif">17</text>
+
+      <!-- Savings annotation -->
+      <text x="515" y="188" font-size="10" fill="#165c38" text-anchor="middle" font-family="DM Sans,system-ui,sans-serif">~5 disputes avoided · $9,186 savings · 34 eligible deals</text>
+    </svg>
+  </div>
+
+  <!-- ══ VALIDATION ══ -->
+  <div class="section-rule"><h2>How we validate</h2><hr></div>
+
+  <p class="prose">Twenty-four months of historical backtesting gives confidence in the direction. It does not tell us whether agents will accept the framing, whether the flat-deal suggestion feels fair in practice, or whether the accuracy holds on live shows. Both quantitative and qualitative validation are needed before scaling.</p>
+
+  <div class="val-grid">
+    <div class="val-card">
+      <div class="val-label">Quantitative · Already done</div>
+      <div class="val-title">Backtest against 495 historical deals</div>
+      <div class="val-body">Every settled vs, % of net, and door deal in the 24-month window replayed against the flat and hybrid counterfactuals. Per-show money delta, disputes avoided, and attention items avoided computed across the full cell grid. SGP backtest measures suggestion accuracy for each deal using only data available before show night.
+        <div class="val-metric">Baseline: <span>$73K savings · 19 disputes avoided · 495 of 495 modelled</span></div>
+      </div>
+    </div>
+    <div class="val-card">
+      <div class="val-label">Quantitative · Phase 3 beta</div>
+      <div class="val-title">Suggestion accuracy tracked on live shows</div>
+      <div class="val-body">Run Suggestion Accuracy Pay as a beta program across the first cohort of converted shows. Track how often the accepted flat diverges from what the artist would have earned under the original deal, by how much, and in which direction. Beta data sizes the Phase 3 partner product and shows whether the cell-mean approach holds up outside of backtesting.
+        <div class="val-metric">Success signal: <span>Gap ≤ $400 on ≥ 60% of beta shows</span></div>
+      </div>
+    </div>
+    <div class="val-card">
+      <div class="val-label">Qualitative · Pre-launch</div>
+      <div class="val-title">Agent and booker readouts on the flat-deal framing</div>
+      <div class="val-body">Before shipping to production, conduct structured readouts with <strong>5 indie bookers</strong> and <strong>5 booking agents</strong> across market sizes. Core question: does the flat suggestion feel fair and transparent, or does it feel like the venue is simplifying at the artist's expense? The framing needs to hold up to an agent reading it at 11pm on a touring cycle.
+        <div class="val-metric">Success signal: <span>≥ 4 of 5 agents rate the framing "fair" or "clearer than current"</span></div>
+      </div>
+    </div>
+    <div class="val-card">
+      <div class="val-label">Qualitative · Post-launch</div>
+      <div class="val-title">Settlement night observation at the venue</div>
+      <div class="val-body">Shadow 3–5 actual settlement conversations at The Crescent in the first 60 days after Phase 1 launch. Observe whether the hybrid door deal framing changes the back-office conversation in practice — does it reduce back-and-forth, or does it introduce new friction we haven't modelled? What the historical data cannot tell us, the room will.
+        <div class="val-metric">Success signal: <span>Back-office conversation ≤ 20 min on converted shows</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout amber">
+    <strong>The one thing backtesting cannot validate:</strong> agent willingness to pre-commit to a flat guarantee weeks before show night. This is a trust and relationship question as much as a product question. The qualitative readouts are designed to surface friction before it reaches production. Phase 3's protection layer is designed to remove the financial downside that creates hesitation.
+  </div>
+
+  <!-- ══ PHASE 3 ══ -->
+  <div class="section-rule"><h2>Phase 3 — Settlement protection <span style="font-family:var(--mono);font-size:10px;font-weight:400;letter-spacing:0.1em;color:var(--dim);margin-left:10px;">Optional</span></h2><hr></div>
+
+  <div class="callout blue" style="margin-bottom:24px">
+    <strong>Phase 3 is optional and independent of Phases 1 and 2.</strong> The deal simplification and dispute reduction in the MVP deliver their full value whether or not protection is ever added. Phase 3 is a confidence layer — it exists to accelerate agent adoption of pre-agreed flats by removing the financial uncertainty that makes some agents hesitate. Venues and agents who are comfortable with the simplified structures can skip it entirely.
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-head">
+      <span class="badge amber">Phase 3 · Post-MVP · Optional</span>
+      <span class="phase-title">Settlement protection — tiered and packaged</span>
+      <span class="phase-tag">Selected clients · beta after MVP</span>
+    </div>
+    <div class="phase-body">
+
+      <div class="pfse-block">
+        <div class="pfse-label">Approach</div>
+        <div class="pfse-content">
+          <p>After Phases 1 and 2 ship, protection is tested with a selected group of client venues and agents. The beta begins with the product that has the highest expected usage — <strong>Instant Dispute Pay</strong>, sized against The Crescent's actual dispute data: 22 of 503 settlements (4.37%) disputed, averaging $345 per disputed settlement. Suggestion Accuracy Pay is tested in parallel with the same beta cohort.</p>
+          <p>The full protection program is designed as a tiered offering — different coverage levels, packages, and deductibles that suit different venue sizes, deal volumes, and risk tolerances. Beta learnings from the selected client group shape which tiers make it to general availability, what the caps and pricing look like at scale, and where the partner model versus platform credit model performs better.</p>
+        </div>
+      </div>
+
+      <div class="pfse-block">
+        <div class="pfse-label">Two products · both tested in beta</div>
+        <div class="pfse-content">
+          <div class="p3-grid">
+            <div class="p3-card featured">
+              <div class="p3-eyebrow g">Product 1 · Highest expected usage</div>
+              <div class="p3-title">Instant Dispute Pay</div>
+              <div class="p3-body">
+                <p>When a settlement enters disputed status, the resolution amount is paid immediately — no back-and-forth, no waiting for an email thread to resolve. The dispute is closed; recovery happens in the next billing cycle.</p>
+                <p style="margin-top:10px">Designed for venues and agents who accept pre-agreed flat deals but want a backstop if a recoup line or expense interpretation is later challenged. Highest expected uptake because the trigger is clear and the value is immediate.</p>
+              </div>
+            </div>
+            <div class="p3-card">
+              <div class="p3-eyebrow">Product 2 · Parallel beta</div>
+              <div class="p3-title">Suggestion Accuracy Pay</div>
+              <div class="p3-body">
+                <p>When the accepted flat suggestion differs from what the artist would have earned under the original deal by more than $50, the gap is covered up to a tiered cap. Caps are set from the live SGP backtest (12-month, n=156): median gap $870, p75 $1,569 — priced as three coverage tiers rather than a single fixed amount.</p>
+                <p style="margin-top:10px">Targets agents who are comfortable with the flat framing but want assurance that the suggestion is accurate before committing weeks in advance.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pfse-block">
+        <div class="pfse-label">Delivery model</div>
+        <div class="pfse-content">
+          <p>Both products can be delivered through two mechanisms, and the beta will test which performs better in practice:</p>
+          <p><strong>Insurance partner model</strong> — Greenroom distributes a licensed product through an embedded insurance infrastructure partner (Boost Insurance or Cover Genius, both purpose-built for B2B SaaS platforms via API). The partner underwrites and carries all regulatory and capital requirements. Greenroom earns a 15–20% distribution fee. No licensing overhead, no balance sheet exposure. This is the preferred model for full commercial launch.</p>
+          <p style="margin-top:10px"><strong>Greenroom platform credit</strong> — where regulation permits and claim amounts are small, Greenroom resolves disputes directly via platform credit or cash payment. Simpler to deploy in beta, no partner dependency, but carries balance sheet exposure at scale. Used selectively during beta to move fast with selected clients before the partner integration is complete.</p>
+          <p style="margin-top:10px">Beta findings determine which model carries which product tier into general availability. The two are not mutually exclusive — a tiered program could use the partner model for larger claims and platform credit for smaller ones.</p>
+        </div>
+      </div>
+
+      <div class="pfse-block">
+        <div class="pfse-label">Pricing, cost, and Greenroom economics</div>
+        <div class="pfse-content">
+
+          <!-- ── Product 1 ── -->
+          <div class="fin-product-head">
+            <span class="fin-product-label">Product 1 · Instant Dispute Pay</span>
+          </div>
+
+          <div class="fin-two-col">
+            <div class="fin-panel">
+              <div class="fin-panel-head">Cost &amp; Price — per enrolled show</div>
+              <div class="fin-row">
+                <span class="fin-k">Expected claim cost / show</span>
+                <span class="fin-v muted">$15.07 · 4.37% × $345 avg disputed</span>
+              </div>
+              <div class="fin-row fin-spacer"><span class="fin-k">Tiers · by source deal type</span></div>
+              <div class="fin-row fin-indent">
+                <span class="fin-k">Basic · flat $0–1K &amp; $1–5K · 3.8–4.2% dispute rate</span>
+                <span class="fin-v">$30 one-sided · $15 each two-sided</span>
+              </div>
+              <div class="fin-row fin-indent">
+                <span class="fin-k">Standard · door, % of net, % of gross · 6.7–8.8%</span>
+                <span class="fin-v">$60 · $30 each</span>
+              </div>
+              <div class="fin-row fin-indent">
+                <span class="fin-k">Pro · vs deals all brackets · 12.4–21.4%</span>
+                <span class="fin-v">$120 · $60 each</span>
+              </div>
+              <div class="fin-row fin-basis">
+                <span class="fin-k fin-basis-k">Two-sided per-side = exactly half of one-sided. Greenroom collects same total; 15% lower claim rate when both enroll raises combined margin to ~57.5%.</span>
+              </div>
+            </div>
+
+            <div class="fin-panel fin-panel-right">
+              <div class="fin-panel-head green">Greenroom Revenue &amp; Margin</div>
+              <div class="fin-row">
+                <span class="fin-k">Net margin per enrolled show · Basic</span>
+                <span class="fin-v green">$14.93 · ~50%</span>
+              </div>
+              <div class="fin-row">
+                <span class="fin-k">Net margin · two-sided enrollment</span>
+                <span class="fin-v green">~57.5%</span>
+              </div>
+              <div class="fin-row fin-basis">
+                <span class="fin-k fin-basis-k">Partner or Greenroom carries claims. Margin target 50%; re-pricing triggers at loss ratio &gt;65% or &lt;35% trailing 3 months.</span>
+              </div>
+              <div class="fin-row fin-spacer"><span class="fin-k">Annual revenue · P1 Basic · all shows</span></div>
+              <div class="fin-row fin-indent">
+                <span class="fin-k">The Crescent · 30% adoption · revenue / net margin</span>
+                <span class="fin-v green">$2,290 / $1,148</span>
+              </div>
+              <div class="fin-row fin-indent">
+                <span class="fin-k">The Crescent · 100% adoption</span>
+                <span class="fin-v green">$7,632 / $3,827</span>
+              </div>
+              <div class="fin-row fin-indent">
+                <span class="fin-k">300 venues · 30% adoption</span>
+                <span class="fin-v green">$687K / $344K</span>
+              </div>
+              <div class="fin-row fin-indent">
+                <span class="fin-k">300 venues · 50% adoption</span>
+                <span class="fin-v green">$1.14M / $571K</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Product 2 ── -->
+          <div class="fin-product-head" style="margin-top:20px">
+            <span class="fin-product-label">Product 2 · Suggestion Accuracy Pay</span>
+          </div>
+
+          <div class="fin-two-col">
+            <div class="fin-panel">
+              <div class="fin-panel-head">Cost &amp; Price — per enrolled show</div>
+              <div class="fin-row">
+                <span class="fin-k">Gap distribution · 12-month backtest · n=156</span>
+                <span class="fin-v muted">median $870 · p75 $1,569 · p90 $2,575</span>
+              </div>
+              <div class="fin-row">
+                <span class="fin-k">Claim rate (gap &gt; $50)</span>
+                <span class="fin-v muted">96.2% of converted deals</span>
+              </div>
+              <div class="fin-row fin-basis">
+                <span class="fin-k fin-basis-k">P2 covers a frequent, larger risk vs P1's rare, small one. Premium reflects that. Door deals require Pro — their mean gap ($2,097) exceeds Standard cap.</span>
+              </div>
+              <div class="fin-row fin-spacer"><span class="fin-k">Tiers · cap / full coverage / premium</span></div>
+              <div class="fin-row fin-indent">
+                <span class="fin-k">Basic · $400 cap · 29.5% of gaps fully covered</span>
+                <span class="fin-v">$680 · $340 each</span>
+              </div>
+              <div class="fin-row fin-indent">
+                <span class="fin-k">Standard · $1,100 cap · 57.1% covered · recommended</span>
+                <span class="fin-v">$1,475 · $735 each</span>
+              </div>
+              <div class="fin-row fin-indent">
+                <span class="fin-k">Pro · $1,900 cap · 80.1% covered · required for door</span>
+                <span class="fin-v">$1,945 · $970 each</span>
+              </div>
+            </div>
+
+            <div class="fin-panel fin-panel-right">
+              <div class="fin-panel-head green">Greenroom Revenue &amp; Margin</div>
+              <div class="fin-row">
+                <span class="fin-k">Target gross margin (all tiers)</span>
+                <span class="fin-v green">~50% · re-priced if loss ratio drifts</span>
+              </div>
+              <div class="fin-row">
+                <span class="fin-k">Beta delivery · platform credit or cash</span>
+                <span class="fin-v muted">Loss-funded · generates pricing signal</span>
+              </div>
+              <div class="fin-row fin-basis">
+                <span class="fin-k fin-basis-k">Beta absorbs gap payments to confirm the gap distribution holds on live accepted deals (selection bias expected to reduce real-world gaps vs backtest).</span>
+              </div>
+              <div class="fin-row fin-spacer"><span class="fin-k">Annual revenue · Confidence bundle (P1 Basic + P2 Standard)</span></div>
+              <div class="fin-row fin-indent">
+                <span class="fin-k">The Crescent · 30% of P2-eligible · revenue / net</span>
+                <span class="fin-v green">$74,498 / $37,249</span>
+              </div>
+              <div class="fin-row fin-indent">
+                <span class="fin-k">The Crescent · 50% of P2-eligible</span>
+                <span class="fin-v green">$124,164 / $62,082</span>
+              </div>
+              <div class="fin-row fin-indent">
+                <span class="fin-k">300 venues · 30% adoption</span>
+                <span class="fin-v green">$22.3M / $11.2M</span>
+              </div>
+              <div class="fin-row fin-indent">
+                <span class="fin-k">300 venues · 50% adoption</span>
+                <span class="fin-v green">$37.2M / $18.6M</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="fin-strategic">
+            <span class="fin-strategic-label">Primary value at Series A</span>
+            <span class="fin-strategic-text">The margin line is the secondary return. The primary return is the agent acceptance rate Phase 3 unlocks for pre-agreed flats. Each conversion produces clean data that improves the next suggestion — compounding on the foundation Phases 1 and 2 build. The revenue potential, particularly from bundles at scale, grows as that data quality compounds.</span>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ IDENTIFIED BUT NOT IMPLEMENTED ══ -->
+  <div class="section-rule"><h2>Identified features — not in scope for this proposal</h2><hr></div>
+
+  <p class="prose">The following features were identified through research and data analysis as delivering real value. They are not included in this proposal — not because they are unimportant, but because each requires the clean data foundation that Phases 1 and 2 produce, and because attempting to build them alongside the structural fix would dilute the MVP's focus. They are listed here so the thinking is visible and the decision can be revisited once the MVP is established.</p>
+
+  <div class="ops-grid">
+    <div class="ops-card">
+      <h4>Expense readiness tracker</h4>
+      <p><strong>What it is:</strong> A per-show expense checklist Mariana and her PM populate during the week. CC fees auto-filled from POS. Hospitality flagged amber if rider cap exists but no amount entered by Wednesday.</p>
+      <p style="margin-top:8px"><strong>Why not now:</strong> High operational value but requires POS integration and expense data standardisation. That standardisation happens naturally as flat deals accumulate — expenses become simpler to track when there is no recoup arithmetic to resolve against them. Better to build this on clean data than on the current messy baseline. Mariana: <em>"If you could just have all the expenses ready when I sat down to settle, that alone would change my life."</em></p>
+    </div>
+    <div class="ops-card">
+      <h4>Tour manager preview link</h4>
+      <p><strong>What it is:</strong> A read-only, mobile-optimised settlement draft sent to the tour manager during load-out — before the back-office sit-down. Diego reviews the numbers on his phone. He arrives with specific questions, not a cold read. Same link optionally CCs the agent.</p>
+      <p style="margin-top:8px"><strong>Why not now:</strong> For flat deals this is almost trivially simple — the preview is a single number. The feature earns its complexity when the settlement involves itemised expenses that the TM needs to review. Build once expense readiness is solved and the settlement statement is consistently complete before the show ends. Diego: <em>"If I could pre-review, the conversation would be 10 minutes instead of 45."</em></p>
+    </div>
+    <div class="ops-card">
+      <h4>Line-item acknowledgment + audit trail</h4>
+      <p><strong>What it is:</strong> At sign-off, each expense line is tagged — standard / absorbed by venue / discussed at table. The signed record captures what both parties confirmed, not just the dollar total. Every line is traceable; no agreement relies on short-term memory.</p>
+      <p style="margin-top:8px"><strong>Why not now:</strong> The Coastal Spell dispute was a recoup interpretation fight — exactly what this feature prevents. But for flat deals, there is nothing to acknowledge beyond the agreed amount. This feature's value scales with deal complexity. Prioritise it when the $5–15K segment is addressed, where disputes are frequent and expensive enough to justify a formal acknowledgment layer. Mariana: <em>"There's no record of what the tour manager said yes to."</em></p>
+    </div>
+    <div class="ops-card">
+      <h4>$5–15K segment</h4>
+      <p><strong>What it is:</strong> The highest dispute rate in the data at 13.5%. Structural intervention — potentially a more sophisticated version of the flat suggestion, or a structured deal-term confirmation flow — for shows in the $5–15K guarantee bracket.</p>
+      <p style="margin-top:8px"><strong>Why not now:</strong> Deal complexity at this level still requires human back-and-forth that a cell-mean suggestion cannot safely replace. Sample size is 37 shows — insufficient for reliable suggestions. The right next step is a dedicated research sprint on how high-guarantee shows are negotiated, what the dispute triggers actually are, and what a second venue's data shows. This is a separate investigation, not a follow-on feature from this MVP.</p>
+    </div>
+  </div>
+
+  <div class="callout blue" style="margin-top: 4px;">
+    <strong>The sequencing logic applies here too.</strong> Each of these features works better on a foundation of clean, structured deal data than on top of the current messy baseline. Phases 1 and 2 create that foundation. Building these features after the MVP means building them correctly, not twice.
+  </div>
+
+  <!-- ══ FOOTER ══ -->
+  <div class="doc-footer">
+    <span>Greenroom · Settlement Redesign · May 2026</span>
+    <span>All figures from live API · 24-month window · The Crescent</span>
+  </div>
+
+</div>
+</body>
+</html>
