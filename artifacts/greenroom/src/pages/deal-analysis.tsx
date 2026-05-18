@@ -104,6 +104,7 @@ export default function DealAnalysisPage() {
       <SizeSection data={d} />
       <ProfitabilitySection data={d} />
       <DisputesSection data={d} />
+      <RepeatArtistsSection data={d} />
       <CostsSection data={d} />
       <RevenueSection data={d} />
     </div>
@@ -268,6 +269,201 @@ function DisputesSection({ data }: { data: DealAnalysis }) {
             <span>
               <strong className="text-ink-600">disputed</strong> = total dollar
               value of contested recoup lines in the cell
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+    </section>
+  );
+}
+
+function RepeatArtistsSection({ data }: { data: DealAnalysis }) {
+  const rad = data.repeatArtistDisputes;
+  if (!rad || rad.artists.length === 0) return null;
+
+  const activeDealTypes = rad.dealTypes.filter((dt) =>
+    rad.artists.some((a) => a.cells.some((c) => c.dealType === dt)),
+  );
+  const activeBuckets = rad.buckets.filter((b) =>
+    rad.artists.some((a) => a.cells.some((c) => c.bucket === b)),
+  );
+
+  const totalShows = rad.artists.reduce((s, a) => s + a.totalShows, 0);
+  const totalDisputes = rad.artists.reduce((s, a) => s + a.totalDisputes, 0);
+
+  function cellBg(disputed: number, shows: number): string {
+    if (shows === 0) return "bg-transparent";
+    if (disputed === 0) return "bg-brand-50/60";
+    const rate = disputed / shows;
+    if (rate >= 0.75) return "bg-rose-300/85";
+    if (rate >= 0.5) return "bg-rose-200/80";
+    if (rate >= 0.25) return "bg-rose-100/80";
+    return "bg-amber-100/80";
+  }
+  function cellFg(disputed: number, shows: number): string {
+    if (shows === 0) return "text-ink-300";
+    if (disputed === 0) return "text-brand-700";
+    const rate = disputed / shows;
+    if (rate >= 0.5) return "text-rose-900";
+    return "text-rose-800";
+  }
+
+  return (
+    <section className="mb-14">
+      <div className="mb-5">
+        <div className="eyebrow text-[10px] text-ink-500 mb-1.5">
+          Repeat artists · friction across deal types &amp; buckets
+        </div>
+        <h2
+          className="font-display text-[26px] font-medium text-ink-900 leading-[1.1]"
+          style={{ letterSpacing: "-0.015em" }}
+        >
+          Who comes back, and where the friction lands
+        </h2>
+        <p className="text-[13px] text-ink-500 mt-2 max-w-2xl leading-relaxed">
+          {rad.artists.length} artists have played The Crescent at least twice
+          and ended at least one of those nights in dispute —{" "}
+          {totalDisputes} disputed settlement{totalDisputes === 1 ? "" : "s"}{" "}
+          across {totalShows} shows. Each row shows where that artist&rsquo;s
+          friction concentrated by deal type and guarantee bucket. Color
+          tracks <span className="text-rose-700">dispute rate</span> in the
+          cell; the small number is{" "}
+          <span className="font-mono tabular">disputed/shows</span>. Click an
+          artist&rsquo;s name to open their profile.
+        </p>
+      </div>
+
+      <Card>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="text-[12px] w-full">
+              <thead>
+                <tr className="border-b border-ink-100/80">
+                  <th className="py-2 pr-3 text-left eyebrow text-[10px] text-ink-400 font-semibold sticky left-0 bg-white z-10 min-w-[200px]">
+                    Artist
+                  </th>
+                  <th className="py-2 px-2 text-left eyebrow text-[10px] text-ink-400 font-semibold">
+                    Shows
+                  </th>
+                  <th className="py-2 px-2 text-left eyebrow text-[10px] text-ink-400 font-semibold">
+                    Disp.
+                  </th>
+                  {activeDealTypes.flatMap((dt) =>
+                    activeBuckets.map((b) => (
+                      <th
+                        key={`${dt}|${b}`}
+                        className="py-2 px-1 text-center eyebrow text-[9px] text-ink-400 font-semibold"
+                        title={`${DEAL_LABELS[dt] ?? dt} · ${b}`}
+                      >
+                        <div className="leading-[1.15] whitespace-nowrap">
+                          <div>{DEAL_LABELS[dt] ?? dt}</div>
+                          <div className="text-ink-300 font-mono tabular text-[9px] normal-case tracking-normal">
+                            {b}
+                          </div>
+                        </div>
+                      </th>
+                    )),
+                  )}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-ink-100/60">
+                {rad.artists.map((a) => {
+                  const cellByKey = new Map(
+                    a.cells.map((c) => [`${c.dealType}|${c.bucket}`, c]),
+                  );
+                  const topDealType = a.dealTypeMix[0];
+                  return (
+                    <tr key={a.artistId} className="align-middle">
+                      <td className="py-2.5 pr-3 sticky left-0 bg-white z-10">
+                        <Link
+                          href={`/artists/${a.artistId}`}
+                          className="text-ink-900 font-medium hover:text-brand-700 hover:underline"
+                        >
+                          {a.artistName}
+                        </Link>
+                        {topDealType && (
+                          <div className="text-[10px] text-ink-400 mt-0.5">
+                            mostly {DEAL_LABELS[topDealType.dealType] ?? topDealType.dealType}
+                          </div>
+                        )}
+                      </td>
+                      <td className="py-2.5 px-2 text-[12px] font-mono tabular text-ink-700">
+                        {a.totalShows}
+                      </td>
+                      <td className="py-2.5 px-2 text-[12px] font-mono tabular text-rose-700 font-semibold">
+                        {a.totalDisputes}
+                      </td>
+                      {activeDealTypes.flatMap((dt) =>
+                        activeBuckets.map((b) => {
+                          const c = cellByKey.get(`${dt}|${b}`);
+                          if (!c || c.shows === 0) {
+                            return (
+                              <td
+                                key={`${dt}|${b}`}
+                                className="py-2 px-1 text-center text-ink-200 font-mono tabular text-[10px]"
+                              >
+                                ·
+                              </td>
+                            );
+                          }
+                          const title = [
+                            `${DEAL_LABELS[dt] ?? dt} · ${b}`,
+                            `${c.disputed} disputed of ${c.shows} show${c.shows === 1 ? "" : "s"}`,
+                            c.disputedAmount > 0
+                              ? `${formatMoneyCompact(c.disputedAmount)} contested`
+                              : null,
+                            c.topTopic ? `top topic: ${RECOUP_LABELS[c.topTopic] ?? c.topTopic}` : null,
+                          ]
+                            .filter(Boolean)
+                            .join(" · ");
+                          return (
+                            <td key={`${dt}|${b}`} className="py-1 px-0.5">
+                              <Link
+                                href={showsHref({
+                                  artistId: a.artistId,
+                                  dealType: dt,
+                                  size: b,
+                                })}
+                                className={`block rounded text-center font-mono tabular text-[10.5px] leading-[1.4] px-1 py-1 ${cellBg(c.disputed, c.shows)} ${cellFg(c.disputed, c.shows)} hover:ring-1 hover:ring-ink-300`}
+                                title={title}
+                              >
+                                {c.disputed}/{c.shows}
+                              </Link>
+                            </td>
+                          );
+                        }),
+                      )}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-ink-100/60 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[10px] text-ink-500">
+            <span className="text-ink-600 font-semibold">Cell color:</span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded bg-brand-50/60 inline-block" />
+              0 disputes
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded bg-amber-100/80 inline-block" />
+              &lt; 25%
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded bg-rose-100/80 inline-block" />
+              25–50%
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded bg-rose-200/80 inline-block" />
+              50–75%
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded bg-rose-300/85 inline-block" />
+              &ge; 75%
+            </span>
+            <span className="ml-auto text-ink-400">
+              Top 24 by total disputes · sorted desc
             </span>
           </div>
         </CardContent>

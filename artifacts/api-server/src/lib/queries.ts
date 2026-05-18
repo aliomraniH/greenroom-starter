@@ -634,6 +634,122 @@ export async function getDealAnalysis() {
     }
   }
 
+  // Repeat-artist dispute mosaic — artists with ≥ 2 past shows at this
+  // venue, broken down by (dealType × bucket). Shows the booker which
+  // recurring acts produce the friction and which (price × shape) cells
+  // they produce it in. Filtered to artists who have at least one
+  // disputed settlement, since the panel exists to surface friction
+  // patterns; clean recurring artists are not interesting here.
+  const artistAcc: Map<
+    string,
+    {
+      artistId: string;
+      totalShows: number;
+      totalDisputes: number;
+      dealTypeCounts: Map<string, number>;
+      cells: Map<
+        string,
+        {
+          shows: number;
+          disputed: number;
+          disputedAmount: number;
+          topicCounts: Map<string, number>;
+        }
+      >;
+    }
+  > = new Map();
+  const artistShowsRows = await db
+    .select({ showId: shows.id, artistId: shows.artistId, name: artists.name })
+    .from(shows)
+    .leftJoin(artists, eq(shows.artistId, artists.id));
+  const artistMetaByShowId = new Map(
+    artistShowsRows.map((r) => [r.showId, { artistId: r.artistId, name: r.name }]),
+  );
+  for (const d of pastDeals) {
+    const meta = artistMetaByShowId.get(d.showId);
+    if (!meta?.artistId || !meta.name) continue;
+    const key = `${meta.artistId}|${meta.name}`;
+    let acc = artistAcc.get(key);
+    if (!acc) {
+      acc = {
+        artistId: meta.artistId,
+        totalShows: 0,
+        totalDisputes: 0,
+        dealTypeCounts: new Map(),
+        cells: new Map(),
+      };
+      artistAcc.set(key, acc);
+    }
+    acc.totalShows++;
+    acc.dealTypeCounts.set(d.dealType, (acc.dealTypeCounts.get(d.dealType) ?? 0) + 1);
+    const bucket = classifyAnalyticsSizeBucket(d);
+    const cellKey = `${d.dealType}|${bucket}`;
+    let cell = acc.cells.get(cellKey);
+    if (!cell) {
+      cell = { shows: 0, disputed: 0, disputedAmount: 0, topicCounts: new Map() };
+      acc.cells.set(cellKey, cell);
+    }
+    cell.shows++;
+    const s = settlementByShowId.get(d.showId);
+    if (s) {
+      const recoupsList = parseRecoups(s.recoupsJson);
+      const hasDisputedRecoup = recoupsList.some((r) => r?.status === "disputed");
+      const hasWithdrawnRecoup = recoupsList.some((r) => r?.status === "withdrawn");
+      const isDisputed = s.status === "disputed" || hasDisputedRecoup || hasWithdrawnRecoup;
+      if (isDisputed) {
+        cell.disputed++;
+        acc.totalDisputes++;
+        for (const r of recoupsList) {
+          if (r?.status === "disputed" || r?.status === "withdrawn") {
+            cell.disputedAmount += r.amount ?? 0;
+            cell.topicCounts.set(r.category, (cell.topicCounts.get(r.category) ?? 0) + 1);
+          }
+        }
+      }
+    }
+  }
+  const artistNameByKey: Record<string, string> = {};
+  for (const [k] of artistAcc) {
+    const [, ...rest] = k.split("|");
+    artistNameByKey[k] = rest.join("|");
+  }
+  const repeatArtistDisputes = {
+    dealTypes: Array.from(dealTypesSeen).sort(),
+    buckets: SIZE_ORDER,
+    artists: Array.from(artistAcc.entries())
+      .filter(([, v]) => v.totalShows >= 2 && v.totalDisputes >= 1)
+      .map(([k, v]) => ({
+        artistId: v.artistId,
+        artistName: artistNameByKey[k] ?? "",
+        totalShows: v.totalShows,
+        totalDisputes: v.totalDisputes,
+        dealTypeMix: Array.from(v.dealTypeCounts.entries())
+          .map(([dealType, count]) => ({ dealType, count }))
+          .sort((a, b) => b.count - a.count),
+        cells: Array.from(v.cells.entries()).map(([ck, c]) => {
+          const [dealType, bucket] = ck.split("|");
+          const topTopicEntry = Array.from(c.topicCounts.entries()).sort(
+            (a, b) => b[1] - a[1],
+          )[0];
+          return {
+            dealType,
+            bucket,
+            shows: c.shows,
+            disputed: c.disputed,
+            disputedAmount: c.disputedAmount,
+            topTopic: topTopicEntry ? topTopicEntry[0] : null,
+          };
+        }),
+      }))
+      .sort(
+        (a, b) =>
+          b.totalDisputes - a.totalDisputes ||
+          b.totalShows - a.totalShows ||
+          a.artistName.localeCompare(b.artistName),
+      )
+      .slice(0, 24),
+  };
+
   const disputeBreakdown = {
     dealTypes: Array.from(dealTypesSeen).sort(),
     buckets: SIZE_ORDER,
@@ -833,6 +949,7 @@ export async function getDealAnalysis() {
       crossTabBySizeAndType,
     },
     disputeBreakdown,
+    repeatArtistDisputes,
   };
 }
 

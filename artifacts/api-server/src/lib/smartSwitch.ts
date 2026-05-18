@@ -236,7 +236,9 @@ export async function generateSuggestion(
             bandWidth: cellBandWidth,
             source: "sgp_engine",
             sampleSize: cell?.n ?? g.artistShowCount + g.agentShowCount,
-            basis: g.basis,
+            basis:
+              `${g.basis} Artist familiarity at this venue: ${familiarity}` +
+              `${artistShowsAtVenue < 2 ? " — confidence tier is capped accordingly until we see at least 2 prior nights." : "."}`,
             isDeadPool: false,
             artistShowsAtVenue,
           };
@@ -304,6 +306,8 @@ export async function generateSuggestion(
           `Switch fell back to the contract guarantee. The flat ` +
           `(${formatMoney(flat)}) mirrors the signed number exactly — ` +
           `same dollar value, no settlement-night recoup math. ` +
+          `Artist familiarity at this venue: ${familiarity}` +
+          `${artistShowsAtVenue < 2 ? " — tier ceiling demoted accordingly" : ""}. ` +
           `Heads-up before sending: historically at this venue, ${dealName} ` +
           `deals in the ${bucket} bucket had the percentage clause out-pay ` +
           `the guarantee on most nights, so the agent may push back on ` +
@@ -349,7 +353,8 @@ export async function generateSuggestion(
         basis:
           `Door deals at this size have only ${sampleSize} prior show${sampleSize === 1 ? "" : "s"} ` +
           `at this venue — not enough history to project a hybrid floor/split with ` +
-          `confidence. Discuss the structure directly with the agent before signing; ` +
+          `confidence. Artist familiarity at this venue: ${familiarity}. ` +
+          `Discuss the structure directly with the agent before signing; ` +
           `the standard $${DOOR_FLOOR} floor is still recommended as a baseline.`,
         artistShowsAtVenue,
       };
@@ -382,7 +387,8 @@ export async function generateSuggestion(
           `available pool after the $${cap} expense cap is ${formatMoney(Math.max(0, projectedAvail))}, ` +
           `at or below the $${DOOR_FLOOR} floor. Artist effectively walks with the floor; ` +
           `the ${Math.round(DOOR_SPLIT_PCT * 100)}% split rarely fires. Treat this as a ` +
-          `flat $${DOOR_FLOOR} guarantee.`,
+          `flat $${DOOR_FLOOR} guarantee. Artist familiarity at this venue: ${familiarity}` +
+          `${artistShowsAtVenue < 2 ? " — tier ceiling demoted accordingly" : ""}.`,
         artistShowsAtVenue,
       };
     }
@@ -412,7 +418,8 @@ export async function generateSuggestion(
         `of walk-up, then ${Math.round(DOOR_SPLIT_PCT * 100)}% of the pool above an ` +
         `$${cap} expense cap. Projected artist payout ~${formatMoney(projectedArtist)} ` +
         `at the cell-average gross of ${formatMoney(avgGross)}; venue stops eating ` +
-        `expense overruns on slow nights.`,
+        `expense overruns on slow nights. Artist familiarity at this venue: ${familiarity}` +
+        `${artistShowsAtVenue < 2 ? " — tier ceiling demoted accordingly" : ""}.`,
       artistShowsAtVenue,
     };
   }

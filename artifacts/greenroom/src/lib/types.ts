@@ -648,4 +648,23 @@ export interface DealAnalysis {
       topTopics: { topic: string; count: number }[];
     }[];
   };
+  repeatArtistDisputes: {
+    dealTypes: string[];
+    buckets: string[];
+    artists: {
+      artistId: string;
+      artistName: string;
+      totalShows: number;
+      totalDisputes: number;
+      dealTypeMix: { dealType: string; count: number }[];
+      cells: {
+        dealType: string;
+        bucket: string;
+        shows: number;
+        disputed: number;
+        disputedAmount: number;
+        topTopic: string | null;
+      }[];
+    }[];
+  };
 }
