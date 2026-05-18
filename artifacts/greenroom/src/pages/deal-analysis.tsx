@@ -291,6 +291,25 @@ function RepeatArtistsSection({ data }: { data: DealAnalysis }) {
   const totalShows = rad.artists.reduce((s, a) => s + a.totalShows, 0);
   const totalDisputes = rad.artists.reduce((s, a) => s + a.totalDisputes, 0);
 
+  const colTotals = new Map<string, { shows: number; disputed: number }>();
+  for (const a of rad.artists) {
+    for (const c of a.cells) {
+      const key = `${c.dealType}|${c.bucket}`;
+      const prev = colTotals.get(key) ?? { shows: 0, disputed: 0 };
+      prev.shows += c.shows;
+      prev.disputed += c.disputed;
+      colTotals.set(key, prev);
+    }
+  }
+  const grandShows = Array.from(colTotals.values()).reduce(
+    (s, v) => s + v.shows,
+    0,
+  );
+  const grandDisputed = Array.from(colTotals.values()).reduce(
+    (s, v) => s + v.disputed,
+    0,
+  );
+
   function cellBg(disputed: number, shows: number): string {
     if (shows === 0) return "bg-transparent";
     if (disputed === 0) return "bg-brand-50/60";
@@ -437,6 +456,59 @@ function RepeatArtistsSection({ data }: { data: DealAnalysis }) {
                   );
                 })}
               </tbody>
+              <tfoot>
+                <tr className="border-t-2 border-ink-200 bg-ink-50/60">
+                  <td className="py-2 pr-3 sticky left-0 bg-ink-50/60 z-10 text-[11px] eyebrow text-ink-600 font-semibold">
+                    Column total
+                  </td>
+                  <td className="py-2 px-2 text-[12px] font-mono tabular text-ink-800 font-semibold">
+                    {grandShows}
+                  </td>
+                  <td className="py-2 px-2 text-[12px] font-mono tabular text-rose-800 font-semibold">
+                    {grandDisputed}
+                  </td>
+                  {activeDealTypes.flatMap((dt) =>
+                    activeBuckets.map((b) => {
+                      const t = colTotals.get(`${dt}|${b}`);
+                      if (!t || t.shows === 0) {
+                        return (
+                          <td
+                            key={`tot-${dt}|${b}`}
+                            className="py-2 px-1 text-center text-ink-200 font-mono tabular text-[10px]"
+                          >
+                            ·
+                          </td>
+                        );
+                      }
+                      const rate = t.disputed / t.shows;
+                      const pctOfAllShows =
+                        grandShows > 0 ? (t.shows / grandShows) * 100 : 0;
+                      const title = [
+                        `${DEAL_LABELS[dt] ?? dt} · ${b}`,
+                        `${t.disputed} disputed of ${t.shows} shows (${(rate * 100).toFixed(0)}% dispute rate)`,
+                        `${pctOfAllShows.toFixed(0)}% of the repeat-artist corpus`,
+                      ].join(" · ");
+                      return (
+                        <td
+                          key={`tot-${dt}|${b}`}
+                          className="py-1.5 px-1 text-center"
+                          title={title}
+                        >
+                          <div className="font-mono tabular text-[11px] text-ink-900 font-semibold leading-tight">
+                            {t.disputed}/{t.shows}
+                          </div>
+                          <div className="font-mono tabular text-[9.5px] text-rose-700 leading-tight">
+                            {(rate * 100).toFixed(0)}%
+                          </div>
+                          <div className="font-mono tabular text-[9px] text-ink-400 leading-tight">
+                            {pctOfAllShows.toFixed(0)}% vol
+                          </div>
+                        </td>
+                      );
+                    }),
+                  )}
+                </tr>
+              </tfoot>
             </table>
           </div>
 
