@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import { getAllShows, getShowById, getAllArtists, getArtistProfile, getReports, getDealAnalysis, getNeedsAttention } from "../lib/queries";
 import { buildShowExport } from "../lib/showExport";
 import { getInsights, enrichSettlements, clearInsightsCache } from "../lib/insights";
-import { getCalibration, getShowMeter, getAccountHealth, getArtistExpenseProfile, clearCalibrationCache } from "../lib/calibration";
+import { getCalibration, getShowMeter, getAccountHealth, getArtistExpenseProfile, getExpenseFrictionByCell, clearCalibrationCache } from "../lib/calibration";
 import { answerAsk, type AskScope } from "../lib/aiAsk";
 import { getLlmStatus, saveLlmSettings, type SaveLlmSettingsInput } from "../lib/llm";
 import { generateAndPersist, decideSuggestion } from "../lib/smartSwitch";
@@ -144,6 +144,15 @@ router.get("/insights", async (_req, res): Promise<void> => {
     res.json(data);
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : "insights_failed" });
+  }
+});
+
+router.get("/insights/expense-friction", async (_req, res): Promise<void> => {
+  try {
+    const data = await getExpenseFrictionByCell();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "expense_friction_failed" });
   }
 });
 

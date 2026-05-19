@@ -648,6 +648,36 @@ export interface AccountHealth {
   hospitalityFlagged: boolean;
   maturityStage: 1 | 2 | 3 | 4;
   settledN: number;
+  expensePctOfGross: {
+    thisMonth: number | null;
+    trailing3mo: number | null;
+    delta: number | null;
+    thisMonthN: number;
+    trailing3moN: number;
+  };
+  calibration: {
+    calibratedCount: number;
+    totalCount: number;
+    generatedAt: string;
+  };
+}
+
+export interface ExpenseFrictionCell {
+  dealType: string;
+  bucket: string;
+  n: number;
+  expensePctMean: number | null;
+  expensePctP75: number | null;
+  topCategory: ExpenseCategory | null;
+  topCategoryCellMean: number | null;
+  topCategoryVenueMean: number | null;
+  topCategoryDrift: number | null;
+  themes: Array<{ theme: string; count: number }>;
+}
+
+export interface ExpenseFrictionPayload {
+  generatedAt: string;
+  cells: ExpenseFrictionCell[];
 }
 
 export interface BucketDrift {
@@ -751,6 +781,9 @@ export interface ArtistExpenseProfile {
   artistId: string;
   settledShows: number;
   totalExpensesMean: number | null;
+  totalExpensesWeightedMean: number | null;
+  totalExpensesMax: number | null;
+  totalExpensesStddev: number | null;
   totalExpensesP75: number | null;
   hospitalityMean: number | null;
   hospitalityP75: number | null;
@@ -758,7 +791,10 @@ export interface ArtistExpenseProfile {
   vsGenre: {
     genre: string | null;
     genreMeanExpenses: number | null;
+    genreP75Expenses: number | null;
     artistVsGenrePct: number | null;
+    p75Delta: number | null;
+    p75Confidence: Confidence | null;
   };
   source: CalibrationSource;
   confidence: Confidence;

@@ -5,7 +5,125 @@ import { api } from "@/lib/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { useApiData, LoadingState } from "@/hooks/useApiData";
 import { CalibrationSection } from "@/components/calibration-section";
-import type { InsightsCell, AttentionKind, SwitchSavingsItem, SwitchProjectedCell, GuaranteeBacktestItem, SgpFlatRepricingItem } from "@/lib/types";
+import type { InsightsCell, AttentionKind, SwitchSavingsItem, SwitchProjectedCell, GuaranteeBacktestItem, SgpFlatRepricingItem, ExpenseFrictionCell } from "@/lib/types";
+
+const CATEGORY_LABELS: Record<string, string> = {
+  hospitality: "Hospitality",
+  production: "Production",
+  sound: "Sound",
+  lights: "Lights",
+  marketing: "Marketing",
+  backline: "Backline",
+  security: "Security",
+  other: "Other",
+};
+
+function ExpenseFrictionSection() {
+  const state = useApiData(() => api.expenseFriction(), []);
+  if (state.status === "loading") return null;
+  if (state.status === "error") return null;
+  const cells = state.data.cells;
+  if (cells.length === 0) return null;
+  return (
+    <Card className="mb-8">
+      <CardContent>
+        <div className="flex items-baseline justify-between mb-4">
+          <div>
+            <div className="eyebrow text-[10px] text-ink-500 mb-1">
+              Expense friction by cell
+            </div>
+            <h3 className="text-[14px] font-semibold text-ink-900">
+              Where expenses run hot vs the venue baseline
+            </h3>
+          </div>
+          <div className="text-[10px] text-ink-400">
+            cells with n ≥ 5 · themes filtered to expense / hospitality
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {cells.map((c) => (
+            <ExpenseFrictionCellCard key={`${c.dealType}|${c.bucket}`} cell={c} />
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ExpenseFrictionCellCard({ cell }: { cell: ExpenseFrictionCell }) {
+  const drift = cell.topCategoryDrift;
+  const driftTone =
+    drift == null
+      ? "text-ink-500"
+      : drift > 0.15
+      ? "text-rose-700"
+      : drift < -0.15
+      ? "text-emerald-700"
+      : "text-ink-600";
+  return (
+    <div className="rounded-md ring-1 ring-ink-200/60 bg-white p-3">
+      <div className="flex items-baseline justify-between gap-2 mb-2">
+        <div className="text-[12px] font-medium text-ink-900">
+          {DEAL_LABELS[cell.dealType] ?? cell.dealType}{" "}
+          <span className="text-ink-400">·</span> {cell.bucket}
+        </div>
+        <div className="text-[10px] text-ink-400">n={cell.n}</div>
+      </div>
+      <div className="grid grid-cols-2 gap-2 mb-2">
+        <div>
+          <div className="text-[10px] eyebrow text-ink-400">Mean exp / gross</div>
+          <div className="text-[16px] font-mono tabular text-ink-900">
+            {cell.expensePctMean == null ? "—" : `${Math.round(cell.expensePctMean * 100)}%`}
+          </div>
+        </div>
+        <div>
+          <div className="text-[10px] eyebrow text-ink-400">P75 exp / gross</div>
+          <div className="text-[16px] font-mono tabular text-ink-900">
+            {cell.expensePctP75 == null ? "—" : `${Math.round(cell.expensePctP75 * 100)}%`}
+          </div>
+        </div>
+      </div>
+      {cell.topCategory && drift != null && (
+        <div className="text-[11.5px] text-ink-600 mb-2">
+          Top drift:{" "}
+          <span className="text-ink-900">
+            {CATEGORY_LABELS[cell.topCategory] ?? cell.topCategory}
+          </span>{" "}
+          <span className={`font-mono tabular ${driftTone}`}>
+            {drift > 0 ? "+" : ""}{Math.round(drift * 100)}%
+          </span>{" "}
+          <span className="text-ink-400">
+            (cell ${cell.topCategoryCellMean?.toLocaleString() ?? "—"} vs venue $
+            {cell.topCategoryVenueMean?.toLocaleString() ?? "—"})
+          </span>
+        </div>
+      )}
+      {cell.themes.length > 0 ? (
+        <div className="border-t border-ink-100 pt-2 mt-2">
+          <div className="text-[10px] eyebrow text-ink-400 mb-1.5">
+            Recurring complaint themes
+          </div>
+          <div className="flex flex-wrap gap-1">
+            {cell.themes.map((t, i) => (
+              <span
+                key={i}
+                className="inline-flex items-center gap-1 text-[10.5px] bg-violet-50 ring-1 ring-violet-200/60 text-violet-700 rounded-sm px-1.5 py-[1px]"
+              >
+                <Sparkles className="h-2.5 w-2.5" />
+                {t.theme}
+                <span className="font-mono tabular text-violet-500">×{t.count}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="text-[10.5px] text-ink-400 italic border-t border-ink-100 pt-2 mt-2">
+          No expense / hospitality themes clustered for this cell yet.
+        </div>
+      )}
+    </div>
+  );
+}
 
 const DEAL_LABELS: Record<string, string> = {
   flat: "Flat",
@@ -88,6 +206,8 @@ export default function InsightsPage() {
       </p>
 
       <TakeActionPanel />
+
+      <ExpenseFrictionSection />
 
       <CalibrationSection variant="insights" />
 

@@ -1,4 +1,4 @@
-import type { ShowListRow, ShowDetail, ArtistRow, ArtistProfile, Reports, DealAnalysis, AttentionItem, InsightsPayload, SwitchSavingsPayload, SwitchProjectedGridPayload, LlmStatus, SaveLlmSettingsInput, SwitchSuggestion, GuaranteeSuggestion, GuaranteeBacktestPayload, SgpFlatRepricingPayload, DealImprovementsPayload, ImprovementKind, CalibrationPayload, ShowMeterPayload, AskScope, AskResult, ArtistExpenseProfile } from "./types";
+import type { ShowListRow, ShowDetail, ArtistRow, ArtistProfile, Reports, DealAnalysis, AttentionItem, InsightsPayload, SwitchSavingsPayload, SwitchProjectedGridPayload, LlmStatus, SaveLlmSettingsInput, SwitchSuggestion, GuaranteeSuggestion, GuaranteeBacktestPayload, SgpFlatRepricingPayload, DealImprovementsPayload, ImprovementKind, CalibrationPayload, ShowMeterPayload, AskScope, AskResult, ArtistExpenseProfile, ExpenseFrictionPayload } from "./types";
 
 const BASE = `${import.meta.env.BASE_URL}api`;
 
@@ -85,6 +85,7 @@ export const api = {
     return res.json() as Promise<{ ok: true; appliedKinds: ImprovementKind[]; dealId: string }>;
   },
   calibration: () => get<CalibrationPayload>("/calibration"),
+  expenseFriction: () => get<ExpenseFrictionPayload>("/insights/expense-friction"),
   artistExpenseProfile: (id: string) =>
     get<ArtistExpenseProfile>(`/artists/${encodeURIComponent(id)}/expense-profile`),
   showMeter: (id: string) => get<ShowMeterPayload>(`/shows/${encodeURIComponent(id)}/meter`),

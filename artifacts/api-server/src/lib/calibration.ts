@@ -765,6 +765,11 @@ export type ArtistExpenseProfile = {
   artistId: string;
   settledShows: number;
   totalExpensesMean: number | null;
+  // Recency-decayed weighted mean (exp decay, half-life ~6 mo). Falls back
+  // to plain mean when no dates are available.
+  totalExpensesWeightedMean: number | null;
+  totalExpensesMax: number | null;
+  totalExpensesStddev: number | null;
   totalExpensesP75: number | null;
   hospitalityMean: number | null;
   hospitalityP75: number | null;
@@ -772,7 +777,12 @@ export type ArtistExpenseProfile = {
   vsGenre: {
     genre: string | null;
     genreMeanExpenses: number | null;
+    genreP75Expenses: number | null;
     artistVsGenrePct: number | null;
+    // P75 comparison (spec): artist P75 vs venue genre P75 with delta +
+    // confidence chip. `confidence` is null when artist has <3 shows.
+    p75Delta: number | null;
+    p75Confidence: Confidence | null;
   };
   source: "venue_computed" | "audit_default" | "none";
   confidence: Confidence;
@@ -801,7 +811,7 @@ export async function getArtistExpenseProfile(
       .filter((s) => s.artistId === artistId && settledShowIds.has(s.id))
       .map((s) => s.id),
   );
-  const totals: number[] = [];
+  const totals: Array<{ total: number; date: string }> = [];
   const hosp: number[] = [];
   const catSums = new Map<ExpenseCategory, number>();
   let nWithExpenses = 0;
@@ -809,7 +819,9 @@ export async function getArtistExpenseProfile(
     const ex = allExpenses.filter((e) => e.showId === id && !e.absorbedByVenue);
     if (ex.length === 0) continue;
     nWithExpenses++;
-    totals.push(ex.reduce((s, e) => s + e.amount, 0));
+    const total = ex.reduce((s, e) => s + e.amount, 0);
+    const sh = allShows.find((x) => x.id === id);
+    totals.push({ total, date: sh?.date ?? today });
     hosp.push(ex.filter((e) => e.category === "hospitality").reduce((s, e) => s + e.amount, 0));
     for (const e of ex) {
       catSums.set(
@@ -827,6 +839,9 @@ export async function getArtistExpenseProfile(
       artistId,
       settledShows: artistShowIds.size,
       totalExpensesMean: null,
+      totalExpensesWeightedMean: null,
+      totalExpensesMax: null,
+      totalExpensesStddev: null,
       totalExpensesP75: null,
       hospitalityMean: null,
       hospitalityP75: null,
@@ -834,16 +849,37 @@ export async function getArtistExpenseProfile(
       vsGenre: {
         genre,
         genreMeanExpenses: gb?.meanExpenses ?? null,
+        genreP75Expenses: gb?.p75Expenses ?? null,
         artistVsGenrePct: null,
+        p75Delta: null,
+        p75Confidence: null,
       },
       source: "none",
       confidence: "none",
     };
   }
 
-  const totalsSorted = [...totals].sort((a, b) => a - b);
+  const totalValues = totals.map((t) => t.total);
+  const totalsSorted = [...totalValues].sort((a, b) => a - b);
   const hospSorted = [...hosp].sort((a, b) => a - b);
-  const mean = totals.reduce((s, v) => s + v, 0) / totals.length;
+  const mean = totalValues.reduce((s, v) => s + v, 0) / totalValues.length;
+  const max = totalValues.reduce((a, b) => Math.max(a, b), totalValues[0]);
+  const variance =
+    totalValues.reduce((s, v) => s + (v - mean) * (v - mean), 0) / totalValues.length;
+  const stddev = Math.sqrt(variance);
+  // Recency-decayed weighted mean (half-life 6 months).
+  const HALF_LIFE_DAYS = 180;
+  const todayMs = Date.parse(today + "T00:00:00Z");
+  let wSum = 0;
+  let wTotal = 0;
+  for (const t of totals) {
+    const tMs = Date.parse(t.date + "T00:00:00Z");
+    const ageDays = Number.isFinite(tMs) ? Math.max(0, (todayMs - tMs) / 86400000) : 0;
+    const w = Math.pow(0.5, ageDays / HALF_LIFE_DAYS);
+    wSum += w * t.total;
+    wTotal += w;
+  }
+  const weightedMean = wTotal > 0 ? wSum / wTotal : mean;
   const p75 = quantile(totalsSorted, 0.75);
   const hospMean = hosp.reduce((s, v) => s + v, 0) / hosp.length;
   const hospP75Val = quantile(hospSorted, 0.75);
@@ -857,10 +893,25 @@ export async function getArtistExpenseProfile(
     gb?.meanExpenses && gb.meanExpenses > 0
       ? (mean - gb.meanExpenses) / gb.meanExpenses
       : null;
+  // P75 comparison (spec: only show when artist has >=3 shows)
+  const genreP75 = gb?.p75Expenses ?? null;
+  const p75Delta =
+    nWithExpenses >= 3 && genreP75 != null && genreP75 > 0
+      ? (p75 - genreP75) / genreP75
+      : null;
+  // Artist-level confidence (separate from venue maturity thresholds).
+  // n≥10 high, n≥5 med, n≥3 low. Below 3 we don't show the comparison.
+  const artistConfidence: Confidence =
+    nWithExpenses >= 10 ? "high" : nWithExpenses >= 5 ? "med" : "low";
+  const p75Confidence: Confidence | null =
+    nWithExpenses >= 3 ? artistConfidence : null;
   return {
     artistId,
     settledShows: artistShowIds.size,
     totalExpensesMean: Math.round(mean),
+    totalExpensesWeightedMean: Math.round(weightedMean),
+    totalExpensesMax: Math.round(max),
+    totalExpensesStddev: Math.round(stddev),
     totalExpensesP75: Math.round(p75),
     hospitalityMean: Math.round(hospMean),
     hospitalityP75: Math.round(hospP75Val),
@@ -868,7 +919,10 @@ export async function getArtistExpenseProfile(
     vsGenre: {
       genre,
       genreMeanExpenses: gb?.meanExpenses ?? null,
+      genreP75Expenses: genreP75,
       artistVsGenrePct: vsGenrePct,
+      p75Delta,
+      p75Confidence,
     },
     source: venueComputed ? "venue_computed" : "audit_default",
     confidence: confidenceFor(nWithExpenses),
@@ -885,14 +939,29 @@ export type AccountHealth = {
   hospitalityFlagged: boolean;
   maturityStage: MaturityStage;
   settledN: number;
+  // Spec tile 2: this-month vs trailing-3-mo expense % of gross
+  expensePctOfGross: {
+    thisMonth: number | null;
+    trailing3mo: number | null;
+    delta: number | null;
+    thisMonthN: number;
+    trailing3moN: number;
+  };
+  // Spec tile 3: calibration freshness ("X of Y calibrated · refreshed Xm ago")
+  calibration: {
+    calibratedCount: number;
+    totalCount: number;
+    generatedAt: string;
+  };
 };
 
 export async function getAccountHealth(): Promise<AccountHealth> {
   await migrationsReady;
   const today = todayISO();
-  const [allShows, allDeals] = await Promise.all([
+  const [allShows, allDeals, allSettlements] = await Promise.all([
     db.select().from(shows),
     db.select().from(deals),
+    db.select().from(settlements),
   ]);
   const upcoming = allShows.filter((s) => s.date > today);
   const dealByShow = new Map(allDeals.map((d) => [d.showId, d]));
@@ -910,6 +979,31 @@ export async function getAccountHealth(): Promise<AccountHealth> {
   const drifted = Object.values(calib.perCategory)
     .filter((c) => c.p75Drift3moVs12mo != null && Math.abs(c.p75Drift3moVs12mo) >= 0.1)
     .map((c) => ({ category: c.category, drift: c.p75Drift3moVs12mo as number }));
+
+  // Expense % of gross — this-month vs trailing 3-mo
+  const showDateById = new Map(allShows.map((s) => [s.id, s.date]));
+  const thisMonthCutoff = isoNMonthsAgo(1);
+  const trailing3moCutoff = isoNMonthsAgo(3);
+  const thisMonthRatios: number[] = [];
+  const trailing3moRatios: number[] = [];
+  for (const s of allSettlements) {
+    const date = showDateById.get(s.showId);
+    if (!date || date > today) continue;
+    if (s.totalExpenses == null || s.grossBoxOffice == null || s.grossBoxOffice <= 0) continue;
+    const ratio = s.totalExpenses / s.grossBoxOffice;
+    if (date >= thisMonthCutoff) thisMonthRatios.push(ratio);
+    if (date >= trailing3moCutoff && date < thisMonthCutoff) trailing3moRatios.push(ratio);
+  }
+  const mean = (arr: number[]): number | null =>
+    arr.length === 0 ? null : arr.reduce((a, b) => a + b, 0) / arr.length;
+  const tm = mean(thisMonthRatios);
+  const t3 = mean(trailing3moRatios);
+  const delta = tm != null && t3 != null ? tm - t3 : null;
+
+  // Calibration freshness: X of Y categories venue-computed (Y = 8)
+  const catRows = Object.values(calib.perCategory);
+  const calibratedCount = catRows.filter((c) => c.source === "venue_computed").length;
+
   return {
     upcomingCount: upcoming.length,
     upcomingNoDealCount: noDeal,
@@ -918,5 +1012,170 @@ export async function getAccountHealth(): Promise<AccountHealth> {
     hospitalityFlagged: calib.hospitalityWatch.flagged,
     maturityStage: calib.maturity.stage,
     settledN: calib.maturity.settledN,
+    expensePctOfGross: {
+      thisMonth: tm,
+      trailing3mo: t3,
+      delta,
+      thisMonthN: thisMonthRatios.length,
+      trailing3moN: trailing3moRatios.length,
+    },
+    calibration: {
+      calibratedCount,
+      totalCount: catRows.length,
+      generatedAt: calib.generatedAt,
+    },
   };
+}
+
+// -------- Expense friction by cell (Insights tab) --------
+
+export type ExpenseFrictionCell = {
+  dealType: string;
+  bucket: string;
+  n: number;
+  expensePctMean: number | null;
+  expensePctP75: number | null;
+  topCategory: ExpenseCategory | null;
+  topCategoryCellMean: number | null;
+  topCategoryVenueMean: number | null;
+  topCategoryDrift: number | null;
+  themes: Array<{ theme: string; count: number }>;
+};
+
+export type ExpenseFrictionPayload = {
+  generatedAt: string;
+  cells: ExpenseFrictionCell[];
+};
+
+// Keyword filter for clustered complaint themes: keep only themes that
+// look like they describe expense or hospitality friction.
+const EXPENSE_THEME_RX = /(expense|hospitality|cost|catering|production|advance|recoup|overage|cap|backline|sound|lights|marketing|food|rider|hotel|hospit)/i;
+
+export async function getExpenseFrictionByCell(): Promise<ExpenseFrictionPayload> {
+  await migrationsReady;
+  const [calib, allShowsRows, allDealsRows, allSettlements, allExpenses] = await Promise.all([
+    getCalibration(),
+    db.select().from(shows),
+    db.select().from(deals),
+    db.select().from(settlements),
+    db.select().from(expenses),
+  ]);
+  // Lazy-load insights to avoid a hard import cycle.
+  const { getInsights } = await import("./insights");
+  const insights = await getInsights().catch(() => null);
+  const themesByCell = new Map<string, Array<{ theme: string; count: number }>>();
+  if (insights) {
+    for (const c of insights.cells) {
+      const filtered = c.bubbles
+        .filter((b) => EXPENSE_THEME_RX.test(b.theme))
+        .slice(0, 5);
+      if (filtered.length > 0) themesByCell.set(`${c.dealType}|${c.bucket}`, filtered);
+    }
+  }
+
+  const today = todayISO();
+  const pastShowIds = new Set(
+    allShowsRows.filter((s) => s.date <= today).map((s) => s.id),
+  );
+  const settlementByShow = new Map(allSettlements.map((s) => [s.showId, s]));
+  const expensesByShow = new Map<string, typeof allExpenses>();
+  for (const e of allExpenses) {
+    const list = expensesByShow.get(e.showId) ?? [];
+    list.push(e);
+    expensesByShow.set(e.showId, list);
+  }
+  // Venue-wide category means (per show)
+  const venueCatTotals = new Map<ExpenseCategory, number[]>();
+  for (const showId of pastShowIds) {
+    const exs = (expensesByShow.get(showId) ?? []).filter((e) => !e.absorbedByVenue);
+    const byCat = new Map<ExpenseCategory, number>();
+    for (const e of exs) {
+      const c = e.category as ExpenseCategory;
+      byCat.set(c, (byCat.get(c) ?? 0) + e.amount);
+    }
+    for (const [c, total] of byCat) {
+      const arr = venueCatTotals.get(c) ?? [];
+      arr.push(total);
+      venueCatTotals.set(c, arr);
+    }
+  }
+  const venueCatMean = new Map<ExpenseCategory, number>();
+  for (const [c, arr] of venueCatTotals) {
+    venueCatMean.set(c, arr.reduce((a, b) => a + b, 0) / arr.length);
+  }
+
+  // Bucket per cell
+  type Acc = {
+    n: number;
+    expensePcts: number[];
+    catTotals: Map<ExpenseCategory, number[]>;
+  };
+  const cellAgg = new Map<string, Acc & { dealType: string; bucket: string }>();
+  for (const d of allDealsRows) {
+    if (!pastShowIds.has(d.showId)) continue;
+    const s = settlementByShow.get(d.showId);
+    if (!s || s.grossBoxOffice == null || s.grossBoxOffice <= 0) continue;
+    if (s.totalExpenses == null) continue;
+    const bucket = classifyAnalyticsSizeBucket(d);
+    const k = `${d.dealType}|${bucket}`;
+    let agg = cellAgg.get(k);
+    if (!agg) {
+      agg = { dealType: d.dealType, bucket, n: 0, expensePcts: [], catTotals: new Map() };
+      cellAgg.set(k, agg);
+    }
+    agg.n++;
+    agg.expensePcts.push(s.totalExpenses / s.grossBoxOffice);
+    const exs = (expensesByShow.get(d.showId) ?? []).filter((e) => !e.absorbedByVenue);
+    const byCat = new Map<ExpenseCategory, number>();
+    for (const e of exs) {
+      const c = e.category as ExpenseCategory;
+      byCat.set(c, (byCat.get(c) ?? 0) + e.amount);
+    }
+    for (const [c, total] of byCat) {
+      const arr = agg.catTotals.get(c) ?? [];
+      arr.push(total);
+      agg.catTotals.set(c, arr);
+    }
+  }
+
+  const out: ExpenseFrictionCell[] = [];
+  for (const agg of cellAgg.values()) {
+    if (agg.n < 5) continue;
+    const sorted = [...agg.expensePcts].sort((a, b) => a - b);
+    const m = sorted.reduce((a, b) => a + b, 0) / sorted.length;
+    const p = quantile(sorted, 0.75);
+    // Top category drift vs venue mean
+    let topCat: ExpenseCategory | null = null;
+    let topDrift = 0;
+    let topCellMean: number | null = null;
+    let topVenueMean: number | null = null;
+    for (const [c, arr] of agg.catTotals) {
+      const cellMean = arr.reduce((a, b) => a + b, 0) / arr.length;
+      const venueMean = venueCatMean.get(c) ?? 0;
+      if (venueMean <= 0) continue;
+      const drift = (cellMean - venueMean) / venueMean;
+      if (Math.abs(drift) > Math.abs(topDrift)) {
+        topDrift = drift;
+        topCat = c;
+        topCellMean = Math.round(cellMean);
+        topVenueMean = Math.round(venueMean);
+      }
+    }
+    out.push({
+      dealType: agg.dealType,
+      bucket: agg.bucket,
+      n: agg.n,
+      expensePctMean: m,
+      expensePctP75: p,
+      topCategory: topCat,
+      topCategoryCellMean: topCellMean,
+      topCategoryVenueMean: topVenueMean,
+      topCategoryDrift: topCat ? topDrift : null,
+      themes: themesByCell.get(`${agg.dealType}|${agg.bucket}`) ?? [],
+    });
+  }
+  out.sort((a, b) => b.n - a.n);
+  // Touch calib so it gets cached and we surface generatedAt
+  void calib;
+  return { generatedAt: new Date().toISOString(), cells: out };
 }

@@ -118,6 +118,13 @@ export async function enrichSettlements(opts: { force?: boolean } = {}): Promise
           .update(settlements)
           .set({ positiveSummary: result.positive, negativeSummary: result.negative })
           .where(eq(settlements.id, s.id));
+        // Settlement-row write path: invalidate calibration cache so the
+        // next calibration read reflects the new positive/negative summary
+        // and any downstream baseline shifts.
+        try {
+          const calib = await import("./calibration");
+          calib.clearCalibrationCache();
+        } catch { /* noop */ }
         out.enriched++;
       } catch (err) {
         out.failed++;
