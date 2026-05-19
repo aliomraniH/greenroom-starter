@@ -1,4 +1,4 @@
-import type { ShowListRow, ShowDetail, ArtistRow, ArtistProfile, Reports, DealAnalysis, AttentionItem, InsightsPayload, SwitchSavingsPayload, SwitchProjectedGridPayload, LlmStatus, SaveLlmSettingsInput, SwitchSuggestion, GuaranteeSuggestion, GuaranteeBacktestPayload, DealImprovementsPayload, ImprovementKind } from "./types";
+import type { ShowListRow, ShowDetail, ArtistRow, ArtistProfile, Reports, DealAnalysis, AttentionItem, InsightsPayload, SwitchSavingsPayload, SwitchProjectedGridPayload, LlmStatus, SaveLlmSettingsInput, SwitchSuggestion, GuaranteeSuggestion, GuaranteeBacktestPayload, SgpFlatRepricingPayload, DealImprovementsPayload, ImprovementKind } from "./types";
 
 const BASE = `${import.meta.env.BASE_URL}api`;
 
@@ -22,6 +22,10 @@ export const api = {
     get<SwitchSavingsPayload>(`/insights/switch-savings?months=${months}&topN=${topN}`),
   switchProjectedGrid: (months = 6) => get<SwitchProjectedGridPayload>(`/insights/switch-projected-grid?months=${months}`),
   guaranteeBacktest: (months = 12, topN = 10) => get<GuaranteeBacktestPayload>(`/insights/guarantee-backtest?months=${months}&topN=${topN}`),
+  sgpFlatRepricing: (months = 12, topN = 10, bucket = "$1–5K", splitPct = 0.85) =>
+    get<SgpFlatRepricingPayload>(
+      `/insights/sgp-flat-repricing?months=${months}&topN=${topN}&bucket=${encodeURIComponent(bucket)}&splitPct=${splitPct}`,
+    ),
   showExport: (id: string) => get<unknown>(`/shows/${encodeURIComponent(id)}/export`),
   llmSettings: () => get<LlmStatus>("/settings/llm"),
   saveLlmSettings: async (input: SaveLlmSettingsInput): Promise<LlmStatus> => {

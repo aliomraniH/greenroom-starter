@@ -490,6 +490,44 @@ export interface SwitchSavingsPayload {
   vsPercentageFiredStats: VsPercentageFiredStats;
 }
 
+export type SgpFlatRepricingDirection =
+  | "would_have_offered_less"
+  | "would_have_offered_more"
+  | "even";
+
+export interface SgpFlatRepricingItem {
+  showId: string;
+  date: string;
+  artistName: string | null;
+  bucket: string;
+  actualFlat: number;
+  actualToArtist: number;
+  grossBoxOffice: number;
+  sgpFairFlat: number;
+  deltaSgpVsActual: number;
+  absDelta: number;
+  direction: SgpFlatRepricingDirection;
+  confidenceTier: ConfidenceTier;
+  insuranceTier: number;
+  simulatedSplitPct: number;
+  basis: string;
+  steps: GuaranteeBacktestSteps;
+}
+
+export interface SgpFlatRepricingPayload {
+  generatedAt: string;
+  windowMonths: number;
+  simulatedSplitPct: number;
+  bucket: string;
+  totalCandidates: number;
+  totalScored: number;
+  moneyOverpaid: number;
+  moneyUnderpriced: number;
+  netDelta: number;
+  items: SgpFlatRepricingItem[];
+  gapCoverage: GapCoverage;
+}
+
 export interface InsightsPayload {
   generatedAt: string;
   enrichmentCoverage: { withSummary: number; total: number };

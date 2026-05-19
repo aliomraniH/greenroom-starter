@@ -341,6 +341,12 @@ export async function generateGuarantee(
     // batch-fetch shows/deals/artists once and avoid the 3 per-candidate
     // DB round-trips this function would otherwise issue.
     preloaded?: { show: Show; deal: Deal; artist: Artist | null };
+    // When set and the deal is `flat`, bypass the flat-deal guard and
+    // re-cast the math as if the deal were a vs split at this pct (e.g.
+    // 0.85). Used by the SGP-flat-repricing backtest in `lib/sgpFlatRepricing.ts`
+    // to ask "what would the engine have proposed at offer time for this
+    // flat?". Caller is responsible for NOT persisting the result.
+    simulateFlatAsVsPercent?: number;
   } = {},
 ): Promise<{ suggestion: GeneratedGuarantee | null; reason?: string }> {
   let show: Show | undefined;
@@ -367,7 +373,9 @@ export async function generateGuarantee(
     return { suggestion: null, reason: "show_already_past" };
   }
   if (!deal) return { suggestion: null, reason: "no_deal" };
-  if (deal.dealType === "flat") {
+  const simulateFlat =
+    deal.dealType === "flat" && opts.simulateFlatAsVsPercent != null;
+  if (deal.dealType === "flat" && !simulateFlat) {
     return { suggestion: null, reason: "flat_deal_no_recommendation" };
   }
   const agentId = artist?.agentId ?? null;
@@ -404,7 +412,10 @@ export async function generateGuarantee(
   let pct = deal.percentage ?? 0;
   if (pct > 1) pct = pct / 100;
   let pctBasis: number;
-  if (deal.dealType === "percentage_of_gross") {
+  if (simulateFlat) {
+    pct = opts.simulateFlatAsVsPercent!;
+    pctBasis = netBase;
+  } else if (deal.dealType === "percentage_of_gross") {
     pctBasis = expectedGross;
   } else if (deal.dealType === "door") {
     if (pct === 0) pct = DEFAULT_DOOR_SPLIT;
@@ -416,15 +427,22 @@ export async function generateGuarantee(
   const percentagePayout = Math.max(0, pct * pctBasis);
 
   // STEP 7: winner & suggested price
+  // For flat-simulation, the "winner" is always the percentage path: we're
+  // asking "what would a fair vs-equivalent flat have been?", not picking
+  // max(flat, percentage). The actual flat is recorded as `guarantee` so the
+  // basis copy / audit still shows it for comparison.
   const guarantee = deal.guaranteeAmount ?? 0;
-  const winner: Winner =
-    Math.abs(guarantee - percentagePayout) < 1
+  const winner: Winner = simulateFlat
+    ? "percentage"
+    : Math.abs(guarantee - percentagePayout) < 1
       ? "tie"
       : guarantee > percentagePayout
         ? "guarantee"
         : "percentage";
   const winnerMargin = Math.abs(guarantee - percentagePayout);
-  const winnerValue = Math.max(guarantee, percentagePayout);
+  const winnerValue = simulateFlat
+    ? percentagePayout
+    : Math.max(guarantee, percentagePayout);
   const suggestedPrice = roundTo50(winnerValue);
   const breakevenGross =
     (suggestedPrice + expenseEstimate) / (1 - TICKETING_FEE_RATE);
@@ -464,8 +482,9 @@ export async function generateGuarantee(
           ? `agent has ${agentShowCount} other shows here`
           : "first-time artist + agent";
 
-  const dealLabel =
-    deal.dealType === "vs"
+  const dealLabel = simulateFlat
+    ? `flat (re-quoted as vs/${Math.round(pct * 100)}%)`
+    : deal.dealType === "vs"
       ? "vs"
       : deal.dealType === "percentage_of_net"
         ? "% of net"
@@ -473,8 +492,9 @@ export async function generateGuarantee(
           ? "% of gross"
           : "door";
 
-  const winnerCopy =
-    winner === "guarantee"
+  const winnerCopy = simulateFlat
+    ? `Fair vs-equivalent payout at ${Math.round(pct * 100)}% × net base = ${formatMoney(percentagePayout)} (actual flat agreed: ${formatMoney(guarantee)}, gap ${formatMoney(winnerMargin)})`
+    : winner === "guarantee"
       ? `Guarantee ${formatMoney(guarantee)} beats the projected ${formatMoney(percentagePayout)} % payout by ${formatMoney(winnerMargin)}`
       : winner === "percentage"
         ? `Projected ${formatMoney(percentagePayout)} % payout exceeds the ${formatMoney(guarantee)} guarantee by ${formatMoney(winnerMargin)}`

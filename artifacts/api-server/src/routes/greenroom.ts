@@ -11,6 +11,7 @@ import { deals, shows } from "../db/schema";
 import { eq } from "drizzle-orm";
 import { getSwitchSavings, getSwitchProjectedGrid } from "../lib/switchSavings";
 import { getGuaranteeBacktest } from "../lib/guaranteeBacktest";
+import { getSgpFlatRepricing } from "../lib/sgpFlatRepricing";
 
 const router: IRouter = Router();
 
@@ -102,6 +103,25 @@ router.get("/insights/guarantee-backtest", async (req, res): Promise<void> => {
     res.json(data);
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : "guarantee_backtest_failed" });
+  }
+});
+
+router.get("/insights/sgp-flat-repricing", async (req, res): Promise<void> => {
+  try {
+    const months = Number(req.query.months ?? 12) || 12;
+    const topN = Number(req.query.topN ?? 10) || 10;
+    const bucket =
+      typeof req.query.bucket === "string" ? req.query.bucket : "$1–5K";
+    let splitPct = Number(req.query.splitPct ?? 0.85) || 0.85;
+    // Normalize: accept both 0.85 and 85 (whole-percent form). Clamp to (0, 1].
+    if (splitPct > 1) splitPct = splitPct / 100;
+    if (!(splitPct > 0 && splitPct <= 1)) splitPct = 0.85;
+    const data = await getSgpFlatRepricing({ months, topN, bucket, splitPct });
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({
+      error: err instanceof Error ? err.message : "sgp_flat_repricing_failed",
+    });
   }
 });
 

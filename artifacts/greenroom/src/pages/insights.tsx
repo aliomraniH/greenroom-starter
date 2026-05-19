@@ -4,7 +4,7 @@ import { Sparkles, Shield, ChevronRight, ArrowUpRight, Clock, DollarSign, Calcul
 import { api } from "@/lib/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { useApiData, LoadingState } from "@/hooks/useApiData";
-import type { InsightsCell, AttentionKind, SwitchSavingsItem, SwitchProjectedCell, GuaranteeBacktestItem } from "@/lib/types";
+import type { InsightsCell, AttentionKind, SwitchSavingsItem, SwitchProjectedCell, GuaranteeBacktestItem, SgpFlatRepricingItem } from "@/lib/types";
 
 const DEAL_LABELS: Record<string, string> = {
   flat: "Flat",
@@ -44,6 +44,7 @@ export default function InsightsPage() {
         </p>
         <GuaranteeBacktestSection />
         <SwitchSavingsSection />
+        <SgpFlatRepricingSection />
         <BeforeAfterCrossTabSection />
         <SwitchProjectedGridSection />
         <LoadingState label="Clustering complaint themes... this can take a minute on first load." />
@@ -89,6 +90,7 @@ export default function InsightsPage() {
 
       <GuaranteeBacktestSection />
       <SwitchSavingsSection />
+      <SgpFlatRepricingSection />
       <BeforeAfterCrossTabSection />
       <SwitchProjectedGridSection />
 
@@ -1993,6 +1995,411 @@ function BacktestBreakdown({ item }: { item: GuaranteeBacktestItem }) {
               : item.deltaSgpVsAgent > 0
                 ? `$${item.deltaSgpVsAgent.toLocaleString()} above the agent's guarantee`
                 : `$${Math.abs(item.deltaSgpVsAgent).toLocaleString()} below the agent's guarantee`}
+          </div>
+        </div>
+        <div className="rounded ring-1 ring-ink-200/60 bg-white p-2.5">
+          <div className="eyebrow text-[10px] text-ink-500 mb-1">Actually paid to artist</div>
+          <div className="text-[15px] font-mono tabular text-ink-900">
+            ${item.actualToArtist.toLocaleString()}
+          </div>
+          <div className="text-[10px] text-ink-500 mt-0.5">
+            on ${item.grossBoxOffice.toLocaleString()} gross
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded ring-1 ring-ink-200/60 bg-white p-2.5">
+        <div className="eyebrow text-[10px] text-ink-500 mb-1">Basis</div>
+        <div className="text-[11.5px] text-ink-700">{item.basis}</div>
+      </div>
+
+      <div className="text-right">
+        <Link
+          href={`/shows/${item.showId}`}
+          className="inline-flex items-center gap-1 text-[11px] text-brand-700 hover:text-brand-800 font-medium"
+        >
+          Open show <ArrowUpRight className="h-3 w-3" />
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function SgpFlatRepricingSection() {
+  const state = useApiData(() => api.sgpFlatRepricing(12, 10, "$1–5K", 0.85), []);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  if (state.status === "loading")
+    return (
+      <Card className="mb-6">
+        <CardContent>
+          <div className="text-[12px] text-ink-400">
+            Loading SGP flat-repricing simulation…
+          </div>
+        </CardContent>
+      </Card>
+    );
+  if (state.status === "error")
+    return (
+      <Card className="mb-6">
+        <CardContent>
+          <div className="text-[12px] text-rose-600">
+            Couldn't load SGP flat-repricing: {state.error.message}
+          </div>
+        </CardContent>
+      </Card>
+    );
+
+  const data = state.data;
+  const splitLabel = `${Math.round(data.simulatedSplitPct * 100)}%`;
+
+  if (data.totalScored === 0) {
+    return (
+      <Card className="mb-6">
+        <CardContent>
+          <div className="flex items-center gap-2 mb-1">
+            <Calculator className="h-4 w-4 text-brand-700" />
+            <span className="eyebrow text-[10px] text-ink-500">
+              Smart Guaranteed Price · flat repricing · last {data.windowMonths} months
+            </span>
+          </div>
+          <div className="text-[13px] text-ink-500">
+            No settled flat {data.bucket} deals in the last {data.windowMonths} months —
+            nothing to re-price.
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="mb-6">
+      <CardContent>
+        <div className="flex items-baseline justify-between mb-1">
+          <div className="flex items-center gap-2">
+            <Calculator className="h-4 w-4 text-brand-700" />
+            <h2 className="text-[15px] font-semibold text-ink-900">
+              Smart Guaranteed Price · flat repricing
+            </h2>
+            <span className="eyebrow text-[10px] text-ink-400">
+              · flat {data.bucket} · vs/{splitLabel} equivalent · last {data.windowMonths} months
+            </span>
+          </div>
+          <div className="text-[11px] text-ink-400 font-mono tabular">
+            {data.items.length} of {data.totalScored} scored deals shown
+          </div>
+        </div>
+        <p className="text-[12px] text-ink-500 mb-4 leading-relaxed">
+          Past settled <span className="font-mono">flat</span> deals in the {data.bucket}{" "}
+          bucket re-quoted as if they had been offered through SGP at the venue's
+          typical vs/{splitLabel} structure, using only data available before each show.
+          The SGP "fair flat" is compared to the flat the venue actually agreed; rows
+          are sorted by the largest divergence so the worst over- and under-prices
+          surface first.
+        </p>
+
+        <div className="grid grid-cols-3 gap-3 mb-3">
+          <div className="rounded-md ring-1 ring-emerald-200/60 bg-emerald-50/40 p-3">
+            <div className="flex items-center gap-1.5 eyebrow text-[10px] text-emerald-700 mb-1">
+              <ShieldCheck className="h-3 w-3" />
+              Would have offered less
+            </div>
+            <div className="text-[22px] font-serif text-ink-900 tabular">
+              {fmtMoney(data.moneyOverpaid)}
+            </div>
+            <div className="text-[10px] text-ink-400">
+              actual flat above SGP fair flat — venue would have saved
+            </div>
+          </div>
+          <div className="rounded-md ring-1 ring-rose-200/60 bg-rose-50/40 p-3">
+            <div className="flex items-center gap-1.5 eyebrow text-[10px] text-rose-700 mb-1">
+              <AlertTriangle className="h-3 w-3" />
+              Would have offered more
+            </div>
+            <div className="text-[22px] font-serif text-ink-900 tabular">
+              {fmtMoney(data.moneyUnderpriced)}
+            </div>
+            <div className="text-[10px] text-ink-400">
+              SGP fair flat above actual — flats came in under fair value
+            </div>
+          </div>
+          <div className="rounded-md ring-1 ring-ink-200/60 bg-white p-3">
+            <div className="eyebrow text-[10px] text-ink-500 mb-1">Net delta</div>
+            <div
+              className={`text-[22px] font-serif tabular ${
+                data.netDelta > 0
+                  ? "text-emerald-700"
+                  : data.netDelta < 0
+                    ? "text-rose-700"
+                    : "text-ink-700"
+              }`}
+            >
+              {data.netDelta >= 0 ? "+" : "−"}
+              {fmtMoney(Math.abs(data.netDelta))}
+            </div>
+            <div className="text-[10px] text-ink-400">
+              offered-less − offered-more across {data.totalScored} flats
+            </div>
+          </div>
+        </div>
+
+        {data.gapCoverage && (
+          <div
+            className="rounded-md ring-1 ring-amber-200/60 bg-amber-50/40 p-3 mb-5"
+            title="Distribution of |SGP fair flat − actual flat| across all scored flats."
+          >
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-1.5 eyebrow text-[10px] text-amber-700">
+                <Calculator className="h-3 w-3" />
+                Repricing-gap coverage · |SGP − flat| ≤ $T
+              </div>
+              <div className="text-[10px] font-mono tabular text-ink-500">
+                median ${data.gapCoverage.medianAbsDelta.toLocaleString()} · p75 $
+                {data.gapCoverage.p75AbsDelta.toLocaleString()} · p90 $
+                {data.gapCoverage.p90AbsDelta.toLocaleString()}
+              </div>
+            </div>
+            <div className="grid grid-cols-5 gap-2">
+              {data.gapCoverage.buckets.map((b) => (
+                <div
+                  key={b.threshold}
+                  className="rounded ring-1 ring-amber-200/40 bg-white p-2 text-center"
+                >
+                  <div className="text-[9px] font-mono tabular text-ink-500">
+                    ≤ ${b.threshold.toLocaleString()}
+                  </div>
+                  <div className="text-[16px] font-serif text-ink-900 tabular leading-tight">
+                    {(b.rate * 100).toFixed(1)}%
+                  </div>
+                  <div className="text-[9px] text-ink-400 font-mono tabular">
+                    {b.count}/{data.gapCoverage.totalScored}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="text-[10px] text-ink-500 mt-2 leading-relaxed">
+              Share of historical flats where the SGP fair flat lands within $T of
+              what was actually agreed — i.e. the gap a Phase-3 cap would have to
+              cover to keep the offer in the venue's comfort zone.
+            </div>
+          </div>
+        )}
+
+        <ul className="space-y-1.5">
+          {data.items.map((it) => (
+            <FlatRepricingRow
+              key={it.showId}
+              item={it}
+              expanded={expandedId === it.showId}
+              onToggle={() =>
+                setExpandedId(expandedId === it.showId ? null : it.showId)
+              }
+            />
+          ))}
+        </ul>
+      </CardContent>
+    </Card>
+  );
+}
+
+const FLAT_DIRECTION_TONE: Record<
+  SgpFlatRepricingItem["direction"],
+  { chip: string; fg: string }
+> = {
+  would_have_offered_less: {
+    chip: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+    fg: "text-emerald-700",
+  },
+  would_have_offered_more: {
+    chip: "bg-rose-50 text-rose-700 ring-rose-200",
+    fg: "text-rose-700",
+  },
+  even: {
+    chip: "bg-ink-50 text-ink-600 ring-ink-200",
+    fg: "text-ink-700",
+  },
+};
+
+function FlatRepricingRow({
+  item,
+  expanded,
+  onToggle,
+}: {
+  item: SgpFlatRepricingItem;
+  expanded: boolean;
+  onToggle: () => void;
+}) {
+  const tierClass = TIER_TONE[item.confidenceTier] ?? TIER_TONE.D;
+  const dirTone = FLAT_DIRECTION_TONE[item.direction];
+  const delta = item.deltaSgpVsActual;
+  return (
+    <li className="rounded-md ring-1 ring-ink-200/60 bg-white">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="w-full text-left px-3 py-2.5 flex items-center gap-3 hover:bg-ink-50/60 rounded-md transition-colors"
+        aria-expanded={expanded}
+      >
+        <ChevronRight
+          className={`h-3.5 w-3.5 text-ink-400 shrink-0 transition-transform ${expanded ? "rotate-90" : ""}`}
+        />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[13px] font-medium text-ink-900 truncate">
+              {item.artistName ?? "—"}
+            </span>
+            <span className="text-[10px] font-mono tabular text-ink-400">
+              {item.date}
+            </span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-ink-50 text-ink-600 ring-1 ring-ink-200">
+              Flat {item.bucket}
+            </span>
+            <span
+              className={`text-[10px] px-1.5 py-0.5 rounded font-mono ring-1 ${tierClass}`}
+              title="Confidence tier"
+            >
+              Tier {item.confidenceTier}
+            </span>
+            <span
+              className={`text-[10px] px-1.5 py-0.5 rounded ring-1 ${dirTone.chip}`}
+            >
+              {item.direction === "would_have_offered_less"
+                ? "would have offered less"
+                : item.direction === "would_have_offered_more"
+                  ? "would have offered more"
+                  : "even"}
+            </span>
+          </div>
+          <div className="mt-1 grid grid-cols-3 gap-3 text-[10.5px] font-mono tabular text-ink-500">
+            <span>
+              <span className="text-ink-400">actual flat</span>{" "}
+              ${item.actualFlat.toLocaleString()}
+            </span>
+            <span>
+              <span className="text-ink-400">SGP fair flat</span>{" "}
+              ${item.sgpFairFlat.toLocaleString()}
+              <span className="ml-1 text-ink-400">
+                @ vs/{Math.round(item.simulatedSplitPct * 100)}%
+              </span>
+            </span>
+            <span>
+              <span className="text-ink-400">paid</span>{" "}
+              ${item.actualToArtist.toLocaleString()}
+            </span>
+          </div>
+        </div>
+        <div className="text-right shrink-0">
+          <div
+            className={`text-[13px] font-mono tabular font-semibold ${dirTone.fg}`}
+          >
+            {delta >= 0 ? "+" : "−"}
+            {fmtMoney(Math.abs(delta))}
+          </div>
+          <div className="text-[9px] text-ink-400 uppercase tracking-[0.06em]">
+            SGP − flat
+          </div>
+        </div>
+      </button>
+
+      {expanded && <FlatRepricingBreakdown item={item} />}
+    </li>
+  );
+}
+
+function FlatRepricingBreakdown({ item }: { item: SgpFlatRepricingItem }) {
+  const s = item.steps;
+  const rows: { n: number; label: string; value: string; aside?: string }[] = [
+    {
+      n: 1,
+      label: "Expected gross",
+      value: `$${Math.round(s.step1_expectedGross.value).toLocaleString()}`,
+      aside: `${srcLabel(s.step1_expectedGross.source)} · n=${s.step1_expectedGross.sampleSize}`,
+    },
+    {
+      n: 2,
+      label: "Ticketing fees",
+      value: `$${Math.round(s.step2_ticketingFees.value).toLocaleString()}`,
+      aside: `@ ${Math.round(s.step2_ticketingFees.rate * 100)}% of gross`,
+    },
+    {
+      n: 3,
+      label: "Net after fees",
+      value: `$${Math.round(s.step3_netAfterFees).toLocaleString()}`,
+      aside: "step 1 − step 2",
+    },
+    {
+      n: 4,
+      label: "Capped expense",
+      value: `$${Math.round(s.step4_expense.cappedValue).toLocaleString()}`,
+      aside: `raw $${Math.round(s.step4_expense.raw).toLocaleString()} (${srcLabel(s.step4_expense.source)}) · cap $${Math.round(s.step4_expense.effectiveCap).toLocaleString()}`,
+    },
+    {
+      n: 5,
+      label: "Net base",
+      value: `$${Math.round(s.step5_netBase).toLocaleString()}`,
+      aside: "max(0, step 3 − step 4)",
+    },
+    {
+      n: 6,
+      label: `Vs/${Math.round(item.simulatedSplitPct * 100)}% payout`,
+      value: `$${Math.round(s.step6_percentagePayout.value).toLocaleString()}`,
+      aside: `${Math.round(s.step6_percentagePayout.pct * 100)}% × $${Math.round(s.step6_percentagePayout.basis).toLocaleString()}`,
+    },
+    {
+      n: 7,
+      label: "SGP fair flat",
+      value: `$${Math.round(s.step7_winner.suggestedPrice).toLocaleString()}`,
+      aside: `rounded to nearest $50 · breakeven $${Math.round(s.step7_winner.breakevenGross).toLocaleString()}`,
+    },
+  ];
+  return (
+    <div className="border-t border-ink-200/50 px-3 py-3 bg-ink-50/30 rounded-b-md text-[12px] leading-relaxed space-y-3">
+      <div className="rounded ring-1 ring-ink-200/60 bg-white p-2.5">
+        <div className="eyebrow text-[10px] text-ink-500 mb-2">
+          7-step SGP re-cast as vs/{Math.round(item.simulatedSplitPct * 100)}%
+        </div>
+        <ol className="space-y-1">
+          {rows.map((r) => (
+            <li
+              key={r.n}
+              className="grid grid-cols-[20px_140px_1fr_auto] gap-2 items-baseline text-[11px] font-mono tabular border-t border-ink-100/70 pt-1 first:border-t-0 first:pt-0"
+            >
+              <span className="text-ink-400">{r.n}.</span>
+              <span className="text-ink-600">{r.label}</span>
+              <span
+                className="text-ink-400 text-[10.5px] truncate"
+                title={r.aside ?? ""}
+              >
+                {r.aside}
+              </span>
+              <span className="text-ink-900 font-semibold text-right">
+                {r.value}
+              </span>
+            </li>
+          ))}
+        </ol>
+      </div>
+
+      <div className="grid grid-cols-3 gap-3">
+        <div className="rounded ring-1 ring-ink-200/60 bg-white p-2.5">
+          <div className="eyebrow text-[10px] text-ink-500 mb-1">Actual flat agreed</div>
+          <div className="text-[15px] font-mono tabular text-ink-900">
+            ${item.actualFlat.toLocaleString()}
+          </div>
+        </div>
+        <div className="rounded ring-1 ring-brand-200 bg-brand-50/30 p-2.5">
+          <div className="eyebrow text-[10px] text-brand-700 mb-1">
+            SGP fair flat (vs/{Math.round(item.simulatedSplitPct * 100)}%)
+          </div>
+          <div className="text-[15px] font-mono tabular text-ink-900">
+            ${item.sgpFairFlat.toLocaleString()}
+          </div>
+          <div className="text-[10px] text-ink-500 mt-0.5">
+            {item.deltaSgpVsActual === 0
+              ? "matches the agreed flat"
+              : item.deltaSgpVsActual > 0
+                ? `$${item.deltaSgpVsActual.toLocaleString()} above the agreed flat`
+                : `$${Math.abs(item.deltaSgpVsActual).toLocaleString()} below the agreed flat`}
           </div>
         </div>
         <div className="rounded ring-1 ring-ink-200/60 bg-white p-2.5">
