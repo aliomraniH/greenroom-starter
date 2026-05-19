@@ -17,6 +17,8 @@ import {
 import type { Bonus, SwitchSuggestion, GuaranteeSuggestion, Deal, Settlement, DealImprovementsPayload, DealImprovement, ImprovementKind } from "@/lib/types";
 import { Wrench } from "lucide-react";
 import { useApiData, LoadingState } from "@/hooks/useApiData";
+import { ShowMeter } from "@/components/show-meter";
+import { AiPrompt } from "@/components/ai-prompt";
 import NotFound from "./not-found";
 
 const COMP_LABELS: Record<string, string> = {
@@ -184,6 +186,14 @@ export default function ShowDetailPage() {
             </div>
           </div>
         )}
+
+        <div className="mb-5">
+          <ShowMeter showId={show.id} />
+        </div>
+
+        <div className="mb-5">
+          <AiPrompt scope="show" id={show.id} variant="inline" title="Ask about this show" />
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-2">
           {deal && deal.dealType !== "flat" && switchEligibleClient(deal) && isActionableStage(settlement) && (

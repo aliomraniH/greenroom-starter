@@ -1,4 +1,4 @@
-import type { ShowListRow, ShowDetail, ArtistRow, ArtistProfile, Reports, DealAnalysis, AttentionItem, InsightsPayload, SwitchSavingsPayload, SwitchProjectedGridPayload, LlmStatus, SaveLlmSettingsInput, SwitchSuggestion, GuaranteeSuggestion, GuaranteeBacktestPayload, SgpFlatRepricingPayload, DealImprovementsPayload, ImprovementKind } from "./types";
+import type { ShowListRow, ShowDetail, ArtistRow, ArtistProfile, Reports, DealAnalysis, AttentionItem, InsightsPayload, SwitchSavingsPayload, SwitchProjectedGridPayload, LlmStatus, SaveLlmSettingsInput, SwitchSuggestion, GuaranteeSuggestion, GuaranteeBacktestPayload, SgpFlatRepricingPayload, DealImprovementsPayload, ImprovementKind, CalibrationPayload, ShowMeterPayload, AskScope, AskResult, ArtistExpenseProfile } from "./types";
 
 const BASE = `${import.meta.env.BASE_URL}api`;
 
@@ -83,6 +83,22 @@ export const api = {
       throw new Error(j.error ?? `API error ${res.status}`);
     }
     return res.json() as Promise<{ ok: true; appliedKinds: ImprovementKind[]; dealId: string }>;
+  },
+  calibration: () => get<CalibrationPayload>("/calibration"),
+  artistExpenseProfile: (id: string) =>
+    get<ArtistExpenseProfile>(`/artists/${encodeURIComponent(id)}/expense-profile`),
+  showMeter: (id: string) => get<ShowMeterPayload>(`/shows/${encodeURIComponent(id)}/meter`),
+  aiAsk: async (input: { scope: AskScope; id?: string; question: string }): Promise<AskResult> => {
+    const res = await fetch(`${BASE}/ai/ask`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    if (!res.ok) {
+      const j = (await res.json().catch(() => ({}))) as { error?: string };
+      throw new Error(j.error ?? `API error ${res.status}`);
+    }
+    return res.json() as Promise<AskResult>;
   },
   applyGuaranteeToDeal: async (
     id: string,

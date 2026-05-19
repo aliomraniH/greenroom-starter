@@ -4,6 +4,8 @@ import { ArrowLeft, AlertTriangle, ThumbsUp, ThumbsDown, ExternalLink } from "lu
 import { api } from "@/lib/api";
 import { formatMoney, formatMoneyCompact, formatShowDate, relativeShowDate } from "@/lib/format";
 import { useApiData, LoadingState } from "@/hooks/useApiData";
+import { AiPrompt } from "@/components/ai-prompt";
+import { ArtistExpenseProfileCard } from "@/components/artist-expense-profile";
 import type { ArtistProfile, ArtistProfileShow, AttentionItem } from "@/lib/types";
 
 const DEAL_LABELS: Record<string, string> = {
@@ -109,6 +111,12 @@ function Profile({ data }: { data: ArtistProfile }) {
           accent={stats.disputedCount > 0 ? "rose" : undefined}
         />
         <StatCard label="Paid to artist" value={formatMoneyCompact(stats.totalPaidToArtist)} mono />
+      </div>
+
+      <ArtistExpenseProfileCard artistId={artist.id} />
+
+      <div className="mb-10">
+        <AiPrompt scope="artist" id={artist.id} variant="inline" title={`Ask about ${artist.name}`} />
       </div>
 
       {stats.dealTypes.length > 0 && (

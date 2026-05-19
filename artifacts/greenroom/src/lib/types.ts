@@ -608,6 +608,113 @@ export interface Reports {
   compsByCategory: Record<string, number>;
 }
 
+// --- Expense Intelligence calibration ---
+export type CalibrationSource = "venue_computed" | "audit_default" | "none";
+export type Confidence = "high" | "med" | "low" | "none";
+export type AlertLevel = "ok" | "watch" | "alert";
+
+export interface CalibratedValue {
+  value: number | null;
+  source: CalibrationSource;
+  confidence: Confidence;
+  n: number;
+}
+
+export type ExpenseCategory =
+  | "hospitality" | "production" | "sound" | "lights"
+  | "marketing" | "backline" | "security" | "other";
+
+export interface CategoryCalibration extends CalibratedValue {
+  category: ExpenseCategory;
+  p50: number | null;
+  p75: number | null;
+  mean: number | null;
+  p75Drift3moVs12mo: number | null;
+}
+
+export interface GenreBaseline {
+  genre: string;
+  n: number;
+  meanExpenses: number | null;
+  p75Expenses: number | null;
+  meanHospitality: number | null;
+}
+
+export interface AccountHealth {
+  upcomingCount: number;
+  upcomingNoDealCount: number;
+  upcomingWithoutCapsCount: number;
+  driftedCategories: { category: ExpenseCategory; drift: number }[];
+  hospitalityFlagged: boolean;
+  maturityStage: 1 | 2 | 3 | 4;
+  settledN: number;
+}
+
+export interface CalibrationPayload {
+  generatedAt: string;
+  maturity: { settledN: number; stage: 1 | 2 | 3 | 4; label: string };
+  totalExpenseCapByBucket: Record<string, CalibratedValue>;
+  perCategory: Record<ExpenseCategory, CategoryCalibration>;
+  hospitalityWatch: {
+    p75: number | null;
+    p75Last3mo: number | null;
+    drift: number | null;
+    flagged: boolean;
+    n: number;
+  };
+  genreBaselines: GenreBaseline[];
+  disputeRateBaseline: { overall: number; n: number; nDisputed: number };
+  accountHealth: AccountHealth;
+}
+
+export interface ShowMeterCell {
+  category: ExpenseCategory;
+  liveAmount: number;
+  cap: number;
+  capSource: "deal_total_cap_share" | "deal_hospitality_cap" | "venue_computed" | "audit_default";
+  pctOfCap: number;
+  alertLevel: AlertLevel;
+  n: number;
+  confidence: Confidence;
+}
+
+export interface ShowMeterPayload {
+  showId: string;
+  generatedAt: string;
+  bucket: string;
+  totalLive: number;
+  totalCap: number;
+  totalCapSource: CalibrationSource;
+  totalPctOfCap: number;
+  totalAlertLevel: AlertLevel;
+  cells: ShowMeterCell[];
+}
+
+export interface ArtistExpenseProfile {
+  artistId: string;
+  settledShows: number;
+  totalExpensesMean: number | null;
+  totalExpensesP75: number | null;
+  hospitalityMean: number | null;
+  hospitalityP75: number | null;
+  topCategory: { category: ExpenseCategory; mean: number } | null;
+  vsGenre: {
+    genre: string | null;
+    genreMeanExpenses: number | null;
+    artistVsGenrePct: number | null;
+  };
+  source: CalibrationSource;
+  confidence: Confidence;
+}
+
+export type AskScope = "account" | "show" | "artist";
+export interface AskResult {
+  answer: string;
+  scope: AskScope;
+  id?: string;
+  warning?: string;
+}
+
 export interface DealAnalysis {
   totalDeals: number;
   byComplexity: {

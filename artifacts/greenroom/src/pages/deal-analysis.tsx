@@ -3,6 +3,7 @@ import { api } from "@/lib/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatMoney, formatMoneyCompact } from "@/lib/format";
 import { useApiData, LoadingState } from "@/hooks/useApiData";
+import { CalibrationSection } from "@/components/calibration-section";
 import type { DealAnalysis, AttentionKind } from "@/lib/types";
 
 const COMPLEXITY_META: Record<
@@ -106,6 +107,7 @@ export default function DealAnalysisPage() {
       <DisputesSection data={d} />
       <RepeatArtistsSection data={d} />
       <CostsSection data={d} />
+      <CalibrationSection variant="analysis" />
       <RevenueSection data={d} />
     </div>
   );

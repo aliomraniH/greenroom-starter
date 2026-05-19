@@ -4,6 +4,7 @@ import { Sparkles, Shield, ChevronRight, ArrowUpRight, Clock, DollarSign, Calcul
 import { api } from "@/lib/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { useApiData, LoadingState } from "@/hooks/useApiData";
+import { CalibrationSection } from "@/components/calibration-section";
 import type { InsightsCell, AttentionKind, SwitchSavingsItem, SwitchProjectedCell, GuaranteeBacktestItem, SgpFlatRepricingItem } from "@/lib/types";
 
 const DEAL_LABELS: Record<string, string> = {
@@ -87,6 +88,8 @@ export default function InsightsPage() {
       </p>
 
       <TakeActionPanel />
+
+      <CalibrationSection variant="insights" />
 
       <GuaranteeBacktestSection />
       <SwitchSavingsSection />

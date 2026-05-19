@@ -2,6 +2,8 @@ import { Router, type IRouter } from "express";
 import { getAllShows, getShowById, getAllArtists, getArtistProfile, getReports, getDealAnalysis, getNeedsAttention } from "../lib/queries";
 import { buildShowExport } from "../lib/showExport";
 import { getInsights, enrichSettlements, clearInsightsCache } from "../lib/insights";
+import { getCalibration, getShowMeter, getAccountHealth, getArtistExpenseProfile, clearCalibrationCache } from "../lib/calibration";
+import { answerAsk, type AskScope } from "../lib/aiAsk";
 import { getLlmStatus, saveLlmSettings, type SaveLlmSettingsInput } from "../lib/llm";
 import { generateAndPersist, decideSuggestion } from "../lib/smartSwitch";
 import { generateAndPersistGuarantee, backfillUpcomingGuarantees } from "../lib/smartGuarantee";
@@ -203,6 +205,7 @@ router.post("/shows/:id/deal/apply-improvements", async (req, res): Promise<void
   }
   try {
     const out = await applyDealImprovements(raw, items);
+    clearCalibrationCache();
     res.json(out);
   } catch (err) {
     const msg = err instanceof Error ? err.message : "apply_failed";
@@ -231,6 +234,7 @@ router.post("/shows/:id/deal/apply-guarantee", async (req, res): Promise<void> =
       update.percentageBasis = null;
     }
     await db.update(deals).set(update).where(eq(deals.id, dealRow.id));
+    clearCalibrationCache();
     res.json({ ok: true, dealId: dealRow.id, guaranteeAmount: amt, dealType: update.dealType ?? dealRow.dealType });
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : "apply_failed" });
@@ -287,9 +291,79 @@ router.post("/settings/llm", async (req, res): Promise<void> => {
     const body = (req.body ?? {}) as SaveLlmSettingsInput;
     await saveLlmSettings(body);
     clearInsightsCache();
+    clearCalibrationCache();
     res.json(await getLlmStatus());
   } catch (err) {
     res.status(400).json({ error: err instanceof Error ? err.message : "llm_save_failed" });
+  }
+});
+
+router.get("/calibration", async (req, res): Promise<void> => {
+  try {
+    const force = req.query.force === "1" || req.query.force === "true";
+    const data = await getCalibration({ force });
+    const health = await getAccountHealth();
+    res.json({ ...data, accountHealth: health });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "calibration_failed" });
+  }
+});
+
+router.get("/shows/:id/meter", async (req, res): Promise<void> => {
+  const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+  try {
+    const data = await getShowMeter(raw);
+    if (!data) {
+      res.status(404).json({ error: "show_not_found" });
+      return;
+    }
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "meter_failed" });
+  }
+});
+
+router.get("/artists/:id/expense-profile", async (req, res): Promise<void> => {
+  const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+  try {
+    const data = await getArtistExpenseProfile(raw);
+    if (!data) {
+      res.status(404).json({ error: "artist_not_found" });
+      return;
+    }
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "profile_failed" });
+  }
+});
+
+router.post("/ai/ask", async (req, res): Promise<void> => {
+  try {
+    const body = (req.body ?? {}) as { scope?: unknown; id?: unknown; question?: unknown };
+    const scope = body.scope;
+    if (scope !== "account" && scope !== "show" && scope !== "artist") {
+      res.status(400).json({ error: "invalid_scope" });
+      return;
+    }
+    const question = typeof body.question === "string" ? body.question.trim() : "";
+    if (!question) {
+      res.status(400).json({ error: "empty_question" });
+      return;
+    }
+    const id = typeof body.id === "string" ? body.id : undefined;
+    if ((scope === "show" || scope === "artist") && !id) {
+      res.status(400).json({ error: "id_required" });
+      return;
+    }
+    const out = await answerAsk({ scope: scope as AskScope, id, question });
+    res.json(out);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "ask_failed";
+    if (msg === "show_not_found" || msg === "artist_not_found") {
+      res.status(404).json({ error: msg });
+      return;
+    }
+    res.status(500).json({ error: msg });
   }
 });
 
