@@ -806,6 +806,27 @@ export type ArtistExpenseProfile = {
     p75Delta: number | null;
     p75Confidence: Confidence | null;
   };
+  // Most recent (up to 5) settled shows for this artist, ordered oldest →
+  // newest. Powers the growth line + stacked-category bars on the artist
+  // profile card.
+  lastShows: Array<{
+    showId: string;
+    date: string;
+    total: number;
+    byCategory: Partial<Record<ExpenseCategory, number>>;
+  }>;
+  // Per-category comparison vs a peer group (same-genre artists, falling
+  // back to the venue-wide average when the artist has no genre on file
+  // or the genre has too few peer shows).
+  categoryComparison: {
+    peerLabel: string;
+    peerN: number;
+    rows: Array<{
+      category: ExpenseCategory;
+      artistMean: number;
+      peerMean: number | null;
+    }>;
+  };
   source: "venue_computed" | "audit_default" | "none";
   confidence: Confidence;
 };
@@ -838,6 +859,12 @@ export async function getArtistExpenseProfile(
   const totals: Array<{ total: number; date: string }> = [];
   const hosp: number[] = [];
   const catSums = new Map<ExpenseCategory, number>();
+  // Per-show category breakdown for this artist; used for both the
+  // last-5-shows chart and (averaged) the peer-comparison chart.
+  const perShowBreakdown = new Map<
+    string,
+    { date: string; total: number; byCategory: Partial<Record<ExpenseCategory, number>> }
+  >();
   let nWithExpenses = 0;
   for (const id of artistShowIds) {
     const ex = allExpenses.filter((e) => e.showId === id && !e.absorbedByVenue);
@@ -847,16 +874,94 @@ export async function getArtistExpenseProfile(
     const sh = allShows.find((x) => x.id === id);
     totals.push({ total, date: sh?.date ?? today });
     hosp.push(ex.filter((e) => e.category === "hospitality").reduce((s, e) => s + e.amount, 0));
+    const byCat: Partial<Record<ExpenseCategory, number>> = {};
     for (const e of ex) {
-      catSums.set(
-        e.category as ExpenseCategory,
-        (catSums.get(e.category as ExpenseCategory) ?? 0) + e.amount,
-      );
+      const cat = e.category as ExpenseCategory;
+      catSums.set(cat, (catSums.get(cat) ?? 0) + e.amount);
+      byCat[cat] = (byCat[cat] ?? 0) + e.amount;
     }
+    perShowBreakdown.set(id, { date: sh?.date ?? today, total, byCategory: byCat });
   }
   const calib = await getCalibration();
   const genre = artistRow.genre ?? null;
   const gb = genre ? calib.genreBaselines.find((g) => g.genre === genre) ?? null : null;
+
+  // -------- Last 5 settled shows (oldest → newest for the growth chart) --------
+  const lastShows = Array.from(perShowBreakdown.entries())
+    .map(([showId, v]) => ({ showId, ...v }))
+    .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
+    .slice(0, 5)
+    .reverse()
+    .map((s) => ({
+      showId: s.showId,
+      date: s.date,
+      total: Math.round(s.total),
+      byCategory: Object.fromEntries(
+        Object.entries(s.byCategory).map(([k, v]) => [k, Math.round(v as number)]),
+      ) as Partial<Record<ExpenseCategory, number>>,
+    }));
+
+  // -------- Peer category comparison --------
+  // Peers = settled shows of OTHER artists in the same genre. Falls back
+  // to a venue-wide average when the genre is missing or has fewer than
+  // 3 peer shows on record.
+  const peerArtistIds = new Set(
+    genre
+      ? (await db.select().from(artists))
+          .filter((a) => a.genre === genre && a.id !== artistId)
+          .map((a) => a.id)
+      : [],
+  );
+  const peerShowIds = new Set(
+    allShows
+      .filter(
+        (s) =>
+          s.artistId &&
+          peerArtistIds.has(s.artistId) &&
+          settledShowIds.has(s.id),
+      )
+      .map((s) => s.id),
+  );
+  const peerCatTotals = new Map<ExpenseCategory, number[]>();
+  for (const id of peerShowIds) {
+    const ex = allExpenses.filter((e) => e.showId === id && !e.absorbedByVenue);
+    if (ex.length === 0) continue;
+    const sums = new Map<ExpenseCategory, number>();
+    for (const e of ex) {
+      const cat = e.category as ExpenseCategory;
+      sums.set(cat, (sums.get(cat) ?? 0) + e.amount);
+    }
+    for (const cat of CATEGORY_LIST) {
+      const arr = peerCatTotals.get(cat) ?? [];
+      arr.push(sums.get(cat) ?? 0);
+      peerCatTotals.set(cat, arr);
+    }
+  }
+  const peerGenreN = peerCatTotals.get("hospitality")?.length ?? 0;
+  const usePeerGenre = peerGenreN >= 3 && !!genre;
+  const peerLabel = usePeerGenre
+    ? `${(genre as string)[0]?.toUpperCase()}${(genre as string).slice(1)} peers`
+    : "Venue average";
+  // When falling back to the venue-wide average, the same-genre count is
+  // not meaningful as a "sample size" for the baseline; expose 0 so the
+  // UI can hide the n=... chip in that case.
+  const peerN = usePeerGenre ? peerGenreN : 0;
+  const categoryRows = CATEGORY_LIST.map((cat) => {
+    const artistTotal = catSums.get(cat) ?? 0;
+    const artistMean = nWithExpenses > 0 ? Math.round(artistTotal / nWithExpenses) : 0;
+    let peerMean: number | null = null;
+    if (usePeerGenre) {
+      const arr = peerCatTotals.get(cat) ?? [];
+      if (arr.length >= 3) {
+        peerMean = Math.round(arr.reduce((s, v) => s + v, 0) / arr.length);
+      }
+    } else {
+      const venueMean = calib.perCategory[cat]?.mean;
+      if (venueMean != null) peerMean = venueMean;
+    }
+    return { category: cat, artistMean, peerMean };
+  });
+  const categoryComparison = { peerLabel, peerN, rows: categoryRows };
 
   if (nWithExpenses === 0) {
     return {
@@ -878,6 +983,8 @@ export async function getArtistExpenseProfile(
         p75Delta: null,
         p75Confidence: null,
       },
+      lastShows: [],
+      categoryComparison: { peerLabel: "Venue average", peerN: 0, rows: [] },
       source: "none",
       confidence: "none",
     };
@@ -948,6 +1055,8 @@ export async function getArtistExpenseProfile(
       p75Delta,
       p75Confidence,
     },
+    lastShows,
+    categoryComparison,
     source: venueComputed ? "venue_computed" : "audit_default",
     confidence: confidenceFor(nWithExpenses),
   };

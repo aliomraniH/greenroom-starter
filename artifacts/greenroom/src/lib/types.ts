@@ -801,6 +801,21 @@ export interface ArtistExpenseProfile {
     p75Delta: number | null;
     p75Confidence: Confidence | null;
   };
+  lastShows: Array<{
+    showId: string;
+    date: string;
+    total: number;
+    byCategory: Partial<Record<ExpenseCategory, number>>;
+  }>;
+  categoryComparison: {
+    peerLabel: string;
+    peerN: number;
+    rows: Array<{
+      category: ExpenseCategory;
+      artistMean: number;
+      peerMean: number | null;
+    }>;
+  };
   source: CalibrationSource;
   confidence: Confidence;
 }
