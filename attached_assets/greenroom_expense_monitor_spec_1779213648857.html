@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Greenroom — Dynamic Expense Intelligence Spec</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Syne+Mono&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+:root{
+  --bg:#0b0c0f;--surf:#13151a;--surf2:#1a1d25;--surf3:#0d0f14;
+  --bdr:rgba(255,255,255,.07);--bdr2:rgba(255,255,255,.13);
+  --text:#e8e6e0;--muted:#66636f;
+  --accent:#e8a020;--blue:#3d8bff;--green:#2ab87a;
+  --red:#e05050;--amber:#e8a020;--purple:#9b72e8;--teal:#20c8c0;
+}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.65;}
+
+/* MASTHEAD */
+.masthead{padding:3.5rem 3rem 2.5rem;border-bottom:1px solid var(--bdr);position:relative;overflow:hidden;}
+.masthead::before{content:'';position:absolute;top:-80px;right:-80px;width:500px;height:500px;background:radial-gradient(circle,rgba(61,139,255,.08) 0%,transparent 65%);pointer-events:none;}
+.eyebrow{font-family:'Syne Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);margin-bottom:1rem;}
+.masthead h1{font-family:'Syne',sans-serif;font-size:clamp(2rem,4vw,3.4rem);font-weight:800;line-height:1.05;letter-spacing:-.03em;max-width:760px;margin-bottom:1.25rem;}
+.masthead h1 em{font-style:normal;color:var(--accent);}
+.masthead-sub{font-size:15px;color:var(--muted);max-width:680px;line-height:1.75;}
+.pill-row{display:flex;gap:.6rem;margin-top:1.75rem;flex-wrap:wrap;}
+.pill{font-family:'Syne Mono',monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;padding:4px 12px;border:1px solid var(--bdr2);border-radius:20px;color:var(--muted);}
+.pill.hi{border-color:var(--accent);color:var(--accent);}
+.pill.bl{border-color:var(--blue);color:var(--blue);}
+
+/* NAV */
+.nav{display:flex;border-bottom:1px solid var(--bdr);overflow-x:auto;position:sticky;top:0;background:rgba(11,12,15,.96);backdrop-filter:blur(14px);z-index:100;}
+.nav a{font-family:'Syne Mono',monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-decoration:none;padding:.9rem 1.4rem;border-right:1px solid var(--bdr);white-space:nowrap;transition:all .15s;display:flex;align-items:center;gap:.55rem;}
+.nav a:hover{color:var(--text);background:var(--surf);}
+.nd{width:5px;height:5px;border-radius:50%;}
+
+/* LAYOUT */
+.wrap{max-width:1260px;margin:0 auto;padding:0 2.5rem 5rem;}
+.section{padding-top:3.5rem;border-top:1px solid var(--bdr);margin-top:3.5rem;}
+.section:first-of-type{border-top:none;}
+.slabel{font-family:'Syne Mono',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:.75rem;}
+.section h2{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;letter-spacing:-.03em;margin-bottom:.85rem;}
+.slead{font-size:14.5px;color:var(--muted);max-width:760px;line-height:1.8;margin-bottom:2rem;}
+
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.5rem;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:.9rem;margin-bottom:1.5rem;}
+@media(max-width:900px){.g2,.g3,.g4{grid-template-columns:1fr}}
+
+/* CARDS */
+.card{background:var(--surf);border:1px solid var(--bdr);padding:1.25rem 1.4rem;}
+.card h4{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;margin-bottom:.8rem;letter-spacing:-.01em;}
+.card p{font-size:12.5px;color:var(--muted);line-height:1.7;}
+
+/* ALGO BLOCKS */
+.ab{background:var(--surf);border:1px solid var(--bdr);overflow:hidden;margin-bottom:1.25rem;}
+.ab-head{background:var(--surf2);border-bottom:1px solid var(--bdr);padding:.85rem 1.25rem;display:flex;justify-content:space-between;align-items:center;}
+.ab-head h3{font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;letter-spacing:-.01em;}
+.ab-body{padding:1.25rem;}
+.ab-desc{font-size:13px;color:var(--muted);line-height:1.75;margin-bottom:1.1rem;}
+
+/* CODE */
+.code{background:var(--surf3);border:1px solid var(--bdr);font-family:'Syne Mono',monospace;font-size:11.5px;line-height:2;padding:1rem 1.25rem;margin:.75rem 0;overflow-x:auto;}
+.cc{color:var(--muted);}
+.ck{color:var(--blue);}
+.cv{color:var(--green);}
+.cf{color:var(--purple);}
+.ct{color:var(--teal);}
+.cw{color:var(--red);}
+.ci{padding-left:1.5rem;display:block;}
+.ci2{padding-left:3rem;display:block;}
+
+/* FALLBACK CHAIN */
+.fc{display:flex;flex-direction:column;gap:0;margin:.75rem 0;}
+.fc-row{display:grid;grid-template-columns:28px 10px 1fr auto;gap:.75rem;align-items:start;padding:.7rem .9rem;border:1px solid var(--bdr);border-bottom:none;font-size:12px;}
+.fc-row:last-child{border-bottom:1px solid var(--bdr);}
+.fc-n{font-family:'Syne Mono',monospace;font-size:9.5px;color:var(--muted);text-align:center;padding-top:2px;}
+.fc-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0;}
+.fc-label{font-weight:500;margin-bottom:2px;}
+.fc-desc{font-size:11.5px;color:var(--muted);line-height:1.6;}
+.badge{font-family:'Syne Mono',monospace;font-size:9.5px;padding:3px 9px;border-radius:10px;white-space:nowrap;}
+.bh{background:rgba(42,184,122,.12);color:var(--green);}
+.bm{background:rgba(232,160,32,.12);color:var(--amber);}
+.bl{background:rgba(224,80,80,.12);color:var(--red);}
+.bn{background:rgba(255,255,255,.05);color:var(--muted);}
+
+/* SIGNAL LIST */
+.sl{display:flex;flex-direction:column;}
+.si{display:grid;grid-template-columns:22px 1fr auto;gap:.7rem;align-items:start;padding:.8rem 0;border-bottom:1px solid var(--bdr);font-size:12.5px;}
+.si:last-child{border-bottom:none;}
+.ic{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;margin-top:1px;}
+.ig{background:rgba(42,184,122,.15);color:var(--green);}
+.ia{background:rgba(232,160,32,.15);color:var(--amber);}
+.ir{background:rgba(224,80,80,.15);color:var(--red);}
+.ib{background:rgba(61,139,255,.15);color:var(--blue);}
+.ip{background:rgba(155,114,232,.15);color:var(--purple);}
+.it{background:rgba(32,200,192,.15);color:var(--teal);}
+.sl-label{font-weight:500;color:var(--text);margin-bottom:2px;}
+.sl-desc{color:var(--muted);font-size:11.5px;line-height:1.6;}
+.stag{font-family:'Syne Mono',monospace;font-size:9px;letter-spacing:.07em;text-transform:uppercase;padding:3px 8px;border-radius:2px;white-space:nowrap;}
+.sg{background:rgba(42,184,122,.12);color:var(--green);}
+.sa{background:rgba(232,160,32,.12);color:var(--amber);}
+.sr{background:rgba(224,80,80,.12);color:var(--red);}
+.sb{background:rgba(61,139,255,.12);color:var(--blue);}
+.sp{background:rgba(155,114,232,.12);color:var(--purple);}
+.st{background:rgba(32,200,192,.12);color:var(--teal);}
+.sm{background:rgba(255,255,255,.05);color:var(--muted);}
+
+/* CALLOUT */
+.callout{border-left:3px solid var(--accent);padding:.95rem 1.25rem;background:rgba(232,160,32,.05);font-size:13px;line-height:1.75;color:var(--muted);margin-bottom:1.5rem;}
+.callout strong{color:var(--text);}
+.callout.blue{border-color:var(--blue);background:rgba(61,139,255,.05);}
+.callout.green{border-color:var(--green);background:rgba(42,184,122,.05);}
+.callout.purple{border-color:var(--purple);background:rgba(155,114,232,.05);}
+.callout.teal{border-color:var(--teal);background:rgba(32,200,192,.05);}
+
+/* DIVIDER */
+.divider{display:flex;align-items:center;gap:1rem;margin:2rem 0 1.25rem;font-family:'Syne Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--bdr);}
+
+/* TABLES */
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:1.5rem;}
+.tbl th{background:var(--surf2);padding:9px 14px;text-align:left;font-family:'Syne Mono',monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--bdr2);font-weight:400;}
+.tbl td{padding:10px 14px;border-bottom:1px solid var(--bdr);vertical-align:top;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:rgba(255,255,255,.015);}
+.mono{font-family:'Syne Mono',monospace;font-size:11px;color:var(--blue);}
+
+/* MATURITY TRACK */
+.mat-track{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--bdr);overflow:hidden;margin-bottom:1.5rem;}
+.mat{padding:1.1rem;border-right:1px solid var(--bdr);}
+.mat:last-child{border-right:none;}
+.mat-n{font-family:'Syne Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem;}
+.mat-name{font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;margin-bottom:.3rem;}
+.mat-range{font-family:'Syne Mono',monospace;font-size:10px;color:var(--accent);margin-bottom:.5rem;}
+.mat-desc{font-size:11.5px;color:var(--muted);line-height:1.6;}
+.mat-bars{display:flex;gap:3px;margin-top:.65rem;}
+.mbar{height:4px;flex:1;background:var(--surf2);border-radius:2px;}
+.mbar.lit{background:var(--accent);}
+
+/* METER */
+.meter{background:var(--surf);border:1px solid var(--bdr);padding:1.35rem;}
+.meter.warn{border-color:rgba(232,160,32,.3);}
+.meter.alert{border-color:rgba(224,80,80,.3);}
+.mh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.1rem;}
+.mt{font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;}
+.ms{font-size:11px;color:var(--muted);margin-top:2px;}
+.mbadge{font-family:'Syne Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:20px;}
+.mok{background:rgba(42,184,122,.12);color:var(--green);border:1px solid rgba(42,184,122,.25);}
+.mwarn{background:rgba(232,160,32,.12);color:var(--amber);border:1px solid rgba(232,160,32,.25);}
+.malert{background:rgba(224,80,80,.12);color:var(--red);border:1px solid rgba(224,80,80,.25);}
+.mtrack{height:10px;background:var(--surf2);border-radius:5px;overflow:visible;position:relative;margin-bottom:.45rem;}
+.mfill{height:100%;border-radius:5px;}
+.mfg{background:linear-gradient(90deg,rgba(42,184,122,.4),var(--green));}
+.mfa{background:linear-gradient(90deg,rgba(232,160,32,.4),var(--amber));}
+.mfr{background:linear-gradient(90deg,rgba(224,80,80,.4),var(--red));}
+.mkr{position:absolute;top:-5px;width:2px;height:20px;border-radius:1px;}
+.mkrlbl{position:absolute;top:-22px;font-family:'Syne Mono',monospace;font-size:8.5px;transform:translateX(-50%);white-space:nowrap;}
+.mlbls{display:flex;justify-content:space-between;font-family:'Syne Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:.9rem;}
+.mstats{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;}
+.mstat{text-align:center;}
+.msv{font-family:'Syne Mono',monospace;font-size:1rem;font-weight:500;line-height:1.2;}
+.msl{font-size:10px;color:var(--muted);margin-top:2px;}
+.cbadge{display:inline-flex;align-items:center;gap:.35rem;font-family:'Syne Mono',monospace;font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;padding:3px 8px;border-radius:10px;}
+.cbh{background:rgba(42,184,122,.1);color:var(--green);border:1px solid rgba(42,184,122,.2);}
+.cbm{background:rgba(232,160,32,.1);color:var(--amber);border:1px solid rgba(232,160,32,.2);}
+.cbl{background:rgba(224,80,80,.1);color:var(--red);border:1px solid rgba(224,80,80,.2);}
+.cdot{width:5px;height:5px;border-radius:50%;}
+
+/* AI PANEL */
+.ai{background:var(--surf);border:1px solid var(--bdr);border-left:3px solid var(--purple);overflow:hidden;}
+.ai-h{background:var(--surf2);padding:.9rem 1.2rem;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:.8rem;}
+.ai-orb{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--blue));display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;position:relative;}
+.ai-orb::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:1px solid rgba(155,114,232,.35);animation:pulse 2.5s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:.8;transform:scale(1.08)}}
+.ai-name{font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;}
+.ai-desc{font-size:11px;color:var(--muted);}
+.ai-body{padding:1.2rem;}
+.ai-ql{font-family:'Syne Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.6rem;}
+.ai-q{background:var(--surf2);border:1px solid var(--bdr);padding:.55rem .85rem;margin-bottom:.35rem;font-size:12px;display:flex;align-items:center;gap:.5rem;}
+.ai-q::before{content:'↗';font-size:10px;color:var(--purple);flex-shrink:0;}
+.chip-row{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.75rem;}
+.chip{font-family:'Syne Mono',monospace;font-size:9.5px;padding:3px 9px;border:1px solid var(--bdr2);color:var(--muted);display:flex;align-items:center;gap:4px;}
+.chipdot{width:5px;height:5px;border-radius:50%;}
+
+/* PIPELINE */
+.pipe{display:flex;overflow-x:auto;margin-bottom:1.5rem;}
+.ps{flex:1;min-width:150px;padding:1rem 1.1rem;background:var(--surf);border:1px solid var(--bdr);border-right:none;position:relative;}
+.ps:last-child{border-right:1px solid var(--bdr);}
+.ps::after{content:'→';position:absolute;right:-11px;top:50%;transform:translateY(-50%);color:var(--bdr2);font-size:14px;z-index:1;}
+.ps:last-child::after{display:none;}
+.ps-n{font-family:'Syne Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--accent);margin-bottom:.35rem;}
+.ps-t{font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;margin-bottom:.3rem;}
+.ps-d{font-size:11.5px;color:var(--muted);line-height:1.55;}
+
+/* FOOTER */
+.footer{border-top:1px solid var(--bdr);padding:1.5rem 3rem;display:flex;justify-content:space-between;align-items:center;font-family:'Syne Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.05em;}
+.flogo{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:var(--text);letter-spacing:-.02em;}
+.flogo span{color:var(--accent);}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="eyebrow">Greenroom Platform · Feature Specification · Dynamic Calibration v2</div>
+  <h1>Expense Intelligence<br><em>Dynamic Calibration</em> Dashboard</h1>
+  <p class="masthead-sub">Every constant is computed from the venue's own settled data. Every reference line is a live query. Every threshold recalibrates after each settled show. Works for any venue, any cost structure, any market — no hardcoded numbers.</p>
+  <div class="pill-row">
+    <span class="pill hi">Zero hardcoded constants</span>
+    <span class="pill bl">8 core algorithms</span>
+    <span class="pill bl">4-tier fallback chain</span>
+    <span class="pill">Venue-agnostic</span>
+    <span class="pill">Self-calibrating</span>
+    <span class="pill">Live expense meter</span>
+    <span class="pill">AI deal health assistant</span>
+  </div>
+</header>
+
+<nav class="nav">
+  <a href="#s0"><span class="nd" style="background:var(--blue)"></span>Calibration Engine</a>
+  <a href="#s1"><span class="nd" style="background:var(--accent)"></span>What to Track</a>
+  <a href="#s2"><span class="nd" style="background:var(--green)"></span>Live Meter</a>
+  <a href="#s3"><span class="nd" style="background:var(--purple)"></span>AI Assistant</a>
+  <a href="#s4"><span class="nd" style="background:var(--teal)"></span>Architecture</a>
+  <a href="#s5"><span class="nd" style="background:var(--muted)"></span>Data Model</a>
+</nav>
+
+<div class="wrap">
+
+<!-- ===== SECTION 0: CALIBRATION ENGINE ===== -->
+<section class="section" id="s0">
+  <div class="slabel" style="color:var(--blue)">Section 00 — Foundation</div>
+  <h2>The Calibration Engine</h2>
+  <p class="slead">All thresholds, caps, baselines, and reference lines are computed from the venue's own settled shows — not set by a developer. Eight algorithms, each with a 4-tier fallback chain that degrades gracefully when data is sparse. A new venue gets useful estimates on day one. Full self-calibration is reached by show ~50.</p>
+
+  <div class="callout blue">
+    <strong>Core principle:</strong> No number in this system is a constant. Every number is a query result.
+    <code style="font-family:'Syne Mono',monospace;font-size:11px">expense_cap</code> is not <code style="font-family:'Syne Mono',monospace;font-size:11px">$1,850</code> —
+    it is <code style="font-family:'Syne Mono',monospace;font-size:11px">PERCENTILE_CONT(0.75) ... WHERE venue_id=? AND bucket='$1–5K'</code>.
+    A venue where crews cost $600/show gets a $750 cap. One where crews cost $2,400 gets a $2,600 cap. The system learns both from data.
+  </div>
+
+  <div class="divider">Venue maturity — four stages of self-calibration</div>
+  <div class="mat-track">
+    <div class="mat" style="border-top:3px solid var(--red)">
+      <div class="mat-n">Stage 1</div>
+      <div class="mat-name">Bootstrapping</div>
+      <div class="mat-range">0 – 15 shows</div>
+      <div class="mat-desc">All constants come from platform-wide defaults or pooled cross-venue data. Meter reference lines shown with low-confidence indicators.</div>
+      <div class="mat-bars"><div class="mbar lit"></div><div class="mbar"></div><div class="mbar"></div><div class="mbar"></div><div class="mbar"></div></div>
+    </div>
+    <div class="mat" style="border-top:3px solid var(--amber)">
+      <div class="mat-n">Stage 2</div>
+      <div class="mat-name">Learning</div>
+      <div class="mat-range">16 – 50 shows</div>
+      <div class="mat-desc">Venue P75s form for high-frequency buckets. Genre baselines emerge. Constants shift from platform defaults to venue-computed as n crosses 8 per cell.</div>
+      <div class="mat-bars"><div class="mbar lit"></div><div class="mbar lit"></div><div class="mbar lit"></div><div class="mbar"></div><div class="mbar"></div></div>
+    </div>
+    <div class="mat" style="border-top:3px solid var(--blue)">
+      <div class="mat-n">Stage 3</div>
+      <div class="mat-name">Calibrated</div>
+      <div class="mat-range">51 – 150 shows</div>
+      <div class="mat-desc">Most buckets and genres have reliable P75s. SGP accuracy score is meaningful. Artist history covers most booking scenarios. Meter fully operational.</div>
+      <div class="mat-bars"><div class="mbar lit"></div><div class="mbar lit"></div><div class="mbar lit"></div><div class="mbar lit"></div><div class="mbar"></div></div>
+    </div>
+    <div class="mat" style="border-top:3px solid var(--green)">
+      <div class="mat-n">Stage 4</div>
+      <div class="mat-name">Self-calibrating</div>
+      <div class="mat-range">150+ shows</div>
+      <div class="mat-desc">All constants fully venue-derived. P75s stable. SGP accuracy above 85%. Dispute baseline reliable enough to drive AI proactive alerts without caveats.</div>
+      <div class="mat-bars"><div class="mbar lit"></div><div class="mbar lit"></div><div class="mbar lit"></div><div class="mbar lit"></div><div class="mbar lit"></div></div>
+    </div>
+  </div>
+
+  <div class="divider">Universal 4-tier fallback — applies to every computed constant</div>
+  <div class="g2">
+    <div>
+      <div class="fc">
+        <div class="fc-row" style="background:rgba(42,184,122,.04)">
+          <div class="fc-n">T1</div><div class="fc-dot" style="background:var(--green)"></div>
+          <div><div class="fc-label">Venue-computed</div><div class="fc-desc">Derived from this venue's own settled shows. Requires minimum n per constant. Most accurate — reflects actual local costs.</div></div>
+          <div class="badge bh">High</div>
+        </div>
+        <div class="fc-row" style="background:rgba(232,160,32,.03)">
+          <div class="fc-n">T2</div><div class="fc-dot" style="background:var(--amber)"></div>
+          <div><div class="fc-label">Cross-venue pooled</div><div class="fc-desc">Aggregated from all platform venues with the same genre or bucket class. Requires n&nbsp;&ge;&nbsp;3 contributing venues. Captures industry patterns.</div></div>
+          <div class="badge bm">Med</div>
+        </div>
+        <div class="fc-row" style="background:rgba(224,80,80,.03)">
+          <div class="fc-n">T3</div><div class="fc-dot" style="background:var(--red)"></div>
+          <div><div class="fc-label">Platform-wide default</div><div class="fc-desc">One constant computed from all platform data regardless of genre or bucket. Directionally useful but ignores local cost structure. Shown with warning indicator.</div></div>
+          <div class="badge bl">Low</div>
+        </div>
+        <div class="fc-row">
+          <div class="fc-n">T4</div><div class="fc-dot" style="background:var(--muted)"></div>
+          <div><div class="fc-label">Suppressed — no display</div><div class="fc-desc">Not enough data to make a defensible estimate. Meter shows "Insufficient data." Suggestion is withheld from the AI for that dimension rather than displaying a misleading number.</div></div>
+          <div class="badge bn">None</div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="height:fit-content">
+      <h4>Minimum n requirements — when T1 activates</h4>
+      <div class="sl">
+        <div class="si"><div class="ic ib">P75</div><div><div class="sl-label">Expense P75 per bucket</div><div class="sl-desc">T1: &ge; 8 shows in that bucket at this venue. Below 8: cross-venue P75 for same bucket class.</div></div></div>
+        <div class="si"><div class="ic ig">H</div><div><div class="sl-label">Hospitality cap</div><div class="sl-desc">T1: &ge; 5 shows with hospitality expenses logged. Below 5: cross-venue P75 by capacity tier.</div></div></div>
+        <div class="si"><div class="ic ip">G</div><div><div class="sl-label">Genre P75 baseline</div><div class="sl-desc">T1: &ge; 5 shows in that genre at this venue. T2: &ge; 3 venues with that genre. T3: all-genre mean.</div></div></div>
+        <div class="si"><div class="ic ia">BE</div><div><div class="sl-label">Breakeven gross</div><div class="sl-desc">T1: &ge; 10 shows with both expense and gross data. Below 10: formula estimate from Algo 4.</div></div></div>
+        <div class="si"><div class="ic ir">D%</div><div><div class="sl-label">Dispute rate baseline</div><div class="sl-desc">T1: &ge; 20 settled shows per deal type. Below 20: platform-wide dispute rate for that deal type.</div></div></div>
+        <div class="si"><div class="ic it">SGP</div><div><div class="sl-label">SGP accuracy score</div><div class="sl-desc">T1: &ge; 15 matched suggestion-vs-actual pairs. Below 15: display "calibrating" rather than a score.</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider">The 8 core algorithms</div>
+
+  <!-- ALGO 1 -->
+  <div class="ab">
+    <div class="ab-head">
+      <h3>Algorithm 1 — Expense P75 per size bucket</h3>
+      <div style="display:flex;gap:.5rem"><span class="stag sb">Recal: on settle</span><span class="cbadge cbh"><span class="cdot" style="background:var(--green)"></span>High when n&ge;8</span></div>
+    </div>
+    <div class="ab-body">
+      <div class="ab-desc">The expense cap default for each gross bucket. Replaces every hardcoded cap constant. A Brooklyn jazz venue and a Nashville rock club will produce different values from this query — as they should. This number sets the default cap on any new deal in that bucket, and is the primary reference line on the live meter.</div>
+      <div class="code">
+<span class="cc">-- Compute P75 billed expense per bucket for this venue</span><br>
+<span class="cc">-- Triggered after every settled show; stored in venue_calibration</span><br><br>
+<span class="ck">WITH</span> billed_by_show <span class="ck">AS</span> (<br>
+<span class="ci"><span class="ck">SELECT</span> s.id <span class="ck">AS</span> show_id,</span>
+<span class="ci2"><span class="cf">SUM</span>(e.amount) <span class="ck">AS</span> total_billed,</span>
+<span class="ci2"><span class="cf">classifyBucket</span>(d.guarantee_amount) <span class="ck">AS</span> bucket</span>
+<span class="ci"><span class="ck">FROM</span> shows s</span>
+<span class="ci"><span class="ck">JOIN</span> deals d <span class="ck">ON</span> d.show_id = s.id</span>
+<span class="ci"><span class="ck">JOIN</span> expenses e <span class="ck">ON</span> e.show_id = s.id</span>
+<span class="ci"><span class="ck">WHERE</span> s.venue_id = <span class="cv">:venue_id</span> <span class="ck">AND</span> e.absorbed_by_venue = <span class="cv">0</span></span>
+<span class="ci"><span class="ck">AND</span> s.status <span class="ck">IN</span> (<span class="cv">'settled'</span>, <span class="cv">'closed'</span>)</span>
+<span class="ci"><span class="ck">GROUP BY</span> s.id, bucket</span>
+)<br>
+<span class="ck">SELECT</span> bucket,<br>
+<span class="ci"><span class="cf">PERCENTILE_CONT</span>(<span class="cv">0.75</span>) <span class="ck">WITHIN GROUP</span> (<span class="ck">ORDER BY</span> total_billed) <span class="ck">AS</span> p75_expense,</span>
+<span class="ci"><span class="cf">PERCENTILE_CONT</span>(<span class="cv">0.50</span>) <span class="ck">WITHIN GROUP</span> (<span class="ck">ORDER BY</span> total_billed) <span class="ck">AS</span> p50_expense,</span>
+<span class="ci"><span class="cf">STDDEV</span>(total_billed) <span class="ck">AS</span> expense_stddev,</span>
+<span class="ci"><span class="cf">COUNT</span>(*) <span class="ck">AS</span> n</span>
+<span class="ck">FROM</span> billed_by_show <span class="ck">GROUP BY</span> bucket<br><br>
+<span class="cc">-- n &lt; 8 per bucket  → use cross-venue P75 for same bucket class</span><br>
+<span class="cc">-- n &lt; 3 venues      → use platform_defaults.expense_p75[bucket]</span><br>
+<span class="cc">-- Store: venue_calibration (key='expense_p75_{bucket}', source, confidence, n)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALGO 2 -->
+  <div class="ab">
+    <div class="ab-head">
+      <h3>Algorithm 2 — Hospitality cap</h3>
+      <div style="display:flex;gap:.5rem"><span class="stag sa">Recal: on settle</span><span class="cbadge cbm"><span class="cdot" style="background:var(--amber)"></span>Med when n&ge;5</span></div>
+    </div>
+    <div class="ab-body">
+      <div class="ab-desc">Hospitality is the most-disputed expense category. Its cap must come from the venue's own data — a 300-cap club has different rider norms than a 1,500-cap theatre. A venue with a full green room will see numbers 3&times; higher than one with a fridge and a deli order policy. Cross-venue fallback uses capacity tier (small/mid/large), not city, as the grouping variable.</div>
+      <div class="code">
+<span class="ck">SELECT</span><br>
+<span class="ci"><span class="cf">PERCENTILE_CONT</span>(<span class="cv">0.75</span>) <span class="ck">WITHIN GROUP</span> (<span class="ck">ORDER BY</span> hosp_total) <span class="ck">AS</span> hospitality_cap,</span>
+<span class="ci"><span class="cf">AVG</span>(hosp_total) <span class="ck">AS</span> hospitality_mean,</span>
+<span class="ci"><span class="cf">COUNT</span>(*) <span class="ck">AS</span> n</span>
+<span class="ck">FROM</span> (<br>
+<span class="ci"><span class="ck">SELECT</span> show_id, <span class="cf">SUM</span>(amount) <span class="ck">AS</span> hosp_total</span>
+<span class="ci"><span class="ck">FROM</span> expenses</span>
+<span class="ci"><span class="ck">WHERE</span> venue_id = <span class="cv">:venue_id</span> <span class="ck">AND</span> category = <span class="cv">'hospitality'</span></span>
+<span class="ci"><span class="ck">AND</span> absorbed_by_venue = <span class="cv">0</span></span>
+<span class="ci"><span class="ck">GROUP BY</span> show_id <span class="ck">HAVING</span> <span class="cf">SUM</span>(amount) &gt; <span class="cv">0</span></span>
+)<br><br>
+<span class="cc">-- Cross-venue fallback groups by capacity_tier:</span><br>
+<span class="cc">-- small (&lt;300), mid (300-800), large (800+)</span><br>
+<span class="cc">-- Capacity, not city, determines rider norms</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALGO 3 -->
+  <div class="ab">
+    <div class="ab-head">
+      <h3>Algorithm 3 — Genre P75 (venue-local blended with cross-venue)</h3>
+      <div style="display:flex;gap:.5rem"><span class="stag sp">Recal: nightly</span><span class="cbadge cbh"><span class="cdot" style="background:var(--green)"></span>High with cross-venue</span></div>
+    </div>
+    <div class="ab-body">
+      <div class="ab-desc">Genre is the best predictor of expense level for first-time artists. A single venue rarely has enough shows per genre for a reliable P75 — cross-venue pooling solves this. When the venue has local genre data, it is blended with the platform estimate. The blend ratio shifts toward local data as local n grows: at n=5 (70/30 blend), at n=20+ (90/10 blend).</div>
+      <div class="code">
+<span class="cc">-- Tier 1: venue-local genre P75 (if n &ge; 5)</span><br>
+<span class="ck">SELECT</span> a.genre,<br>
+<span class="ci"><span class="cf">PERCENTILE_CONT</span>(<span class="cv">0.75</span>) <span class="ck">WITHIN GROUP</span> (<span class="ck">ORDER BY</span> e.billed_total) <span class="ck">AS</span> p75_local,</span>
+<span class="ci"><span class="cf">COUNT</span>(*) <span class="ck">AS</span> n_local</span>
+<span class="ck">FROM</span> expense_totals_per_show e<br>
+<span class="ck">JOIN</span> artists a <span class="ck">ON</span> a.id = e.artist_id<br>
+<span class="ck">WHERE</span> e.venue_id = <span class="cv">:venue_id</span><br>
+<span class="ck">GROUP BY</span> a.genre<br><br>
+<span class="cc">-- Tier 2: cross-venue pool (only billed_expense_total shared — no gross/payout)</span><br>
+<span class="ck">SELECT</span> genre,<br>
+<span class="ci"><span class="cf">PERCENTILE_CONT</span>(<span class="cv">0.75</span>) <span class="ck">WITHIN GROUP</span> (<span class="ck">ORDER BY</span> billed_total) <span class="ck">AS</span> p75_platform,</span>
+<span class="ci"><span class="cf">COUNT</span>(<span class="ck">DISTINCT</span> venue_id) <span class="ck">AS</span> n_venues</span>
+<span class="ck">FROM</span> platform_expense_pool <span class="ck">GROUP BY</span> genre<br><br>
+<span class="cc">-- Blend rule:</span><br>
+<span class="cc">-- n_local &ge; 5: BLEND(local_weight * p75_local + (1-local_weight) * p75_platform)</span><br>
+<span class="cc">-- local_weight = MIN(0.9, 0.7 + (n_local - 5) * 0.025)</span><br>
+<span class="cc">-- n_local &lt; 5 and n_venues &ge; 3: p75_platform only</span><br>
+<span class="cc">-- n_venues &lt; 3: venue_calibration.expense_p75_{bucket} as proxy</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALGO 4 -->
+  <div class="ab">
+    <div class="ab-head">
+      <h3>Algorithm 4 — Dynamic breakeven gross per deal type &amp; bucket</h3>
+      <div style="display:flex;gap:.5rem"><span class="stag sa">Recal: nightly</span><span class="cbadge cbm"><span class="cdot" style="background:var(--amber)"></span>Med when n&ge;10</span></div>
+    </div>
+    <div class="ab-body">
+      <div class="ab-desc">The breakeven gross is not a fixed number. It varies by deal type, by how expensive or lean a given artist's setup is, and by what the ticketing platform actually charges in fees. The engine computes it for every (deal_type &times; bucket) cell with sufficient data — giving each cell its own real breakeven line on the meter.</div>
+      <div class="code">
+<span class="cc">-- breakeven_gross = (avg_artist_payout + avg_billed_expense) / (1 - fee_rate)</span><br>
+<span class="ck">WITH</span> cell_stats <span class="ck">AS</span> (<br>
+<span class="ci"><span class="ck">SELECT</span> d.deal_type, <span class="cf">classifyBucket</span>(d.guarantee_amount) <span class="ck">AS</span> bucket,</span>
+<span class="ci2"><span class="cf">AVG</span>(s.total_to_artist) <span class="ck">AS</span> avg_artist,</span>
+<span class="ci2"><span class="cf">AVG</span>(e.billed_total) <span class="ck">AS</span> avg_expense,</span>
+<span class="ci2"><span class="cf">AVG</span>(tk.fees / <span class="cf">NULLIF</span>(tk.gross, <span class="cv">0</span>)) <span class="ck">AS</span> actual_fee_rate,</span>
+<span class="ci2"><span class="cf">COUNT</span>(*) <span class="ck">AS</span> n</span>
+<span class="ci"><span class="ck">FROM</span> settlements s</span>
+<span class="ci"><span class="ck">JOIN</span> deals d <span class="ck">ON</span> d.show_id = s.show_id</span>
+<span class="ci"><span class="ck">JOIN</span> expense_totals_per_show e <span class="ck">ON</span> e.show_id = s.show_id</span>
+<span class="ci"><span class="ck">JOIN</span> ticket_sales tk <span class="ck">ON</span> tk.show_id = s.show_id</span>
+<span class="ci"><span class="ck">WHERE</span> s.venue_id = <span class="cv">:venue_id</span> <span class="ck">GROUP BY</span> d.deal_type, bucket</span>
+)<br>
+<span class="ck">SELECT</span> deal_type, bucket, n,<br>
+<span class="ci">(avg_artist + avg_expense) / (<span class="cv">1.0</span> - actual_fee_rate) <span class="ck">AS</span> breakeven_gross</span>
+<span class="ck">FROM</span> cell_stats <span class="ck">WHERE</span> n &gt;= <span class="cv">10</span><br><br>
+<span class="cc">-- When n &lt; 10: formula estimate</span><br>
+<span class="cc">-- breakeven_est = (deal.guaranteeAmount + venue_avg_expense) / (1 - venue_fee_rate)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALGO 5 -->
+  <div class="ab">
+    <div class="ab-head">
+      <h3>Algorithm 5 — Actual ticketing fee rate</h3>
+      <div style="display:flex;gap:.5rem"><span class="stag sg">Recal: monthly</span><span class="cbadge cbh"><span class="cdot" style="background:var(--green)"></span>Stable after 10 shows</span></div>
+    </div>
+    <div class="ab-body">
+      <div class="ab-desc">The SGP engine currently hardcodes 10% ticketing fees. In reality fee rates range from 6% to 15% depending on the ticketing platform and deal structure. High variance in the computed rate (stddev &gt; 0.03) signals the venue uses multiple ticketing platforms — in which case the mode or most-recent rate is used rather than the mean.</div>
+      <div class="code">
+<span class="ck">SELECT</span><br>
+<span class="ci"><span class="cf">SUM</span>(fees) / <span class="cf">NULLIF</span>(<span class="cf">SUM</span>(gross), <span class="cv">0</span>) <span class="ck">AS</span> actual_fee_rate,</span>
+<span class="ci"><span class="cf">STDDEV</span>(fees / <span class="cf">NULLIF</span>(gross, <span class="cv">0</span>)) <span class="ck">AS</span> fee_rate_variance,</span>
+<span class="ci"><span class="cf">COUNT</span>(<span class="ck">DISTINCT</span> show_id) <span class="ck">AS</span> n_shows</span>
+<span class="ck">FROM</span> ticket_sales<br>
+<span class="ck">WHERE</span> venue_id = <span class="cv">:venue_id</span><br>
+<span class="ck">AND</span> captured_at &gt; <span class="cf">NOW</span>() - <span class="ck">INTERVAL</span> <span class="cv">'12 months'</span><br><br>
+<span class="cc">-- If fee_rate_variance &gt; 0.03 → use MODE not AVG (mixed platforms)</span><br>
+<span class="cc">-- Default if n &lt; 10: 0.10 (10%)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALGO 6 -->
+  <div class="ab">
+    <div class="ab-head">
+      <h3>Algorithm 6 — Dispute rate baseline per deal type</h3>
+      <div style="display:flex;gap:.5rem"><span class="stag sr">Recal: weekly</span><span class="cbadge cbl"><span class="cdot" style="background:var(--red)"></span>Needs n&ge;20</span></div>
+    </div>
+    <div class="ab-body">
+      <div class="ab-desc">The baseline dispute rate tells the system what "normal" looks like for each deal type at this specific venue. A spike above this baseline is the primary trigger for AI proactive alerts. For Stage 1–2 venues, platform-wide dispute rates by deal type are used — these are reliable because disputes correlate strongly with deal structure regardless of venue.</div>
+      <div class="code">
+<span class="ck">SELECT</span> d.deal_type,<br>
+<span class="ci"><span class="cf">classifyBucket</span>(d.guarantee_amount) <span class="ck">AS</span> bucket,</span>
+<span class="ci"><span class="cf">COUNT</span>(*) <span class="ck">AS</span> total_settled,</span>
+<span class="ci"><span class="cf">SUM</span>(<span class="ck">CASE WHEN</span> s.status = <span class="cv">'disputed'</span></span>
+<span class="ci2"><span class="ck">OR</span> <span class="cf">hasDisputedRecoup</span>(s.recoups_json) <span class="ck">THEN</span> <span class="cv">1</span> <span class="ck">ELSE</span> <span class="cv">0</span> <span class="ck">END</span>) <span class="ck">AS</span> dispute_count,</span>
+<span class="ci"><span class="cf">ROUND</span>(dispute_count::numeric / <span class="cf">NULLIF</span>(total_settled, <span class="cv">0</span>), <span class="cv">4</span>) <span class="ck">AS</span> dispute_rate</span>
+<span class="ck">FROM</span> settlements s <span class="ck">JOIN</span> deals d <span class="ck">ON</span> d.show_id = s.show_id<br>
+<span class="ck">WHERE</span> s.venue_id = <span class="cv">:venue_id</span><br>
+<span class="ck">AND</span> s.completed_at &gt; <span class="cf">NOW</span>() - <span class="ck">INTERVAL</span> <span class="cv">'12 months'</span><br>
+<span class="ck">GROUP BY</span> d.deal_type, bucket <span class="ck">HAVING</span> <span class="cf">COUNT</span>(*) &gt;= <span class="cv">20</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALGO 7 -->
+  <div class="ab">
+    <div class="ab-head">
+      <h3>Algorithm 7 — SGP accuracy drift (the self-improvement loop)</h3>
+      <div style="display:flex;gap:.5rem"><span class="stag st">Recal: on settle</span><span class="cbadge cbm"><span class="cdot" style="background:var(--amber)"></span>Needs n&ge;15</span></div>
+    </div>
+    <div class="ab-body">
+      <div class="ab-desc">The engine closes its own feedback loop. After every settled show, it compares what the SGP suggested against what actually settled. Systematic drift above 15% signals the underlying P75s are miscalibrated — it triggers automatic re-runs of Algo 1 and Algo 3 for the affected cells. This is how the engine improves itself over time without human intervention.</div>
+      <div class="code">
+<span class="ck">SELECT</span> d.deal_type,<br>
+<span class="ci"><span class="cf">AVG</span>(g.suggested_price - s.total_to_artist) <span class="ck">AS</span> mean_delta,</span>
+<span class="ci"><span class="cf">AVG</span>(<span class="cf">ABS</span>(g.suggested_price - s.total_to_artist)</span>
+<span class="ci2">/ <span class="cf">NULLIF</span>(s.total_to_artist, <span class="cv">0</span>)) <span class="ck">AS</span> mean_pct_error,</span>
+<span class="ci"><span class="cf">COUNT</span>(*) <span class="ck">AS</span> n</span>
+<span class="ck">FROM</span> guarantee_suggestions g<br>
+<span class="ck">JOIN</span> settlements s <span class="ck">ON</span> s.show_id = g.show_id<br>
+<span class="ck">JOIN</span> deals d <span class="ck">ON</span> d.show_id = g.show_id<br>
+<span class="ck">WHERE</span> g.venue_id = <span class="cv">:venue_id</span><br>
+<span class="ck">AND</span> s.completed_at &gt; <span class="cf">NOW</span>() - <span class="ck">INTERVAL</span> <span class="cv">'6 months'</span><br><br>
+<span class="cc">-- mean_pct_error &gt; 0.15 → trigger recalibration of Algo 1 + Algo 3</span><br>
+<span class="cc">-- mean_delta consistently positive → suggestions too high (expense est too low)</span><br>
+<span class="cc">-- mean_delta consistently negative → suggestions too low (expense est too high)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALGO 8 -->
+  <div class="ab">
+    <div class="ab-head">
+      <h3>Algorithm 8 — Per-artist dynamic expense profile (recency-weighted)</h3>
+      <div style="display:flex;gap:.5rem"><span class="stag sb">Recal: on settle</span><span class="cbadge cbh"><span class="cdot" style="background:var(--green)"></span>High after 2 shows</span></div>
+    </div>
+    <div class="ab-body">
+      <div class="ab-desc">The most accurate single reference for any established act. Recency-weighted so that a crew change 2 years ago doesn't anchor the estimate. Cross-venue shows are included when available via the platform pool — this is the primary mechanism by which a touring artist's expense profile travels with them to a new venue.</div>
+      <div class="code">
+<span class="ck">WITH</span> artist_history <span class="ck">AS</span> (<br>
+<span class="ci"><span class="ck">SELECT</span> e.artist_id, e.show_id, e.billed_total, s.date,</span>
+<span class="ci2"><span class="cc">-- shows in last 12 months count 2x</span></span>
+<span class="ci2"><span class="ck">CASE WHEN</span> s.date &gt; <span class="cf">NOW</span>() - <span class="ck">INTERVAL</span> <span class="cv">'12 months'</span></span>
+<span class="ci2">     <span class="ck">THEN</span> <span class="cv">2.0</span> <span class="ck">ELSE</span> <span class="cv">1.0</span> <span class="ck">END</span> <span class="ck">AS</span> recency_weight</span>
+<span class="ci"><span class="ck">FROM</span> expense_totals_per_show e <span class="ck">JOIN</span> shows s <span class="ck">ON</span> s.id = e.show_id</span>
+<span class="cc">-- Include cross-venue shows where shared via platform pool</span>
+)<br>
+<span class="ck">SELECT</span> artist_id,<br>
+<span class="ci"><span class="cf">SUM</span>(billed_total * recency_weight) / <span class="cf">SUM</span>(recency_weight) <span class="ck">AS</span> weighted_mean,</span>
+<span class="ci"><span class="cf">MAX</span>(billed_total) <span class="ck">AS</span> max_expense,</span>
+<span class="ci"><span class="cf">STDDEV</span>(billed_total) <span class="ck">AS</span> expense_stddev,</span>
+<span class="ci"><span class="cf">COUNT</span>(*) <span class="ck">AS</span> n_shows,</span>
+<span class="ci"><span class="cf">COUNT</span>(<span class="ck">DISTINCT</span> venue_id) <span class="ck">AS</span> n_venues</span>
+<span class="ck">FROM</span> artist_history <span class="ck">GROUP BY</span> artist_id<br><br>
+<span class="cc">-- weighted_mean → meter "artist avg" reference line</span><br>
+<span class="cc">-- max_expense   → suggested cap minimum (cap must be &ge; max seen)</span><br>
+<span class="cc">-- expense_stddev → meter confidence band width</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider">Recalibration cadence</div>
+  <table class="tbl">
+    <thead><tr><th>Constant</th><th>Algorithm</th><th>Trigger</th><th>Why this cadence</th></tr></thead>
+    <tbody>
+      <tr><td>Artist expense profile</td><td class="mono">Algo 8</td><td>After each settled show for this artist</td><td style="color:var(--muted);font-size:12px">Per-artist data changes only when this artist settles.</td></tr>
+      <tr><td>Expense P75 per bucket</td><td class="mono">Algo 1</td><td>After each settled show</td><td style="color:var(--muted);font-size:12px">One show can shift P75 significantly when n is small. Recalculate immediately.</td></tr>
+      <tr><td>Hospitality cap</td><td class="mono">Algo 2</td><td>After each settled show with hospitality expenses</td><td style="color:var(--muted);font-size:12px">Only shows with hospitality charges affect this value.</td></tr>
+      <tr><td>Genre P75</td><td class="mono">Algo 3</td><td>Nightly (local); weekly (cross-venue pull)</td><td style="color:var(--muted);font-size:12px">Cross-venue data comes from a pooled API call — rate-limited. Local genre P75 is event-driven.</td></tr>
+      <tr><td>Breakeven gross</td><td class="mono">Algo 4</td><td>Nightly at midnight</td><td style="color:var(--muted);font-size:12px">Requires joins across multiple tables. Stable enough that nightly batch is sufficient.</td></tr>
+      <tr><td>Ticketing fee rate</td><td class="mono">Algo 5</td><td>Monthly</td><td style="color:var(--muted);font-size:12px">Fee rates are set by ticketing contracts, which change infrequently.</td></tr>
+      <tr><td>Dispute rate baseline</td><td class="mono">Algo 6</td><td>Weekly</td><td style="color:var(--muted);font-size:12px">Dispute rates are slow-moving. Weekly recalibration avoids over-weighting recent anomalies.</td></tr>
+      <tr><td>SGP accuracy drift</td><td class="mono">Algo 7</td><td>After each settled show</td><td style="color:var(--muted);font-size:12px">Drift accumulates show-by-show. Detect emerging bias early — trigger recal if &gt;15%.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ===== SECTION 1: WHAT TO TRACK ===== -->
+<section class="section" id="s1">
+  <div class="slabel" style="color:var(--accent)">Section 01 — Monitoring Dimensions</div>
+  <h2>What to Track</h2>
+  <p class="slead">Four dimensions — per deal, per bucket, per genre, per period. Every threshold here references a computed value from the calibration engine, not a hardcoded number. The system defines "normal" from the venue's own data, then alerts when something departs from it.</p>
+
+  <div class="callout">
+    <strong>Key shift:</strong> In the previous spec, "alert at 80% of $1,850" was a rule. In this version it is "alert at 80% of <code style="font-family:'Syne Mono',monospace;font-size:11px">venue_calibration.expense_p75_1_5k</code>." A venue where that field is $750 alerts at $600. One where it is $2,400 alerts at $1,920. The front-end renders the same component — the numbers it receives are different per venue.
+  </div>
+
+  <div class="g2">
+    <div class="ab" style="margin-bottom:0">
+      <div class="ab-head"><h3>Per Deal — 8 live signals</h3><span class="stag sr">Highest urgency</span></div>
+      <div class="ab-body">
+        <div class="sl">
+          <div class="si"><div class="ic ir">$</div><div><div class="sl-label">Expenses vs <span class="mono" style="font-size:10px">calibration.expense_p75_{bucket}</span></div><div class="sl-desc">Alert at 80% and 100% of computed cap. Not fixed — a $600-per-show venue alerts at $480. A $2,400 venue alerts at $1,920.</div></div><span class="stag sr">Live</span></div>
+          <div class="si"><div class="ic ia">&#916;</div><div><div class="sl-label">Deviation from <span class="mono" style="font-size:10px">artist_profile.weighted_mean</span></div><div class="sl-desc">+25% above this artist's recency-weighted history triggers a pre-dispute flag. Threshold widens for high-stddev artists (volatile cost profile).</div></div><span class="stag sa">Alert</span></div>
+          <div class="si"><div class="ic ib">%</div><div><div class="sl-label">Expense as % of gross vs <span class="mono" style="font-size:10px">calibration.breakeven_{deal}_{bucket}</span></div><div class="sl-desc">Health bands (safe/watch/risk/structural loss) computed from the venue's own breakeven, not fixed at 25/40/75%.</div></div><span class="stag sb">Ratio</span></div>
+          <div class="si"><div class="ic ig">H</div><div><div class="sl-label">Hospitality vs <span class="mono" style="font-size:10px">calibration.hospitality_cap</span></div><div class="sl-desc">Cap computed from venue's own P75. A large theatre may have a $900 cap. A small club, $180. Neither is the default $400.</div></div><span class="stag sg">Cap</span></div>
+          <div class="si"><div class="ic ip">&#8596;</div><div><div class="sl-label">Absorbed vs billed split vs venue rolling baseline</div><div class="sl-desc">If venue is absorbing more than its rolling-average absorption rate, flag it. Hidden absorption compresses real margin.</div></div><span class="stag sp">Split</span></div>
+          <div class="si"><div class="ic it">SGP</div><div><div class="sl-label">Expense run vs SGP accuracy band (mean &#177; 1.5&#963;)</div><div class="sl-desc">If tonight's expense is outside the band where the SGP suggestion was accurate historically, the flat suggestion may settle differently than projected.</div></div><span class="stag st">Forecast</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="ab" style="margin-bottom:0">
+      <div class="ab-head"><h3>Per Bucket, Genre &amp; Period</h3><span class="stag sb">Analytical</span></div>
+      <div class="ab-body">
+        <div class="sl">
+          <div class="si"><div class="ic ib">P75</div><div><div class="sl-label">Bucket P75 drift — rolling 3-month vs 12-month</div><div class="sl-desc">If the recent P75 is &gt;10% above the annual P75 for the same bucket, a cost driver changed. Algo 7 surfaces the category (hospitality, production, etc.).</div></div><span class="stag sb">Drift</span></div>
+          <div class="si"><div class="ic ip">G</div><div><div class="sl-label">Artist expense vs <span class="mono" style="font-size:10px">genre_calibration.p75</span></div><div class="sl-desc">When any active deal's running expense exceeds the blended genre P75, flag before settlement closes. Deviation of &gt;20% gets an AI note on the side panel.</div></div><span class="stag sp">Alert</span></div>
+          <div class="si"><div class="ic ia">D%</div><div><div class="sl-label">Dispute rate vs <span class="mono" style="font-size:10px">calibration.dispute_rate_{deal}</span></div><div class="sl-desc">Alert when rolling 90-day dispute rate exceeds 2&#215; the venue's own computed baseline. The baseline itself is dynamic — not fixed at 5.22%.</div></div><span class="stag sa">Risk</span></div>
+          <div class="si"><div class="ic ir">&#8593;</div><div><div class="sl-label">Bucket migration — monthly gross distribution shift</div><div class="sl-desc">Computed from actual gross distribution. A shift of &gt;5 shows toward the &lt;breakeven bucket in any month is an early warning of portfolio degradation.</div></div><span class="stag sr">Portfolio</span></div>
+          <div class="si"><div class="ic it">SGP</div><div><div class="sl-label">SGP accuracy drift — Algo 7 recalibration trigger</div><div class="sl-desc">When Algo 7 mean_pct_error &gt;15%, auto-trigger full recalibration of Algo 1 and Algo 3 for affected cells. Displayed in the Calibration Status view.</div></div><span class="stag st">Accuracy</span></div>
+          <div class="si"><div class="ic ig">&#8721;</div><div><div class="sl-label">Cumulative venue net vs venue-computed target line</div><div class="sl-desc">Target = rolling 12-month average venue net &#215; (1 + operator-set growth target). Not a fixed number — recomputed each month from actual historical data.</div></div><span class="stag sg">KPI</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION 2: LIVE METER ===== -->
+<section class="section" id="s2">
+  <div class="slabel" style="color:var(--green)">Section 02 — Live Expense Meter</div>
+  <h2>The Dynamic Live Meter</h2>
+  <p class="slead">Every reference line is a live database query. The cap is the venue's computed P75 for this bucket. The artist average is the recency-weighted mean from Algo 8. The genre P75 is the blended local+platform estimate from Algo 3. All update after every settled show. The front-end renders whatever the API returns — zero business logic on the client.</p>
+
+  <div class="callout green">
+    <strong>Meter data contract:</strong> <code style="font-family:'Syne Mono',monospace;font-size:11px">GET /api/shows/:id/meter</code> returns a <code style="font-family:'Syne Mono',monospace;font-size:11px">MeterPayload</code> with every reference line, its source, its confidence, and the n backing it. <code style="font-family:'Syne Mono',monospace;font-size:11px">alert_level</code> is computed server-side. Confidence badges render from the payload fields — not from front-end logic.
+  </div>
+
+  <div class="code" style="margin-bottom:1.5rem">
+<span class="cc">-- MeterPayload schema (returned by /api/shows/:id/meter)</span><br>
+{<br>
+<span class="ci"><span class="ck">"current_expense"</span>: <span class="cv">1085</span>,        <span class="cc">-- live SUM of billed expenses</span></span>
+<span class="ci"><span class="ck">"cap"</span>: { <span class="ck">"value"</span>: <span class="cv">1620</span>, <span class="ck">"source"</span>: <span class="cv">"venue_computed"</span>, <span class="ck">"confidence"</span>: <span class="cv">"high"</span>, <span class="ck">"n"</span>: <span class="cv">42</span> },</span>
+<span class="ci"><span class="ck">"artist_mean"</span>: { <span class="ck">"value"</span>: <span class="cv">1310</span>, <span class="ck">"stddev"</span>: <span class="cv">180</span>, <span class="ck">"n"</span>: <span class="cv">4</span> },</span>
+<span class="ci"><span class="ck">"genre_p75"</span>: { <span class="ck">"value"</span>: <span class="cv">1692</span>, <span class="ck">"source"</span>: <span class="cv">"blended"</span>, <span class="ck">"n_venues"</span>: <span class="cv">47</span> },</span>
+<span class="ci"><span class="ck">"breakeven_gross"</span>: <span class="cv">4180</span>,       <span class="cc">-- from Algo 4, for this deal_type + bucket</span></span>
+<span class="ci"><span class="ck">"current_gross"</span>: <span class="cv">3400</span>,          <span class="cc">-- from live ticket_sales</span></span>
+<span class="ci"><span class="ck">"alert_level"</span>: <span class="cv">"watch"</span>,         <span class="cc">-- server-computed: ok / watch / alert</span></span>
+<span class="ci"><span class="ck">"hospitality"</span>: { <span class="ck">"cap"</span>: <span class="cv">380</span>, <span class="ck">"spend"</span>: <span class="cv">290</span>, <span class="ck">"confidence"</span>: <span class="cv">"high"</span> },</span>
+<span class="ci"><span class="ck">"venue_maturity_stage"</span>: <span class="cv">4</span>        <span class="cc">-- surfaces in AI assistant prompt</span></span>
+}
+  </div>
+
+  <div class="g3">
+    <div class="meter">
+      <div class="mh"><div><div class="mt">Glass Bottle — tonight</div><div class="ms">Flat · $2,800 guar · indie rock</div></div><div class="mbadge mok">On track</div></div>
+      <div class="mtrack" style="overflow:visible">
+        <div class="mfill mfg" style="width:67%"></div>
+        <div class="mkr" style="left:75%;background:var(--amber)"><div class="mkrlbl" style="color:var(--amber)">Cap ← venue P75</div></div>
+        <div class="mkr" style="left:83%;background:rgba(155,114,232,.5)"><div class="mkrlbl" style="color:var(--purple);left:10px">Genre P75</div></div>
+      </div>
+      <div class="mlbls"><span>$0</span><span style="color:var(--green)">$1,085 now</span><span style="color:var(--amber)">$1,620 cap</span></div>
+      <div class="mstats">
+        <div class="mstat"><div class="msv" style="color:var(--green)">$1,085</div><div class="msl">Billed</div></div>
+        <div class="mstat"><div class="msv">$1,310</div><div class="msl">Artist avg (n=4)</div></div>
+        <div class="mstat"><div class="msv">$1,692</div><div class="msl">Genre P75</div></div>
+        <div class="mstat"><div class="msv">67%</div><div class="msl">Of cap</div></div>
+      </div>
+      <div style="margin-top:.75rem;display:flex;gap:.4rem;flex-wrap:wrap">
+        <span class="cbadge cbh"><span class="cdot" style="background:var(--green)"></span>Cap: venue P75, n=42</span>
+        <span class="cbadge cbh"><span class="cdot" style="background:var(--green)"></span>Artist: n=4 shows</span>
+      </div>
+    </div>
+
+    <div class="meter warn">
+      <div class="mh"><div><div class="mt">Gentle Riot — tonight</div><div class="ms">vs · $4,200 guar · indie rock</div></div><div class="mbadge mwarn">Watch</div></div>
+      <div class="mtrack" style="overflow:visible">
+        <div class="mfill mfa" style="width:88%"></div>
+        <div class="mkr" style="left:82%;background:var(--amber)"><div class="mkrlbl" style="color:var(--amber)">Cap</div></div>
+      </div>
+      <div class="mlbls"><span>$0</span><span style="color:var(--amber)">$1,558 now</span><span style="color:var(--amber)">$1,620 cap</span></div>
+      <div class="mstats">
+        <div class="mstat"><div class="msv" style="color:var(--amber)">$1,558</div><div class="msl">Billed</div></div>
+        <div class="mstat"><div class="msv">$1,893</div><div class="msl">Artist avg (n=6)</div></div>
+        <div class="mstat"><div class="msv">$1,692</div><div class="msl">Genre P75</div></div>
+        <div class="mstat"><div class="msv" style="color:var(--amber)">88%</div><div class="msl">Of cap</div></div>
+      </div>
+      <div style="margin-top:.75rem">
+        <span class="cbadge cbm"><span class="cdot" style="background:var(--amber)"></span>Artist avg above genre P75 — larger crew pattern</span>
+      </div>
+    </div>
+
+    <div class="meter alert">
+      <div class="mh"><div><div class="mt">Red Letter — tonight</div><div class="ms">door · no guar · post rock</div></div><div class="mbadge malert">Cap breached</div></div>
+      <div class="mtrack" style="overflow:visible">
+        <div class="mfill mfr" style="width:100%"></div>
+        <div class="mkr" style="left:82%;background:var(--amber)"><div class="mkrlbl" style="color:var(--amber)">Cap</div></div>
+      </div>
+      <div class="mlbls"><span>$0</span><span style="color:var(--red)">$2,130 (+$380 over)</span><span style="color:var(--amber)">$1,750 cap</span></div>
+      <div class="mstats">
+        <div class="mstat"><div class="msv" style="color:var(--red)">$2,130</div><div class="msl">Billed</div></div>
+        <div class="mstat"><div class="msv">$1,912</div><div class="msl">Genre P75</div></div>
+        <div class="mstat"><div class="msv" style="color:var(--red)">+$380</div><div class="msl">Over cap</div></div>
+        <div class="mstat"><div class="msv" style="color:var(--red)">122%</div><div class="msl">Of cap</div></div>
+      </div>
+      <div style="margin-top:.75rem">
+        <span class="cbadge cbl"><span class="cdot" style="background:var(--red)"></span>Cap: cross-venue only — n=3 door shows, low confidence</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout blue">
+    <strong>Confidence badges change the meaning of the meter:</strong> When the cap is backed by n=3 shows (cross-venue, low confidence), the meter renders a warning indicator and the AI assistant adds a caveat: "The cap shown is estimated from platform data — this venue has only 3 door shows on record. Treat it as directional, not a hard limit." This prevents the operator from treating a low-n estimate as a contract number.
+  </div>
+</section>
+
+<!-- ===== SECTION 3: AI ASSISTANT ===== -->
+<section class="section" id="s3">
+  <div class="slabel" style="color:var(--purple)">Section 03 — AI Deal Health Assistant</div>
+  <h2>The AI Side Panel</h2>
+  <p class="slead">The assistant is context-injected at call time with the full MeterPayload, calibration state, settlement notes, agent preferences, and recoup history for the open record. It knows which constants are high-confidence and which are estimates — and qualifies its answers accordingly. Calibration state is part of the system prompt.</p>
+
+  <div class="g2">
+    <div class="ai">
+      <div class="ai-h">
+        <div class="ai-orb">&#9672;</div>
+        <div>
+          <div class="ai-name">Deal Health · Glass Bottle</div>
+          <div class="ai-desc">Stage 4 venue · High confidence on all caps · n=42 bucket shows · SGP accuracy 11%</div>
+        </div>
+      </div>
+      <div class="ai-body">
+        <div class="ai-ql">Questions powered by dynamic calibration</div>
+        <div class="ai-q">Is tonight's expense run normal for this artist?</div>
+        <div class="ai-q">How does this compare to the indie rock genre baseline?</div>
+        <div class="ai-q">What cap should I set if we rebook this artist?</div>
+        <div class="ai-q">Is the $1,620 cap based on enough shows to trust?</div>
+        <div class="ai-q">Are we on track to beat breakeven tonight?</div>
+        <div class="ai-q">When will the hospitality cap update with tonight's data?</div>
+        <div class="ai-q">Our SGP was off by 18% last quarter — what's driving it?</div>
+        <div class="ai-q">How does this venue's breakeven compare to stage 2 venues?</div>
+        <div class="ai-ql" style="margin-top:1rem">Context injected into every call</div>
+        <div class="chip-row">
+          <div class="chip"><div class="chipdot" style="background:var(--green)"></div>MeterPayload (live)</div>
+          <div class="chip"><div class="chipdot" style="background:var(--blue)"></div>Calibration state</div>
+          <div class="chip"><div class="chipdot" style="background:var(--amber)"></div>Confidence levels + n</div>
+          <div class="chip"><div class="chipdot" style="background:var(--purple)"></div>Settlement notes</div>
+          <div class="chip"><div class="chipdot" style="background:var(--red)"></div>Prior disputes</div>
+          <div class="chip"><div class="chipdot" style="background:var(--teal)"></div>SGP accuracy drift</div>
+          <div class="chip"><div class="chipdot" style="background:var(--muted)"></div>Maturity stage</div>
+          <div class="chip"><div class="chipdot" style="background:var(--green)"></div>Artist expense profile</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="ab" style="margin-bottom:1rem">
+        <div class="ab-head"><h3>System prompt — calibration-aware template</h3></div>
+        <div class="ab-body">
+          <div class="code" style="font-size:10.5px;line-height:1.85">
+<span class="cc">You are a deal health assistant for {venue_name}.</span><br>
+<span class="cc">Calibration: Stage {maturity_stage} ({n_settled} settled shows).</span><br><br>
+<span class="ck">Current deal:</span><br>
+<span class="ci">Artist: {artist_name} | Genre: {genre} | Deal: {deal_type}</span>
+<span class="ci">Expense: ${current_expense} of ${cap.value} cap</span>
+<span class="ci">Cap source: {cap.source} (n={cap.n}, confidence: {cap.confidence})</span>
+<span class="ci">Artist mean: ${artist_mean.value} (&#177;{artist_mean.stddev}, n={artist_mean.n})</span>
+<span class="ci">Genre P75: ${genre_p75.value} from {genre_p75.n_venues} venues</span>
+<span class="ci">Breakeven: ${breakeven_gross} | Current gross: ${current_gross}</span>
+<span class="ci">Alert level: {alert_level} | SGP accuracy: {sgp_accuracy_pct}%</span><br><br>
+<span class="ck">Response rules:</span><br>
+<span class="ci">- cap.confidence="low" &#8594; warn that cap is estimated, not venue-proven</span>
+<span class="ci">- maturity_stage &lt; 3 &#8594; note baselines are still forming, add caveat</span>
+<span class="ci">- sgp_accuracy_pct &gt; 15 &#8594; flag that recalibration is running</span>
+<span class="ci">- Never state a threshold as absolute &#8594; always cite its source and n</span><br><br>
+<span class="cc">Settlement history: {positive_summary} | {negative_summary}</span><br>
+<span class="cc">Prior disputes: {dispute_count} on {n_shows} shows</span>
+          </div>
+        </div>
+      </div>
+      <div class="callout purple" style="margin-bottom:0">
+        <strong>Why calibration state belongs in the prompt:</strong> The assistant must not say "your cap is $1,850" when it was actually computed from 3 cross-venue shows at low confidence. Including the source and n forces the model to qualify claims appropriately — turning calibration metadata into epistemic honesty rather than false precision.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION 4: ARCHITECTURE ===== -->
+<section class="section" id="s4">
+  <div class="slabel" style="color:var(--teal)">Section 04 — Dashboard Architecture</div>
+  <h2>Five Views + Calibration Panel</h2>
+  <p class="slead">A calibration management view (View 00) sits at the front. It exposes the internals of the engine — which constants are venue-computed vs estimated, when each was last refreshed, its n, and whether any are flagged for recalibration. The four operational views follow.</p>
+  <div class="pipe">
+    <div class="ps"><div class="ps-n" style="color:var(--blue)">View 00</div><div class="ps-t">Calibration Status</div><div class="ps-d">Venue maturity score. Per-constant confidence badges. Last-computed timestamps. Drift from prior calibration. Force-recalibrate buttons.</div></div>
+    <div class="ps"><div class="ps-n">View 01</div><div class="ps-t">Portfolio Overview</div><div class="ps-d">Dynamic breakeven line on gross chart. Bucket migration. Both-positive rate vs venue-computed target. SGP accuracy trend.</div></div>
+    <div class="ps"><div class="ps-n">View 02</div><div class="ps-t">Live Deals</div><div class="ps-d">Live meters with dynamic caps + confidence badges. Alert level from server. AI assistant rail. Risk-sorted list.</div></div>
+    <div class="ps"><div class="ps-n">View 03</div><div class="ps-t">Artist Intelligence</div><div class="ps-d">Dynamic expense profile (Algo 8). Weighted mean, max, stddev, n_venues. Health score. AI pre-loaded with artist + calibration context.</div></div>
+    <div class="ps"><div class="ps-n">View 04</div><div class="ps-t">Genre &amp; Period</div><div class="ps-d">Genre P75 with blend ratio indicator (local vs platform). SGP accuracy drift chart. Seasonal expense patterns per genre.</div></div>
+  </div>
+</section>
+
+<!-- ===== SECTION 5: DATA MODEL ===== -->
+<section class="section" id="s5">
+  <div class="slabel" style="color:var(--muted)">Section 05 — Data Model</div>
+  <h2>What to Store</h2>
+  <p class="slead">One new table — <code style="font-family:'Syne Mono',monospace">venue_calibration</code> — is the entire foundation. Everything else is derived from existing tables via the 8 algorithms. The calibration table stores every computed constant with its source, confidence level, backing n, and prior value for drift display.</p>
+
+  <div class="code" style="margin-bottom:1.5rem">
+<span class="ck">CREATE TABLE</span> venue_calibration (<br>
+<span class="ci">id            TEXT <span class="ck">PRIMARY KEY</span>,</span>
+<span class="ci">venue_id      TEXT <span class="ck">NOT NULL REFERENCES</span> venues(id),</span>
+<
+<span class="ci">key           TEXT NOT NULL,</span>
+<span class="ci">value         REAL NOT NULL,</span>
+<span class="ci">value_p50     REAL,</span>
+<span class="ci">value_stddev  REAL,</span>
+<span class="ci">n             INTEGER NOT NULL,</span>
+<span class="ci">source        TEXT NOT NULL,</span>
+<span class="ci">confidence    TEXT NOT NULL,</span>
+<span class="ci">algorithm     TEXT NOT NULL,</span>
+<span class="ci">computed_at   INTEGER NOT NULL,</span>
+<span class="ci">prev_value    REAL,</span>
+<span class="ci">prev_computed_at INTEGER,</span>
+UNIQUE(venue_id, key)
+);
+  </div>
+
+  <div class="divider">Example rows — same key, two different venues</div>
+  <table class="tbl">
+    <thead><tr><th>venue</th><th>key</th><th>value</th><th>n</th><th>source</th><th>confidence</th><th>algo</th></tr></thead>
+    <tbody>
+      <tr><td style="color:var(--muted);font-size:11px">The Crescent, Nashville</td><td class="mono">expense_p75_1_5k</td><td>$1,850</td><td>42</td><td style="color:var(--green)">venue_computed</td><td><span class="badge bh">High</span></td><td class="mono">algo_1</td></tr>
+      <tr><td style="color:var(--muted);font-size:11px">Grey Eagle, Asheville</td><td class="mono">expense_p75_1_5k</td><td>$740</td><td>11</td><td style="color:var(--amber)">venue_computed</td><td><span class="badge bm">Med</span></td><td class="mono">algo_1</td></tr>
+      <tr><td style="color:var(--muted);font-size:11px">Bowery Ballroom, NYC</td><td class="mono">hospitality_cap</td><td>$920</td><td>67</td><td style="color:var(--green)">venue_computed</td><td><span class="badge bh">High</span></td><td class="mono">algo_2</td></tr>
+      <tr><td style="color:var(--muted);font-size:11px">New venue, Portland</td><td class="mono">genre_p75_indie_rock</td><td>$1,692</td><td>0 local + 47 venues</td><td style="color:var(--amber)">cross_venue</td><td><span class="badge bm">Med</span></td><td class="mono">algo_3</td></tr>
+      <tr><td style="color:var(--muted);font-size:11px">Grey Eagle, Asheville</td><td class="mono">breakeven_vs_1_5k</td><td>$2,890</td><td>12</td><td style="color:var(--amber)">venue_computed</td><td><span class="badge bm">Med</span></td><td class="mono">algo_4</td></tr>
+      <tr><td style="color:var(--muted);font-size:11px">Bowery Ballroom, NYC</td><td class="mono">ticketing_fee_rate</td><td>12.8%</td><td>184</td><td style="color:var(--green)">venue_computed</td><td><span class="badge bh">High</span></td><td class="mono">algo_5</td></tr>
+      <tr><td style="color:var(--muted);font-size:11px">The Crescent, Nashville</td><td class="mono">sgp_accuracy_pct_error</td><td>11%</td><td>38</td><td style="color:var(--green)">venue_computed</td><td><span class="badge bh">High</span></td><td class="mono">algo_7</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout green">
+    <strong>What changes per venue — nothing in the code, everything in the data:</strong> The Crescent's expense cap is $1,850 because 42 settled shows produced that P75. Grey Eagle's is $740 because their crews are smaller and costs are lower. Bowery Ballroom's hospitality cap is $920 because a New York mid-cap venue has a different green room standard. A Portland venue that joined yesterday gets the cross-venue P75 as its starting point and refines it with every show it settles. The schema, algorithms, front-end, and AI prompt template are identical across all venues. The calibration table is what makes them different.
+  </div>
+</section>
+
+</div>
+
+<footer class="footer">
+  <div class="flogo">Green<span>room</span></div>
+  <div>Dynamic Expense Intelligence &middot; v2 Spec &middot; May 2026</div>
+  <div>Zero hardcoded constants &middot; Self-calibrating &middot; Venue-agnostic</div>
+</footer>
+</body>
+</html>
