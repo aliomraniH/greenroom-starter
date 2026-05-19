@@ -57,6 +57,13 @@ export const CATEGORY_LIST = [
 ] as const;
 export type ExpenseCategory = (typeof CATEGORY_LIST)[number];
 
+// Mirrors queries.ts: a show is "settled" once its status is settled or
+// closed. Drafts/submitted/in-review/disputed settlement rows do not
+// contribute to calibration baselines, maturity, or artist profiles.
+export function isSettledShowStatus(status: string | null | undefined): boolean {
+  return status === "settled" || status === "closed";
+}
+
 function todayISO(): string {
   return new Date().toISOString().slice(0, 10);
 }
@@ -192,7 +199,18 @@ async function computeCalibration(): Promise<CalibrationPayload> {
   for (const s of allShows) artistByShowId.set(s.id, s.artistId);
   const artistById = new Map(allArtists.map((a) => [a.id, a]));
 
-  const settledShowIds = new Set(allSettlements.map((s) => s.showId).filter((id) => pastShowIds.has(id)));
+  // Only past shows in a settled state contribute to calibration. Mirrors
+  // the predicate used by queries.ts (`show.status in {settled, closed}`)
+  // so drafts/submitted/in-review/disputed settlements never skew the
+  // venue baselines, maturity stage, or artist expense profiles.
+  const settledShowIdSet = new Set(
+    allShows
+      .filter((s) => s.date <= today && isSettledShowStatus(s.status))
+      .map((s) => s.id),
+  );
+  const settledShowIds = new Set(
+    allSettlements.map((s) => s.showId).filter((id) => settledShowIdSet.has(id)),
+  );
   const settledN = settledShowIds.size;
 
   // Bucket expenses by show
@@ -804,11 +822,13 @@ export async function getArtistExpenseProfile(
     db.select().from(expenses),
   ]);
   const settlementsRows = await db.select().from(settlements);
+  const settledShowIdSet = new Set(
+    allShows
+      .filter((s) => s.date <= today && isSettledShowStatus(s.status))
+      .map((s) => s.id),
+  );
   const settledShowIds = new Set(
-    settlementsRows.map((s) => s.showId).filter((id) => {
-      const sh = allShows.find((x) => x.id === id);
-      return sh && sh.date <= today;
-    }),
+    settlementsRows.map((s) => s.showId).filter((id) => settledShowIdSet.has(id)),
   );
   const artistShowIds = new Set(
     allShows
@@ -994,9 +1014,11 @@ export async function getAccountHealth(): Promise<AccountHealth> {
   const trailing3moCutoff = isoNMonthsAgo(3);
   const thisMonthRatios: number[] = [];
   const trailing3moRatios: number[] = [];
+  const showStatusById = new Map(allShows.map((s) => [s.id, s.status]));
   for (const s of allSettlements) {
     const date = showDateById.get(s.showId);
     if (!date || date > today) continue;
+    if (!isSettledShowStatus(showStatusById.get(s.showId))) continue;
     if (s.totalExpenses == null || s.grossBoxOffice == null || s.grossBoxOffice <= 0) continue;
     const ratio = s.totalExpenses / s.grossBoxOffice;
     if (date >= thisMonthCutoff) thisMonthRatios.push(ratio);
@@ -1102,8 +1124,11 @@ export async function getExpenseFrictionByCell(): Promise<ExpenseFrictionPayload
   }
 
   const today = todayISO();
+  // Only settled past shows contribute to friction-by-cell baselines.
   const pastShowIds = new Set(
-    allShowsRows.filter((s) => s.date <= today).map((s) => s.id),
+    allShowsRows
+      .filter((s) => s.date <= today && isSettledShowStatus(s.status))
+      .map((s) => s.id),
   );
   const settlementByShow = new Map(allSettlements.map((s) => [s.showId, s]));
   const expensesByShow = new Map<string, typeof allExpenses>();
