@@ -188,10 +188,6 @@ export default function ShowDetailPage() {
         )}
 
         <div className="mb-5">
-          <ShowMeter showId={show.id} />
-        </div>
-
-        <div className="mb-5">
           <AiPrompt scope="show" id={show.id} variant="inline" title="Ask about this show" />
         </div>
 
@@ -421,6 +417,10 @@ export default function ShowDetailPage() {
               )}
             </CardContent>
           </Card>
+
+          <div className="md:col-span-3 mb-1">
+            <ShowMeter showId={show.id} />
+          </div>
 
           <Card className="md:col-span-3">
             <CardHeader>

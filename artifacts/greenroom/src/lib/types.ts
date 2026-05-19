@@ -753,7 +753,7 @@ export interface ShowMeterPayload {
   dealType: string | null;
   totalLive: number;
   totalCap: number;
-  totalCapSource: CalibrationSource;
+  totalCapSource: CalibrationSource | "deal_expense_cap";
   totalCapConfidence: Confidence;
   totalPctOfCap: number;
   totalAlertLevel: AlertLevel;

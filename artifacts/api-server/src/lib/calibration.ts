@@ -604,7 +604,7 @@ export type ShowMeterPayload = {
   dealType: string | null;
   totalLive: number;
   totalCap: number;
-  totalCapSource: CalibrationSource;
+  totalCapSource: TotalCapSource;
   totalCapConfidence: Confidence;
   totalPctOfCap: number;
   totalAlertLevel: AlertLevel;
@@ -679,9 +679,13 @@ export async function getShowMeter(showId: string): Promise<ShowMeterPayload | n
   const dealTotalCap = dealRow?.expenseCap ?? null;
   const bucketCap = calib.totalExpenseCapByBucket[bucket];
   const totalCap = dealTotalCap ?? bucketCap?.value ?? 1750;
-  const totalCapSource: CalibrationSource =
+  // Cap provenance is meaningfully different when the deal contract sets
+  // the cap vs. when we derived it from the venue's calibration. Surface
+  // `deal_expense_cap` so the UI and AI prompt context don't mislabel
+  // contract-defined values as calibration-derived.
+  const totalCapSource: TotalCapSource =
     dealTotalCap != null
-      ? "venue_computed"
+      ? "deal_expense_cap"
       : bucketCap?.source ?? "audit_default";
 
   const cells: ShowMeterCell[] = [];
@@ -929,6 +933,10 @@ export async function getArtistExpenseProfile(
   };
 }
 
+// Total-cap provenance. Distinct from the per-category capSource union;
+// `deal_expense_cap` makes contract-set caps unambiguous in UI/AI context.
+export type TotalCapSource = CalibrationSource | "deal_expense_cap";
+
 // -------- Account-level health --------
 
 export type AccountHealth = {
@@ -1000,9 +1008,29 @@ export async function getAccountHealth(): Promise<AccountHealth> {
   const t3 = mean(trailing3moRatios);
   const delta = tm != null && t3 != null ? tm - t3 : null;
 
-  // Calibration freshness: X of Y categories venue-computed (Y = 8)
-  const catRows = Object.values(calib.perCategory);
-  const calibratedCount = catRows.filter((c) => c.source === "venue_computed").length;
+  // Calibration freshness: X of 8 spec primitives are venue-computed.
+  // Primitives per spec (T2 cross-venue collapsed to audit defaults for
+  // single-venue MVP, so each primitive's calibration check is local):
+  //   1. P75 expense cap per size bucket
+  //   2. Hospitality cap (venue-wide)
+  //   3. Genre P75 baselines
+  //   4. Breakeven gross per dealType × bucket
+  //   5. Actual ticketing-fee rate (rolling 12-mo)
+  //   6. Dispute-rate baseline per cell
+  //   7. SGP accuracy drift per cell
+  //   8. Per-artist expense profile (any artist with venue_computed)
+  const primitiveFlags = [
+    Object.values(calib.totalExpenseCapByBucket).some((b) => b.source === "venue_computed"),
+    calib.hospitalityWatch.p75 != null && calib.hospitalityWatch.n >= MATURITY_T1_MIN,
+    calib.genreBaselines.length > 0,
+    calib.cellBaselines.some((c) => c.breakevenGross.source === "venue_computed"),
+    calib.feeRateRolling12mo.source === "venue_computed",
+    calib.disputeRateBaseline.n >= MATURITY_T1_MIN,
+    calib.cellBaselines.some((c) => c.sgpAccuracyDrift.source === "venue_computed"),
+    calib.maturity.settledN >= MATURITY_T1_MIN,
+  ];
+  const calibratedCount = primitiveFlags.filter(Boolean).length;
+  const totalPrimitives = primitiveFlags.length;
 
   return {
     upcomingCount: upcoming.length,
@@ -1021,7 +1049,7 @@ export async function getAccountHealth(): Promise<AccountHealth> {
     },
     calibration: {
       calibratedCount,
-      totalCount: catRows.length,
+      totalCount: totalPrimitives,
       generatedAt: calib.generatedAt,
     },
   };

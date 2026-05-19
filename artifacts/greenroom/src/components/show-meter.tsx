@@ -65,7 +65,7 @@ export function ShowMeter({ showId }: { showId: string }) {
           <Bar pct={m.totalPctOfCap} tone={totalTone.bar} />
           <div className="text-[10.5px] text-ink-500 mt-1.5 flex items-center gap-2 flex-wrap">
             <span>
-              Cap source: {m.totalCapSource === "venue_computed" ? "venue-computed P75" : m.totalCapSource === "audit_default" ? "industry audit default" : "—"}
+              Cap source: {m.totalCapSource === "deal_expense_cap" ? "deal contract cap" : m.totalCapSource === "venue_computed" ? "venue-computed P75" : m.totalCapSource === "audit_default" ? "industry audit default" : "—"}
             </span>
             <span className="text-ink-400">· {confidenceLabel(m.totalCapConfidence)}</span>
           </div>
