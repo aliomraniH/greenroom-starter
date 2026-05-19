@@ -492,6 +492,7 @@ export async function getDealAnalysis() {
     show_settled_no_settlement: 0,
     disputed_recoups_but_signed: 0,
     stale_disputed: 0,
+    expense_overrun: 0,
   });
   const crossAcc: Map<string, Map<string, CrossCell>> = new Map();
   const dealTypesSeen = new Set<string>();
@@ -960,7 +961,10 @@ export type AttentionKind =
   | "notes_say_closed_but_status_open"
   | "show_settled_no_settlement"
   | "disputed_recoups_but_signed"
-  | "stale_disputed";
+  | "stale_disputed"
+  | "expense_overrun";
+
+export type AttentionSeverity = "high" | "med";
 
 export type AttentionItem = {
   kind: AttentionKind;
@@ -971,6 +975,11 @@ export type AttentionItem = {
   settlementStatus: string | null;
   detail: string;
   evidence?: string;
+  severity: AttentionSeverity;
+  // Stable per-item key used by clients for snooze/dismiss persistence.
+  // Combination of kind + showId — sufficient because no item kind fires
+  // more than once per show.
+  id: string;
 };
 
 export async function getNeedsAttention(): Promise<AttentionItem[]> {
@@ -983,17 +992,40 @@ export async function getNeedsAttention(): Promise<AttentionItem[]> {
     .where(lte(shows.date, todayDateString()))
     .orderBy(desc(shows.date));
 
-  const items: AttentionItem[] = [];
+  // Lazy-load to avoid an import cycle with calibration.ts (which imports
+  // classifyAnalyticsSizeBucket from this module).
+  const [{ getCalibration }, allDealsRows] = await Promise.all([
+    import("./calibration"),
+    db.select().from(deals),
+  ]);
+  const calib = await getCalibration();
+  const dealByShow = new Map(allDealsRows.map((d) => [d.showId, d]));
+
+  const raw: Array<AttentionItem & { sortDate: string }> = [];
   const todayMs = new Date(today + "T00:00:00").getTime();
   const STALE_DAYS = 30;
+  const EXPENSE_OVERRUN_RATIO = 1.25; // ≥25% over the applicable cap
+
+  const push = (
+    kind: AttentionKind,
+    severity: AttentionSeverity,
+    base: Omit<AttentionItem, "kind" | "severity" | "id">,
+  ) => {
+    raw.push({
+      ...base,
+      kind,
+      severity,
+      id: `${kind}:${base.showId}`,
+      sortDate: base.date,
+    });
+  };
 
   for (const r of allShowsRows) {
     const { show, artist, settlement } = r;
     const artistName = artist?.name ?? null;
 
     if ((show.status === "settled" || show.status === "closed") && !settlement) {
-      items.push({
-        kind: "show_settled_no_settlement",
+      push("show_settled_no_settlement", "med", {
         showId: show.id,
         artistName,
         date: show.date,
@@ -1014,8 +1046,7 @@ export async function getNeedsAttention(): Promise<AttentionItem[]> {
         .join("\n");
       const match = noteText.match(CLOSED_KEYWORDS);
       if (match) {
-        items.push({
-          kind: "notes_say_closed_but_status_open",
+        push("notes_say_closed_but_status_open", "med", {
           showId: show.id,
           artistName,
           date: show.date,
@@ -1031,8 +1062,7 @@ export async function getNeedsAttention(): Promise<AttentionItem[]> {
       const recoupsList = parseRecoups(settlement.recoupsJson);
       const disputed = recoupsList.filter((rc) => rc?.status === "disputed");
       if (disputed.length > 0) {
-        items.push({
-          kind: "disputed_recoups_but_signed",
+        push("disputed_recoups_but_signed", "high", {
           showId: show.id,
           artistName,
           date: show.date,
@@ -1048,8 +1078,7 @@ export async function getNeedsAttention(): Promise<AttentionItem[]> {
       const ageMs = todayMs - settlement.disputedAt.getTime();
       const ageDays = Math.floor(ageMs / (1000 * 60 * 60 * 24));
       if (ageDays >= STALE_DAYS) {
-        items.push({
-          kind: "stale_disputed",
+        push("stale_disputed", "high", {
           showId: show.id,
           artistName,
           date: show.date,
@@ -1059,9 +1088,45 @@ export async function getNeedsAttention(): Promise<AttentionItem[]> {
         });
       }
     }
+
+    // Irregular-expense flag: total expenses exceeded the applicable cap
+    // (contract expenseCap, else venue P75 by size bucket) by ≥25%. Past
+    // settled shows only — we want booker action, not noise on live shows.
+    const deal = dealByShow.get(show.id);
+    if (
+      deal &&
+      settlement.totalExpenses != null &&
+      settlement.totalExpenses > 0
+    ) {
+      const bucket = classifyAnalyticsSizeBucket(deal);
+      const dealCap = deal.expenseCap ?? null;
+      const bucketCap = calib.totalExpenseCapByBucket[bucket]?.value ?? null;
+      const cap = dealCap ?? bucketCap;
+      const capSource = dealCap != null ? "contract cap" : "venue P75";
+      if (cap != null && settlement.totalExpenses > cap * EXPENSE_OVERRUN_RATIO) {
+        const overPct = Math.round(
+          ((settlement.totalExpenses - cap) / cap) * 100,
+        );
+        push("expense_overrun", "med", {
+          showId: show.id,
+          artistName,
+          date: show.date,
+          status: show.status,
+          settlementStatus: sStatus,
+          detail: `Total expenses $${Math.round(settlement.totalExpenses)} ran ${overPct}% over the ${capSource} of $${Math.round(cap)}.`,
+        });
+      }
+    }
   }
 
-  return items;
+  // Sort: severity desc, then date desc (most recent first).
+  const sevRank = { high: 2, med: 1 } as const;
+  raw.sort((a, b) => {
+    const s = sevRank[b.severity] - sevRank[a.severity];
+    if (s !== 0) return s;
+    return b.sortDate.localeCompare(a.sortDate);
+  });
+  return raw.map(({ sortDate: _drop, ...item }) => item);
 }
 
 export async function getReports() {

@@ -3,7 +3,7 @@ import { formatMoneyCompact, formatShowDate, formatShowMonth, relativeShowDate }
 import { useApiData, LoadingState } from "@/hooks/useApiData";
 import { classifyComplexity, classifySizeBucket } from "@/lib/dealClassify";
 import { ShowsList, type ShowRow } from "./shows-list";
-import { AccountHealthWidget } from "@/components/account-health";
+import { AttentionWidget } from "@/components/attention-widget";
 import { AiPrompt } from "@/components/ai-prompt";
 
 export default function ShowsPage() {
@@ -82,7 +82,7 @@ export default function ShowsPage() {
         <StatCard label="Paid to artists" value={formatMoneyCompact(totalToArtists)} mono />
       </div>
 
-      <AccountHealthWidget />
+      <AttentionWidget />
 
       <AiPrompt scope="account" variant="prominent" title="Ask Greenroom about your venue" />
 

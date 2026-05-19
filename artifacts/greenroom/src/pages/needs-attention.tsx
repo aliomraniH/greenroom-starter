@@ -39,6 +39,13 @@ const KIND_META: Record<
     icon: Clock,
     tone: "sky",
   },
+  expense_overrun: {
+    title: "Expenses ran over cap",
+    blurb:
+      "Total expenses on a settled show exceeded the contract or venue P75 cap by 25% or more. Worth a look — usually hospitality, production, or marketing overruns.",
+    icon: AlertTriangle,
+    tone: "amber",
+  },
 };
 
 const KIND_ORDER: AttentionKind[] = [
@@ -46,6 +53,7 @@ const KIND_ORDER: AttentionKind[] = [
   "disputed_recoups_but_signed",
   "show_settled_no_settlement",
   "stale_disputed",
+  "expense_overrun",
 ];
 
 export default function NeedsAttentionPage() {
@@ -60,6 +68,7 @@ export default function NeedsAttentionPage() {
     show_settled_no_settlement: [],
     disputed_recoups_but_signed: [],
     stale_disputed: [],
+    expense_overrun: [],
   };
   for (const it of items) grouped[it.kind].push(it);
 
@@ -161,4 +170,5 @@ const KIND_LABEL: Record<AttentionKind, string> = {
   show_settled_no_settlement: "missing settlement",
   disputed_recoups_but_signed: "unresolved recoup",
   stale_disputed: "stale dispute",
+  expense_overrun: "expense overrun",
 };

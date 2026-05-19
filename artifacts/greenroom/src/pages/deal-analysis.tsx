@@ -1093,12 +1093,14 @@ const ATTENTION_KIND_ORDER: AttentionKind[] = [
   "disputed_recoups_but_signed",
   "show_settled_no_settlement",
   "notes_say_closed_but_status_open",
+  "expense_overrun",
 ];
 const ATTENTION_KIND_SHORT: Record<AttentionKind, string> = {
   stale_disputed: "stale dispute",
   disputed_recoups_but_signed: "disputed recoup",
   show_settled_no_settlement: "missing settlement",
   notes_say_closed_but_status_open: "notes vs status",
+  expense_overrun: "expense overrun",
 };
 
 function CrossTabCard({ data }: { data: DealAnalysis }) {

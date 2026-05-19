@@ -138,6 +138,7 @@ const KIND_LABEL: Record<AttentionKind, string> = {
   disputed_recoups_but_signed: "Disputed recoup",
   show_settled_no_settlement: "Missing settlement",
   notes_say_closed_but_status_open: "Notes vs status",
+  expense_overrun: "Expense overrun",
 };
 
 const KIND_TONE: Record<AttentionKind, { bg: string; fg: string; ring: string }> = {
@@ -145,6 +146,7 @@ const KIND_TONE: Record<AttentionKind, { bg: string; fg: string; ring: string }>
   disputed_recoups_but_signed: { bg: "bg-rose-50", fg: "text-rose-700", ring: "ring-rose-200" },
   show_settled_no_settlement: { bg: "bg-amber-50", fg: "text-amber-700", ring: "ring-amber-200" },
   notes_say_closed_but_status_open: { bg: "bg-amber-50", fg: "text-amber-700", ring: "ring-amber-200" },
+  expense_overrun: { bg: "bg-amber-50", fg: "text-amber-700", ring: "ring-amber-200" },
 };
 
 export default function InsightsPage() {

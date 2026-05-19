@@ -272,7 +272,10 @@ export type AttentionKind =
   | "notes_say_closed_but_status_open"
   | "show_settled_no_settlement"
   | "disputed_recoups_but_signed"
-  | "stale_disputed";
+  | "stale_disputed"
+  | "expense_overrun";
+
+export type AttentionSeverity = "high" | "med";
 
 export interface AttentionItem {
   kind: AttentionKind;
@@ -283,6 +286,8 @@ export interface AttentionItem {
   settlementStatus: string | null;
   detail: string;
   evidence?: string;
+  severity: AttentionSeverity;
+  id: string;
 }
 
 export type LlmProvider = "anthropic" | "openai";

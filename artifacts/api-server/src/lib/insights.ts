@@ -233,12 +233,14 @@ export async function getInsights(opts: { force?: boolean } = {}): Promise<Insig
       show_settled_no_settlement: 0,
       disputed_recoups_but_signed: 0,
       stale_disputed: 0,
+      expense_overrun: 0,
     });
     const emptyKindToIds = (): Record<AttentionKind, string[]> => ({
       notes_say_closed_but_status_open: [],
       show_settled_no_settlement: [],
       disputed_recoups_but_signed: [],
       stale_disputed: [],
+      expense_overrun: [],
     });
     const grid = new Map<string, Acc>();
     const dealTypesSeen = new Set<string>();
