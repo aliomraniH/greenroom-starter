@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Sparkles, Loader2, Send } from "lucide-react";
 import { api } from "@/lib/api";
 import { Card, CardContent } from "@/components/ui/card";
+import { AnswerMarkdown } from "@/components/answer-markdown";
 import type { AskScope } from "@/lib/types";
 
 const SUGGESTIONS: Record<AskScope, string[]> = {
@@ -143,9 +144,7 @@ export function AiPrompt({
       )}
       {answer && (
         <div className="mt-3 rounded-md p-3 bg-white ring-1 ring-violet-200/60">
-          <div className="text-[12.5px] text-ink-800 leading-relaxed whitespace-pre-wrap">
-            {answer}
-          </div>
+          <AnswerMarkdown text={answer} />
           {(contextSummary || confidence) && (
             <div className="mt-2.5 pt-2 border-t border-ink-100/70 flex items-center gap-2 flex-wrap text-[10.5px] text-ink-500">
               {confidence && (
