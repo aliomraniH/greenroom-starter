@@ -650,20 +650,58 @@ export interface AccountHealth {
   settledN: number;
 }
 
+export interface BucketDrift {
+  bucket: string;
+  p75: number | null;
+  p75Last3mo: number | null;
+  drift: number | null;
+  flagged: boolean;
+  n: number;
+  n3mo: number;
+}
+
+export interface CellBaseline {
+  dealType: string;
+  bucket: string;
+  n: number;
+  breakevenGross: CalibratedValue;
+  disputeRate: CalibratedValue;
+  sgpAccuracyDrift: CalibratedValue;
+}
+
+export interface FeeRateRolling extends CalibratedValue {
+  rate: number | null;
+  windowDays: number;
+  grossSum: number;
+  feesSum: number;
+}
+
+export interface HospitalityWatch {
+  p75: number | null;
+  p75Last3mo: number | null;
+  drift: number | null;
+  flagged: boolean;
+  n: number;
+  recentBreaches: Array<{
+    showId: string;
+    date: string;
+    amount: number;
+    overBy: number;
+  }>;
+  underCapPct: number | null;
+}
+
 export interface CalibrationPayload {
   generatedAt: string;
   maturity: { settledN: number; stage: 1 | 2 | 3 | 4; label: string };
   totalExpenseCapByBucket: Record<string, CalibratedValue>;
   perCategory: Record<ExpenseCategory, CategoryCalibration>;
-  hospitalityWatch: {
-    p75: number | null;
-    p75Last3mo: number | null;
-    drift: number | null;
-    flagged: boolean;
-    n: number;
-  };
+  bucketDrift: BucketDrift[];
+  hospitalityWatch: HospitalityWatch;
   genreBaselines: GenreBaseline[];
   disputeRateBaseline: { overall: number; n: number; nDisputed: number };
+  cellBaselines: CellBaseline[];
+  feeRateRolling12mo: FeeRateRolling;
   accountHealth: AccountHealth;
 }
 
@@ -682,12 +720,31 @@ export interface ShowMeterPayload {
   showId: string;
   generatedAt: string;
   bucket: string;
+  dealType: string | null;
   totalLive: number;
   totalCap: number;
   totalCapSource: CalibrationSource;
+  totalCapConfidence: Confidence;
   totalPctOfCap: number;
   totalAlertLevel: AlertLevel;
   cells: ShowMeterCell[];
+  markers: {
+    artistMean: number | null;
+    artistMeanN: number;
+    genreP75: number | null;
+    genre: string | null;
+    breakevenGross: number | null;
+    breakevenSource: CalibrationSource;
+  };
+  currentGross: number;
+  hospitalitySummary: {
+    live: number;
+    cap: number;
+    venueP75: number | null;
+    pctOfCap: number;
+    alertLevel: AlertLevel;
+  };
+  maturity: { stage: 1 | 2 | 3 | 4; settledN: number; label: string };
 }
 
 export interface ArtistExpenseProfile {
@@ -710,6 +767,8 @@ export interface ArtistExpenseProfile {
 export type AskScope = "account" | "show" | "artist";
 export interface AskResult {
   answer: string;
+  contextSummary: string;
+  confidence: Confidence;
   scope: AskScope;
   id?: string;
   warning?: string;

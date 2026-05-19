@@ -41,6 +41,8 @@ export function AiPrompt({
 }) {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState<string | null>(null);
+  const [contextSummary, setContextSummary] = useState<string | null>(null);
+  const [confidence, setConfidence] = useState<string | null>(null);
   const [warning, setWarning] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,11 +52,15 @@ export function AiPrompt({
     if (!trimmed || loading) return;
     setLoading(true);
     setAnswer(null);
+    setContextSummary(null);
+    setConfidence(null);
     setWarning(null);
     setError(null);
     try {
       const out = await api.aiAsk({ scope, id, question: trimmed });
       setAnswer(out.answer);
+      setContextSummary(out.contextSummary || null);
+      setConfidence(out.confidence || null);
       setWarning(out.warning ?? null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Ask failed");
@@ -136,8 +142,28 @@ export function AiPrompt({
         </div>
       )}
       {answer && (
-        <div className="mt-3 rounded-md p-3 bg-white ring-1 ring-violet-200/60 text-[12.5px] text-ink-800 leading-relaxed whitespace-pre-wrap">
-          {answer}
+        <div className="mt-3 rounded-md p-3 bg-white ring-1 ring-violet-200/60">
+          <div className="text-[12.5px] text-ink-800 leading-relaxed whitespace-pre-wrap">
+            {answer}
+          </div>
+          {(contextSummary || confidence) && (
+            <div className="mt-2.5 pt-2 border-t border-ink-100/70 flex items-center gap-2 flex-wrap text-[10.5px] text-ink-500">
+              {confidence && (
+                <span
+                  className={`px-1.5 py-0.5 rounded-full font-medium uppercase tracking-[0.06em] ${
+                    confidence === "high"
+                      ? "bg-emerald-50 text-emerald-700"
+                      : confidence === "med"
+                      ? "bg-amber-50 text-amber-700"
+                      : "bg-rose-50 text-rose-700"
+                  }`}
+                >
+                  {confidence} confidence
+                </span>
+              )}
+              {contextSummary && <span>· {contextSummary}</span>}
+            </div>
+          )}
         </div>
       )}
     </>

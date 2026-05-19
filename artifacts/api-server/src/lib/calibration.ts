@@ -1,7 +1,12 @@
 import { eq } from "drizzle-orm";
 import { db, migrationsReady } from "../db";
-import { shows, deals, settlements, expenses, artists } from "../db/schema";
+import { shows, deals, settlements, expenses, artists, ticketSales, guaranteeSuggestions } from "../db/schema";
 import { classifyAnalyticsSizeBucket } from "./queries";
+
+const DEAL_TYPES = ["flat", "percentage_of_gross", "percentage_of_net", "vs", "door"] as const;
+type DealType = (typeof DEAL_TYPES)[number];
+const BUCKETS = ["$0–1K", "$1–5K", "$5–15K", "$15K+", "Uncapped %"] as const;
+function cellKey(d: DealType, b: string): string { return `${d}::${b}`; }
 
 export type CalibrationSource = "venue_computed" | "audit_default" | "none";
 export type Confidence = "high" | "med" | "low" | "none";
@@ -101,6 +106,47 @@ export type GenreBaseline = {
   meanHospitality: number | null;
 };
 
+export type BucketDrift = {
+  bucket: string;
+  p75: number | null;
+  p75Last3mo: number | null;
+  drift: number | null;
+  flagged: boolean;
+  n: number;
+  n3mo: number;
+};
+
+export type CellBaseline = {
+  dealType: DealType;
+  bucket: string;
+  n: number;
+  breakevenGross: CalibratedValue;
+  disputeRate: CalibratedValue;
+  sgpAccuracyDrift: CalibratedValue;
+};
+
+export type FeeRateRolling = CalibratedValue & {
+  rate: number | null;
+  windowDays: number;
+  grossSum: number;
+  feesSum: number;
+};
+
+export type HospitalityWatch = {
+  p75: number | null;
+  p75Last3mo: number | null;
+  drift: number | null;
+  flagged: boolean;
+  n: number;
+  recentBreaches: Array<{
+    showId: string;
+    date: string;
+    amount: number;
+    overBy: number;
+  }>;
+  underCapPct: number | null;
+};
+
 export type CalibrationPayload = {
   generatedAt: string;
   maturity: {
@@ -110,19 +156,16 @@ export type CalibrationPayload = {
   };
   totalExpenseCapByBucket: Record<string, CalibratedValue>;
   perCategory: Record<ExpenseCategory, CategoryCalibration>;
-  hospitalityWatch: {
-    p75: number | null;
-    p75Last3mo: number | null;
-    drift: number | null;
-    flagged: boolean;
-    n: number;
-  };
+  bucketDrift: BucketDrift[];
+  hospitalityWatch: HospitalityWatch;
   genreBaselines: GenreBaseline[];
   disputeRateBaseline: {
     overall: number;
     n: number;
     nDisputed: number;
   };
+  cellBaselines: CellBaseline[];
+  feeRateRolling12mo: FeeRateRolling;
 };
 
 let cached: CalibrationPayload | null = null;
@@ -259,17 +302,9 @@ async function computeCalibration(): Promise<CalibrationPayload> {
     }
   }
 
-  // -------- Hospitality watch --------
+  // -------- Hospitality watch (base; recent breaches + under-cap pct filled below) --------
   const hospP75 = perCategory.hospitality.p75;
   const hospDrift = perCategory.hospitality.p75Drift3moVs12mo;
-  const hospitalityWatch = {
-    p75: hospP75,
-    p75Last3mo:
-      hospDrift != null && hospP75 != null ? Math.round(hospP75 * (1 + hospDrift)) : null,
-    drift: hospDrift,
-    flagged: hospDrift != null && Math.abs(hospDrift) >= 0.1,
-    n: perCategory.hospitality.n,
-  };
 
   // -------- Genre baselines --------
   const expensesByGenre = new Map<string, { totals: number[]; hosp: number[] }>();
@@ -307,19 +342,193 @@ async function computeCalibration(): Promise<CalibrationPayload> {
   }
   genreBaselines.sort((a, b) => b.n - a.n);
 
-  // -------- Dispute rate baseline --------
-  let nDisputed = 0;
-  for (const s of allSettlements) {
-    if (!settledShowIds.has(s.showId)) continue;
-    let isDisputed = s.status === "disputed";
-    if (!isDisputed) {
-      try {
-        const recs = JSON.parse(s.recoupsJson ?? "[]") as Array<{ status?: string }>;
-        if (recs.some((r) => r.status === "disputed")) isDisputed = true;
-      } catch {/* noop */}
-    }
-    if (isDisputed) nDisputed++;
+  // -------- Dispute rate baseline (overall) + per-cell --------
+  const settlementByShow = new Map(allSettlements.map((s) => [s.showId, s]));
+  function isDisputed(s: typeof allSettlements[number] | undefined): boolean {
+    if (!s) return false;
+    if (s.status === "disputed") return true;
+    try {
+      const recs = JSON.parse(s.recoupsJson ?? "[]") as Array<{ status?: string }>;
+      if (recs.some((r) => r.status === "disputed")) return true;
+    } catch { /* noop */ }
+    return false;
   }
+  let nDisputed = 0;
+  for (const id of settledShowIds) {
+    if (isDisputed(settlementByShow.get(id))) nDisputed++;
+  }
+
+  // -------- Bucket P75 drift (rolling 3mo vs trailing 12mo per bucket) --------
+  const cutoff12moBucket = isoNMonthsAgo(12);
+  const bucketDrift: BucketDrift[] = [];
+  for (const bucket of BUCKETS) {
+    const bucketDeals = dealsByBucket.get(bucket) ?? [];
+    const all: number[] = [];
+    const last3: number[] = [];
+    for (const d of bucketDeals) {
+      const ex = expensesByShow.get(d.showId);
+      if (!ex || ex.length === 0) continue;
+      const date = showDateById.get(d.showId);
+      if (!date || date < cutoff12moBucket || date > today) continue;
+      const total = ex.reduce((s, e) => s + e.amount, 0);
+      all.push(total);
+      if (date >= cutoff3mo) last3.push(total);
+    }
+    if (all.length < 3) {
+      bucketDrift.push({
+        bucket,
+        p75: null,
+        p75Last3mo: null,
+        drift: null,
+        flagged: false,
+        n: all.length,
+        n3mo: last3.length,
+      });
+      continue;
+    }
+    all.sort((a, b) => a - b);
+    const p75 = quantile(all, 0.75);
+    let p75_3: number | null = null;
+    let drift: number | null = null;
+    if (last3.length >= 3) {
+      last3.sort((a, b) => a - b);
+      p75_3 = quantile(last3, 0.75);
+      drift = p75 > 0 ? (p75_3 - p75) / p75 : null;
+    }
+    bucketDrift.push({
+      bucket,
+      p75: Math.round(p75),
+      p75Last3mo: p75_3 != null ? Math.round(p75_3) : null,
+      drift,
+      flagged: drift != null && drift > 0.1,
+      n: all.length,
+      n3mo: last3.length,
+    });
+  }
+
+  // -------- Hospitality watch additions (breaches + under-cap pct) --------
+  const hospCap = perCategory.hospitality.value ?? CATEGORY_AUDIT_DEFAULTS.hospitality;
+  const hospitalityShows: Array<{ showId: string; date: string; amount: number }> = [];
+  for (const showId of settledShowIds) {
+    const exs = expensesByShow.get(showId) ?? [];
+    const hospSum = exs.filter((e) => e.category === "hospitality")
+      .reduce((s, e) => s + e.amount, 0);
+    if (hospSum > 0) {
+      const date = showDateById.get(showId) ?? "";
+      hospitalityShows.push({ showId, date, amount: hospSum });
+    }
+  }
+  const hospWithCap = hospitalityShows.filter((h) => hospCap > 0);
+  const underCapPct = hospWithCap.length > 0
+    ? hospWithCap.filter((h) => h.amount <= hospCap).length / hospWithCap.length
+    : null;
+  const recentBreaches = hospitalityShows
+    .filter((h) => h.amount > hospCap)
+    .sort((a, b) => (a.date < b.date ? 1 : -1))
+    .slice(0, 3)
+    .map((h) => ({
+      showId: h.showId,
+      date: h.date,
+      amount: Math.round(h.amount),
+      overBy: Math.round(h.amount - hospCap),
+    }));
+
+  // -------- Per-cell baselines (dispute rate + breakeven + SGP drift) --------
+  const dealByShow = new Map(allDeals.map((d) => [d.showId, d]));
+  const allSgp = await db.select().from(guaranteeSuggestions);
+  const sgpByShow = new Map(allSgp.map((g) => [g.showId, g]));
+
+  const cellAgg = new Map<string, {
+    dealType: DealType;
+    bucket: string;
+    showIds: string[];
+    breakevens: number[];
+    disputed: number;
+    sgpErrors: number[];
+  }>();
+  for (const d of allDeals) {
+    if (!settledShowIds.has(d.showId)) continue;
+    const dt = d.dealType as DealType;
+    const b = classifyAnalyticsSizeBucket(d);
+    const k = cellKey(dt, b);
+    let agg = cellAgg.get(k);
+    if (!agg) {
+      agg = { dealType: dt, bucket: b, showIds: [], breakevens: [], disputed: 0, sgpErrors: [] };
+      cellAgg.set(k, agg);
+    }
+    agg.showIds.push(d.showId);
+    const settle = settlementByShow.get(d.showId);
+    if (isDisputed(settle)) agg.disputed++;
+    // Breakeven gross: guarantee + total expenses (approx, ignores ticketing fees)
+    const exs = expensesByShow.get(d.showId);
+    const expTotal = exs ? exs.reduce((s, e) => s + e.amount, 0) : 0;
+    const guarantee = d.guaranteeAmount ?? 0;
+    if (guarantee + expTotal > 0) agg.breakevens.push(guarantee + expTotal);
+    // SGP accuracy drift: |suggested - settled to-artist| / settled
+    const sgp = sgpByShow.get(d.showId);
+    if (sgp && settle?.totalToArtist != null && settle.totalToArtist > 0) {
+      const err = Math.abs(sgp.suggestedPrice - settle.totalToArtist) / settle.totalToArtist;
+      agg.sgpErrors.push(err);
+    }
+  }
+  const cellBaselines: CellBaseline[] = [];
+  for (const dt of DEAL_TYPES) {
+    for (const b of BUCKETS) {
+      const k = cellKey(dt, b);
+      const agg = cellAgg.get(k);
+      const n = agg?.showIds.length ?? 0;
+      if (n === 0) continue;
+      const breakevenP50 = agg!.breakevens.length > 0
+        ? quantile([...agg!.breakevens].sort((a, b) => a - b), 0.5)
+        : null;
+      const breakeven: CalibratedValue = breakevenP50 != null && n >= 5
+        ? { value: Math.round(breakevenP50 / 50) * 50, source: "venue_computed", confidence: confidenceFor(n), n }
+        : { value: breakevenP50 != null ? Math.round(breakevenP50 / 50) * 50 : null, source: n > 0 ? "audit_default" : "none", confidence: "none", n };
+      const disputeRate = n >= 5
+        ? { value: agg!.disputed / n, source: "venue_computed" as const, confidence: confidenceFor(n), n }
+        : { value: settledN > 0 ? nDisputed / settledN : null, source: "audit_default" as const, confidence: "none" as const, n };
+      const sgpMean = agg!.sgpErrors.length > 0
+        ? agg!.sgpErrors.reduce((s, v) => s + v, 0) / agg!.sgpErrors.length
+        : null;
+      const sgpDrift: CalibratedValue = sgpMean != null && agg!.sgpErrors.length >= 3
+        ? { value: sgpMean, source: "venue_computed", confidence: confidenceFor(agg!.sgpErrors.length), n: agg!.sgpErrors.length }
+        : { value: null, source: "none", confidence: "none", n: agg!.sgpErrors.length };
+      cellBaselines.push({
+        dealType: dt,
+        bucket: b,
+        n,
+        breakevenGross: breakeven,
+        disputeRate,
+        sgpAccuracyDrift: sgpDrift,
+      });
+    }
+  }
+
+  // -------- Rolling 12-mo ticketing fee rate --------
+  const allTickets = await db.select().from(ticketSales);
+  const cutoff12 = isoNMonthsAgo(12);
+  let grossSum = 0;
+  let feesSum = 0;
+  let nWindow = 0;
+  const seenShows = new Set<string>();
+  for (const t of allTickets) {
+    const date = showDateById.get(t.showId);
+    if (!date || date < cutoff12 || date > today) continue;
+    grossSum += t.gross;
+    feesSum += t.fees;
+    if (!seenShows.has(t.showId)) { seenShows.add(t.showId); nWindow++; }
+  }
+  const feeRate = grossSum > 0 ? feesSum / grossSum : null;
+  const feeRateRolling12mo: FeeRateRolling = {
+    rate: feeRate,
+    value: feeRate,
+    source: nWindow >= MATURITY_T1_MIN ? "venue_computed" : feeRate != null ? "audit_default" : "none",
+    confidence: confidenceFor(nWindow),
+    n: nWindow,
+    windowDays: 365,
+    grossSum: Math.round(grossSum),
+    feesSum: Math.round(feesSum),
+  };
 
   return {
     generatedAt: new Date().toISOString(),
@@ -337,13 +546,25 @@ async function computeCalibration(): Promise<CalibrationPayload> {
     },
     totalExpenseCapByBucket,
     perCategory,
-    hospitalityWatch,
+    bucketDrift,
+    hospitalityWatch: {
+      p75: hospP75,
+      p75Last3mo:
+        hospDrift != null && hospP75 != null ? Math.round(hospP75 * (1 + hospDrift)) : null,
+      drift: hospDrift,
+      flagged: hospDrift != null && Math.abs(hospDrift) >= 0.1,
+      n: perCategory.hospitality.n,
+      recentBreaches,
+      underCapPct,
+    },
     genreBaselines,
     disputeRateBaseline: {
       overall: settledN > 0 ? nDisputed / settledN : 0,
       n: settledN,
       nDisputed,
     },
+    cellBaselines,
+    feeRateRolling12mo,
   };
 }
 
@@ -380,12 +601,35 @@ export type ShowMeterPayload = {
   showId: string;
   generatedAt: string;
   bucket: string;
+  dealType: string | null;
   totalLive: number;
   totalCap: number;
   totalCapSource: CalibrationSource;
+  totalCapConfidence: Confidence;
   totalPctOfCap: number;
   totalAlertLevel: AlertLevel;
   cells: ShowMeterCell[];
+  markers: {
+    artistMean: number | null;
+    artistMeanN: number;
+    genreP75: number | null;
+    genre: string | null;
+    breakevenGross: number | null;
+    breakevenSource: CalibrationSource;
+  };
+  currentGross: number;
+  hospitalitySummary: {
+    live: number;
+    cap: number;
+    venueP75: number | null;
+    pctOfCap: number;
+    alertLevel: AlertLevel;
+  };
+  maturity: {
+    stage: MaturityStage;
+    settledN: number;
+    label: string;
+  };
 };
 
 function classifyAlert(pct: number): AlertLevel {
@@ -400,9 +644,30 @@ export async function getShowMeter(showId: string): Promise<ShowMeterPayload | n
   if (!showRow) return null;
   const [dealRow] = await db.select().from(deals).where(eq(deals.showId, showId));
   const allExpenses = await db.select().from(expenses).where(eq(expenses.showId, showId));
+  const showTickets = await db.select().from(ticketSales).where(eq(ticketSales.showId, showId));
 
   const calib = await getCalibration();
   const bucket = dealRow ? classifyAnalyticsSizeBucket(dealRow) : "$1–5K";
+  const dealType = (dealRow?.dealType as string | undefined) ?? null;
+
+  // Markers
+  const artistProfile = showRow.artistId
+    ? await getArtistExpenseProfile(showRow.artistId)
+    : null;
+  const artistRow = showRow.artistId
+    ? (await db.select().from(artists).where(eq(artists.id, showRow.artistId)))[0]
+    : null;
+  const genre = artistRow?.genre ?? null;
+  const genreP75 = genre
+    ? calib.genreBaselines.find((g) => g.genre === genre)?.p75Expenses ?? null
+    : null;
+  const cellBaseline = dealType
+    ? calib.cellBaselines.find((c) => c.dealType === dealType && c.bucket === bucket) ?? null
+    : null;
+  const breakeven = cellBaseline?.breakevenGross.value ?? null;
+  const breakevenSource: CalibrationSource = cellBaseline?.breakevenGross.source ?? "none";
+
+  const currentGross = showTickets.reduce((s, t) => s + t.gross, 0);
 
   const liveByCat = new Map<string, number>();
   for (const e of allExpenses) {
@@ -454,16 +719,43 @@ export async function getShowMeter(showId: string): Promise<ShowMeterPayload | n
   const totalLive = Array.from(liveByCat.values()).reduce((s, v) => s + v, 0);
   const totalPct = totalCap > 0 ? totalLive / totalCap : 0;
 
+  // Hospitality summary
+  const hospLive = liveByCat.get("hospitality") ?? 0;
+  const hospCap = dealRow?.hospitalityCap ?? calib.perCategory.hospitality.value ?? CATEGORY_AUDIT_DEFAULTS.hospitality;
+  const hospPct = hospCap > 0 ? hospLive / hospCap : 0;
+
+  const totalCapConfidence: Confidence =
+    dealTotalCap != null ? "high" : bucketCap?.confidence ?? "none";
+
   return {
     showId,
     generatedAt: new Date().toISOString(),
     bucket,
+    dealType,
     totalLive,
     totalCap,
     totalCapSource,
+    totalCapConfidence,
     totalPctOfCap: totalPct,
     totalAlertLevel: classifyAlert(totalPct),
     cells: cells.sort((a, b) => b.pctOfCap - a.pctOfCap),
+    markers: {
+      artistMean: artistProfile?.totalExpensesMean ?? null,
+      artistMeanN: artistProfile?.settledShows ?? 0,
+      genreP75,
+      genre,
+      breakevenGross: breakeven,
+      breakevenSource,
+    },
+    currentGross: Math.round(currentGross),
+    hospitalitySummary: {
+      live: hospLive,
+      cap: hospCap,
+      venueP75: calib.perCategory.hospitality.p75,
+      pctOfCap: hospPct,
+      alertLevel: classifyAlert(hospPct),
+    },
+    maturity: calib.maturity,
   };
 }
 
