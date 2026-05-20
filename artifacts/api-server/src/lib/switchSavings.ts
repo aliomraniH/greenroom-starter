@@ -230,9 +230,15 @@ export async function getSwitchSavings(opts: { months?: number; topN?: number } 
     const disputedRecoupCount = recoups.filter((x) => x.status === "disputed").length;
     const hadDispute = settlement.status === "disputed" || disputedRecoupCount > 0;
 
+    // Skip rows where Smart Switch couldn't recommend a concrete flat
+    // (source = "insufficient_confidence"). Coercing null → 0 here would
+    // synthesize a fake $0 counterfactual and inflate "savings vs. actual
+    // payout" by the full actualPayout. These rows are simply
+    // non-modellable and shouldn't enter the savings totals.
+    if (generated.shape === "flat" && generated.suggestedFlat == null) continue;
     let counterfactual: number;
     if (generated.shape === "flat") {
-      counterfactual = generated.suggestedFlat ?? 0;
+      counterfactual = generated.suggestedFlat!;
     } else {
       const cap = generated.doorExpenseCap ?? 1500;
       const pool = Math.max(0, gross * 0.9 - cap);
@@ -252,7 +258,7 @@ export async function getSwitchSavings(opts: { months?: number; topN?: number } 
 
     const moneySaved = Math.round(actualPayout - counterfactual);
 
-    const moneyRationale = `Venue actually paid the artist $${Math.round(actualPayout).toLocaleString()} after applying ${recoups.length} recoup line${recoups.length === 1 ? "" : "s"} (${disputedRecoupCount} disputed, total $${Math.round(recoupTotal).toLocaleString()}) against $${Math.round(gross).toLocaleString()} gross. Smart Switch ${generated.shape === "flat" ? `flat at $${(generated.suggestedFlat ?? 0).toLocaleString()}` : `hybrid ($${generated.doorFloor} floor + ${Math.round((generated.doorSplitPct ?? 0) * 100)}% above $${generated.doorExpenseCap})`} would have settled at $${counterfactual.toLocaleString()} — a ${moneySaved >= 0 ? "saving" : "premium"} of $${Math.abs(moneySaved).toLocaleString()} for the venue.`;
+    const moneyRationale = `Venue actually paid the artist $${Math.round(actualPayout).toLocaleString()} after applying ${recoups.length} recoup line${recoups.length === 1 ? "" : "s"} (${disputedRecoupCount} disputed, total $${Math.round(recoupTotal).toLocaleString()}) against $${Math.round(gross).toLocaleString()} gross. Smart Switch ${generated.shape === "flat" ? `flat at $${generated.suggestedFlat!.toLocaleString()}` : `hybrid ($${generated.doorFloor} floor + ${Math.round((generated.doorSplitPct ?? 0) * 100)}% above $${generated.doorExpenseCap})`} would have settled at $${counterfactual.toLocaleString()} — a ${moneySaved >= 0 ? "saving" : "premium"} of $${Math.abs(moneySaved).toLocaleString()} for the venue.`;
 
     const timeSavedRationale = `Estimated ~${minutesSpent} min of settlement-night work: ${MINUTES.base} min baseline + ${disputedRecoupCount} disputed recoup${disputedRecoupCount === 1 ? "" : "s"} × ${MINUTES.perDisputedRecoup} min + ${notesP + signoffP} paragraph${notesP + signoffP === 1 ? "" : "s"} of notes/sign-off thread × ${MINUTES.perParagraph} min${settlement.status === "disputed" ? ` + ${MINUTES.disputeStatusBonus} min for the formal dispute` : ""}. Smart Switch ${generated.shape === "flat" ? "flat" : "hybrid"} replaces this with a ~${minutesUnderSwitch}-min ${generated.shape === "flat" ? "handshake — no recoup arithmetic" : "door count and cap check"}.`;
 
@@ -456,8 +462,15 @@ export async function getSwitchProjectedGrid(
         artist: artistById.get(show.artistId) ?? null,
       });
       if (!generated) continue;
-      if (generated.shape === "flat") {
-        projectedPayout = generated.suggestedFlat ?? 0;
+      // Same insufficient_confidence guard as the per-show items pass:
+      // a null flat means we have no concrete counterfactual to model, so
+      // leave projectedPayout = actualPayout (treat as "no switch" rather
+      // than fabricating a $0 payout).
+      if (generated.shape === "flat" && generated.suggestedFlat == null) {
+        // projectedPayout already set to actualPayout above; just skip the
+        // switch-modeled branch and fall through to the cell accumulator.
+      } else if (generated.shape === "flat") {
+        projectedPayout = generated.suggestedFlat!;
       } else {
         const cap = generated.doorExpenseCap ?? 1500;
         const pool = Math.max(0, gross * 0.9 - cap);
