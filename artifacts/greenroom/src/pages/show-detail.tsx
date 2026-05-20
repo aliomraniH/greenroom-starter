@@ -787,15 +787,27 @@ function SmartSwitchPanel({
                         context yet; the current-deal projection has no such
                         race and is read straight from the persisted value. */}
                     {(() => {
+                      // Both projections follow the report's canonical
+                      // formulas: venue net = net_after_fees − actual
+                      // expenses (≈ expenseEstimate) − artist payout. The
+                      // delta therefore comes from the artist payout only,
+                      // which is the whole point — same gross, same
+                      // expenses, just a different way of paying the
+                      // artist. We anchor the SGP tile to the live
+                      // suggested flat so it stays in sync if the
+                      // headline number is re-rounded after persistence.
                       const flat = sug.suggestedFlat as number;
-                      const projSgp = sgp.projectedVenueNetSgp != null
-                        ? sgp.netAfterFees - sgp.expenseEstimate - flat
-                        : sgp.netAfterFees - sgp.expenseEstimate - sgp.suggestedPrice;
-                      const projCurrent = sgp.projectedVenueNetCurrent
-                        ?? (sgp.netAfterFees - sgp.expenseEstimate - sgp.suggestedPrice);
-                      const sgpWins = projSgp > projCurrent + 1;
+                      const projSgp = sgp.netAfterFees - sgp.expenseEstimate - flat;
+                      // Skip rendering on legacy rows that pre-date the
+                      // canonical-formula backfill — a silent SGP-equal
+                      // fallback would mint a false tie.
+                      if (sgp.projectedVenueNetCurrent == null) return null;
+                      const projCurrent = sgp.projectedVenueNetCurrent;
                       const delta = projSgp - projCurrent;
-                      const tile = (label: string, val: number, isSgp: boolean, isWinner: boolean) => {
+                      const TIE_BAND = 50;
+                      const sgpWins = delta >= TIE_BAND;
+                      const currentWins = delta <= -TIE_BAND;
+                      const tile = (label: string, val: number, isSgp: boolean, isWinner: boolean, sub: string) => {
                         const positive = val >= 0;
                         return (
                           <div
@@ -809,7 +821,7 @@ function SmartSwitchPanel({
                           >
                             <div className="flex items-center justify-between mb-1">
                               <div className="eyebrow text-[10px] text-ink-500">{label}</div>
-                              {isSgp && isWinner && (
+                              {isWinner && (
                                 <span className="text-[9px] font-semibold uppercase tracking-wider text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">
                                   Winner
                                 </span>
@@ -826,27 +838,53 @@ function SmartSwitchPanel({
                             >
                               {positive ? "" : "−"}{formatMoney(Math.abs(val))}
                             </div>
-                            <div className="text-[10.5px] text-ink-500 mt-1.5 leading-tight">
-                              {isSgp
-                                ? "Flat artist payment + SGP-capped expenses"
-                                : "Deal as written: max(guarantee, %) + deal cap"}
-                            </div>
+                            <div className="text-[10.5px] text-ink-500 mt-1.5 leading-tight">{sub}</div>
                           </div>
                         );
                       };
+                      const pctLabel = `${Math.round((deal.percentage ?? 0) * 100)}%`;
+                      const capPhrase = deal.expenseCap != null
+                        ? `$${deal.expenseCap.toLocaleString()} cap`
+                        : "no expense cap";
+                      const currentSub =
+                        deal.dealType === "flat"
+                          ? `Deal as written: gross − fees − exp − $${(deal.guaranteeAmount ?? 0).toLocaleString()} guarantee`
+                          : deal.dealType === "vs"
+                            ? `Deal as written: max(guarantee, ${pctLabel} × net base; ${capPhrase})`
+                            : deal.dealType === "percentage_of_net"
+                              ? `Deal as written: ${pctLabel} × net base (${capPhrase})`
+                              : deal.dealType === "percentage_of_gross"
+                                ? `Deal as written: ${pctLabel} × gross (no expense deduct)`
+                                : deal.expenseCap != null
+                                  ? `Deal as written: gross − min(expenses, $${deal.expenseCap.toLocaleString()} cap); venue absorbs overrun`
+                                  : `Deal as written: gross − expenses (no cap); venue absorbs fees`;
+                      // Winner rationale is deal-type aware: cap/% story
+                      // only applies to vs/%net; door+%gross use their own
+                      // explanation; everything else falls back to a
+                      // structural description without misattributing
+                      // cause.
+                      const tightCap = deal.expenseCap != null && deal.expenseCap < sgp.expenseEstimate;
+                      const sgpWinCopy =
+                        deal.dealType === "door"
+                          ? `Switching from a pure door deal to the SGP flat captures an additional ${formatMoney(delta)} of venue net — door deals at this gross historically leave the venue eating fees and any expense overrun; the flat pays the artist a known number and stops there.`
+                          : deal.dealType === "percentage_of_gross"
+                            ? `Switching to the SGP flat captures an additional ${formatMoney(delta)} of venue net. A ${pctLabel}-of-gross structure pays the artist before any expense deduct; the SGP flat lets the venue recover its actuals first.`
+                            : (deal.dealType === "vs" || deal.dealType === "percentage_of_net") && tightCap
+                              ? `Switching to the SGP flat captures an additional ${formatMoney(delta)} of venue net. The current deal's tight $${deal.expenseCap!.toLocaleString()} expense cap forces the venue to absorb overrun on top of an inflated ${pctLabel} payout — the SGP flat pays the artist their fair number and stops there.`
+                              : `Switching to the SGP flat captures an additional ${formatMoney(delta)} of venue net on the same expected gross.`;
                       return (
                         <div className="space-y-2">
                           <div className="grid grid-cols-2 gap-3">
-                            {tile("Projected venue net · current deal", projCurrent, false, !sgpWins && delta < -1)}
-                            {tile("Projected venue net · SGP flat", projSgp, true, sgpWins)}
+                            {tile("Projected venue net · current deal", projCurrent, false, currentWins, currentSub)}
+                            {tile("Projected venue net · SGP flat", projSgp, true, sgpWins, `Flat artist payment of ${formatMoney(flat)} + same actual expenses`)}
                           </div>
-                          {Math.abs(delta) >= 50 && (
-                            <div className={`text-[11.5px] leading-tight ${sgpWins ? "text-emerald-700" : "text-rose-700"}`}>
-                              {sgpWins
-                                ? `Switching to the SGP flat captures an additional ${formatMoney(delta)} of venue net under the same expected gross, mostly by tightening expense pass-through.`
-                                : `Current deal projects ${formatMoney(-delta)} more venue net than the SGP flat — keeping the existing structure is the better call on these inputs.`}
-                            </div>
-                          )}
+                          <div className={`text-[11.5px] leading-tight ${sgpWins ? "text-emerald-700" : currentWins ? "text-rose-700" : "text-ink-600"}`}>
+                            {sgpWins
+                              ? sgpWinCopy
+                              : currentWins
+                                ? `Current deal projects ${formatMoney(-delta)} more venue net than the SGP flat on this gross — keeping the existing structure is the better call on these inputs.`
+                                : `Same projected venue net on this gross — the SGP flat is dollar-neutral here but locks the artist payment in writing before the show, eliminating the recoup arithmetic and expense-line disputes that this venue's % deals historically generate.`}
+                          </div>
                         </div>
                       );
                     })()}
@@ -1063,12 +1101,23 @@ function SmartGuaranteedPricePanel({
                   surface gets the same comparison so deals outside the
                   $1–5K switch window still show the structural delta. */}
               {(() => {
-                const projSgp = sug.projectedVenueNetSgp
-                  ?? (sug.netAfterFees - sug.expenseEstimate - sug.suggestedPrice);
-                const projCurrent = sug.projectedVenueNetCurrent ?? projSgp;
-                const sgpWins = projSgp > projCurrent + 1;
+                // Identical canonical math to the Smart Switch panel
+                // above — venue net = net_after_fees − actual expenses
+                // (≈ expenseEstimate) − artist payout. Tie band of $50
+                // keeps small rounding deltas from minting a "Winner"
+                // badge; below the band we surface the qualitative SGP
+                // value (no recoup arithmetic) instead.
+                const projSgp = sug.netAfterFees - sug.expenseEstimate - sug.suggestedPrice;
+                // Don't fall back to projSgp on legacy rows — that would
+                // mint a silent tie and hide the fact that the row hasn't
+                // been backfilled with the new canonical formula yet.
+                if (sug.projectedVenueNetCurrent == null) return null;
+                const projCurrent = sug.projectedVenueNetCurrent;
                 const delta = projSgp - projCurrent;
-                const tile = (label: string, val: number, isSgp: boolean, isWinner: boolean) => {
+                const TIE_BAND = 50;
+                const sgpWins = delta >= TIE_BAND;
+                const currentWins = delta <= -TIE_BAND;
+                const tile = (label: string, val: number, isWinner: boolean, sub: string) => {
                   const positive = val >= 0;
                   return (
                     <div
@@ -1082,7 +1131,7 @@ function SmartGuaranteedPricePanel({
                     >
                       <div className="flex items-center justify-between mb-1">
                         <div className="eyebrow text-[10px] text-ink-500">{label}</div>
-                        {isSgp && isWinner && (
+                        {isWinner && (
                           <span className="text-[9px] font-semibold uppercase tracking-wider text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">
                             Winner
                           </span>
@@ -1095,27 +1144,48 @@ function SmartGuaranteedPricePanel({
                       >
                         {positive ? "" : "−"}{formatMoney(Math.abs(val))}
                       </div>
-                      <div className="text-[10.5px] text-ink-500 mt-1.5 leading-tight">
-                        {isSgp
-                          ? "Flat artist payment + SGP-capped expenses"
-                          : "Deal as written: max(guarantee, %) + deal cap"}
-                      </div>
+                      <div className="text-[10.5px] text-ink-500 mt-1.5 leading-tight">{sub}</div>
                     </div>
                   );
                 };
+                const pctLabel = `${Math.round((deal.percentage ?? 0) * 100)}%`;
+                const capPhrase = deal.expenseCap != null
+                  ? `$${deal.expenseCap.toLocaleString()} cap`
+                  : "no expense cap";
+                const currentSub =
+                  deal.dealType === "flat"
+                    ? `Deal as written: gross − fees − exp − $${(deal.guaranteeAmount ?? 0).toLocaleString()} guarantee`
+                    : deal.dealType === "vs"
+                      ? `Deal as written: max(guarantee, ${pctLabel} × net base; ${capPhrase})`
+                      : deal.dealType === "percentage_of_net"
+                        ? `Deal as written: ${pctLabel} × net base (${capPhrase})`
+                        : deal.dealType === "percentage_of_gross"
+                          ? `Deal as written: ${pctLabel} × gross (no expense deduct)`
+                          : deal.expenseCap != null
+                            ? `Deal as written: gross − min(expenses, $${deal.expenseCap.toLocaleString()} cap); venue absorbs overrun`
+                            : `Deal as written: gross − expenses (no cap); venue absorbs fees`;
+                const tightCap = deal.expenseCap != null && deal.expenseCap < sug.expenseEstimate;
+                const sgpWinCopy =
+                  deal.dealType === "door"
+                    ? `Switching from a pure door deal to the SGP flat captures an additional ${formatMoney(delta)} of venue net — door deals at this gross historically leave the venue eating fees and any expense overrun; the flat pays the artist a known number and stops there.`
+                    : deal.dealType === "percentage_of_gross"
+                      ? `Switching to the SGP flat captures an additional ${formatMoney(delta)} of venue net. A ${pctLabel}-of-gross structure pays the artist before any expense deduct; the SGP flat lets the venue recover its actuals first.`
+                      : (deal.dealType === "vs" || deal.dealType === "percentage_of_net") && tightCap
+                        ? `Switching to the SGP flat captures an additional ${formatMoney(delta)} of venue net. The current deal's tight $${deal.expenseCap!.toLocaleString()} expense cap forces the venue to absorb overrun on top of an inflated ${pctLabel} payout — the SGP flat pays the artist their fair number and stops there.`
+                        : `Switching to the SGP flat captures an additional ${formatMoney(delta)} of venue net on the same expected gross.`;
                 return (
                   <div className="space-y-2 pt-1">
                     <div className="grid grid-cols-2 gap-3">
-                      {tile("Projected venue net · current deal", projCurrent, false, !sgpWins && delta < -1)}
-                      {tile("Projected venue net · SGP flat", projSgp, true, sgpWins)}
+                      {tile("Projected venue net · current deal", projCurrent, currentWins, currentSub)}
+                      {tile("Projected venue net · SGP flat", projSgp, sgpWins, `Flat artist payment of ${formatMoney(sug.suggestedPrice)} + same actual expenses`)}
                     </div>
-                    {Math.abs(delta) >= 50 && (
-                      <div className={`text-[11.5px] leading-tight ${sgpWins ? "text-emerald-700" : "text-rose-700"}`}>
-                        {sgpWins
-                          ? `Switching to the SGP flat captures an additional ${formatMoney(delta)} of venue net under the same expected gross.`
-                          : `Current deal projects ${formatMoney(-delta)} more venue net than the SGP flat under these inputs.`}
-                      </div>
-                    )}
+                    <div className={`text-[11.5px] leading-tight ${sgpWins ? "text-emerald-700" : currentWins ? "text-rose-700" : "text-ink-600"}`}>
+                      {sgpWins
+                        ? sgpWinCopy
+                        : currentWins
+                          ? `Current deal projects ${formatMoney(-delta)} more venue net than the SGP flat — keeping the existing structure is the better call on these inputs.`
+                          : `Same projected venue net on this gross — the SGP flat is dollar-neutral here but locks the artist payment in writing before the show, eliminating the recoup arithmetic and expense-line disputes that this venue's % deals historically generate.`}
+                    </div>
                   </div>
                 );
               })()}

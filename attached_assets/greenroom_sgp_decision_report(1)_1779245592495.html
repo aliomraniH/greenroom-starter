@@ -1,0 +1,1679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Greenroom SGP — Under $10K Decision Report</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --ink:     #0f0e0d;
+    --paper:   #f5f2ec;
+    --rule:    #d8d2c6;
+    --muted:   #8a8278;
+    --accent:  #c84b00;
+    --green:   #1a7a4a;
+    --blue:    #1a4e8a;
+    --amber:   #a85a00;
+    --red:     #9b1c1c;
+    --ink-10:  rgba(15,14,13,.10);
+    --ink-20:  rgba(15,14,13,.20);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'DM Sans',sans-serif;
+    font-size:14px;
+    line-height:1.6;
+  }
+
+  /* ── HEADER ── */
+  .masthead{
+    border-bottom:2px solid var(--ink);
+    padding:2.5rem 3rem 1.75rem;
+    display:grid;
+    grid-template-columns:1fr auto;
+    align-items:end;
+    gap:2rem;
+  }
+  .masthead-eyebrow{
+    font-family:'DM Mono',monospace;
+    font-size:10px;
+    letter-spacing:.15em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:.75rem;
+  }
+  .masthead h1{
+    font-family:'DM Serif Display',serif;
+    font-size:clamp(2rem,4vw,3.25rem);
+    line-height:1.1;
+    letter-spacing:-.02em;
+  }
+  .masthead h1 em{
+    font-style:italic;
+    color:var(--accent);
+  }
+  .masthead-meta{
+    text-align:right;
+    font-family:'DM Mono',monospace;
+    font-size:10px;
+    color:var(--muted);
+    line-height:2;
+    border-left:1px solid var(--rule);
+    padding-left:2rem;
+  }
+
+  /* ── NAV ── */
+  .nav-strip{
+    display:flex;
+    gap:0;
+    border-bottom:1px solid var(--rule);
+    overflow-x:auto;
+    position:sticky;
+    top:0;
+    background:var(--paper);
+    z-index:100;
+  }
+  .nav-strip a{
+    font-family:'DM Mono',monospace;
+    font-size:10px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--muted);
+    text-decoration:none;
+    padding:.75rem 1.5rem;
+    border-right:1px solid var(--rule);
+    white-space:nowrap;
+    transition:all .15s;
+    display:flex;align-items:center;gap:.5rem;
+  }
+  .nav-strip a:hover{color:var(--ink);background:var(--ink-10)}
+  .nav-num{
+    width:18px;height:18px;border-radius:50%;
+    background:var(--ink);color:var(--paper);
+    font-size:9px;display:inline-flex;
+    align-items:center;justify-content:center;font-weight:500;
+  }
+
+  /* ── LAYOUT ── */
+  .body-wrap{max-width:1160px;margin:0 auto;padding:0 2.5rem 4rem}
+  .section{
+    padding-top:3rem;
+    border-top:1px solid var(--rule);
+    margin-top:3rem;
+    animation:fadeUp .4s ease both;
+  }
+  .section:first-of-type{border-top:none}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+  .section-header{
+    display:grid;
+    grid-template-columns:auto 1fr auto;
+    align-items:baseline;
+    gap:1rem;
+    margin-bottom:1.75rem;
+  }
+  .section-num{
+    font-family:'DM Serif Display',serif;
+    font-size:4rem;
+    line-height:1;
+    color:var(--ink-20);
+    letter-spacing:-.04em;
+    user-select:none;
+  }
+  .section-title-block h2{
+    font-family:'DM Serif Display',serif;
+    font-size:1.6rem;
+    line-height:1.2;
+    letter-spacing:-.015em;
+  }
+  .section-title-block .subtitle{
+    font-size:12px;
+    color:var(--muted);
+    margin-top:.25rem;
+  }
+  .verdict-pill{
+    font-family:'DM Mono',monospace;
+    font-size:10px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    padding:4px 12px;
+    border-radius:20px;
+    font-weight:500;
+    white-space:nowrap;
+  }
+  .v-green{background:rgba(26,122,74,.12);color:var(--green)}
+  .v-amber{background:rgba(168,90,0,.12);color:var(--amber)}
+  .v-blue {background:rgba(26,78,138,.12);color:var(--blue)}
+  .v-red  {background:rgba(155,28,28,.12);color:var(--red)}
+
+  /* ── LEAD TEXT ── */
+  .lead{
+    font-size:15.5px;
+    line-height:1.7;
+    color:var(--ink);
+    border-left:3px solid var(--accent);
+    padding-left:1.25rem;
+    margin-bottom:1.75rem;
+  }
+
+  /* ── CALLOUT ── */
+  .callout{
+    background:var(--ink);
+    color:var(--paper);
+    padding:1.25rem 1.5rem;
+    border-radius:4px;
+    margin-bottom:1.5rem;
+    font-size:13px;
+    line-height:1.65;
+  }
+  .callout strong{color:#f0c060}
+  .callout.green{background:rgba(26,122,74,.10);color:var(--green);border:1px solid rgba(26,122,74,.25)}
+  .callout.green strong{color:var(--green)}
+  .callout.amber{background:rgba(168,90,0,.10);color:var(--amber);border:1px solid rgba(168,90,0,.25)}
+  .callout.amber strong{color:var(--amber)}
+  .callout.blue{background:rgba(26,78,138,.10);color:var(--blue);border:1px solid rgba(26,78,138,.25)}
+  .callout.blue strong{color:var(--blue)}
+  .callout.red{background:rgba(155,28,28,.10);color:var(--red);border:1px solid rgba(155,28,28,.25)}
+  .callout.red strong{color:var(--red)}
+
+  /* ── GRID ── */
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-bottom:1.5rem}
+  .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}
+  @media(max-width:800px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}}
+
+  /* ── STAT CARDS ── */
+  .stat-card{
+    background:#fff;
+    border:1px solid var(--rule);
+    padding:1.1rem 1.25rem;
+  }
+  .stat-label{
+    font-family:'DM Mono',monospace;
+    font-size:9.5px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:.4rem;
+  }
+  .stat-value{
+    font-family:'DM Serif Display',serif;
+    font-size:2.1rem;
+    line-height:1;
+    letter-spacing:-.02em;
+  }
+  .stat-sub{font-size:11px;color:var(--muted);margin-top:.35rem}
+  .s-green{color:var(--green)}
+  .s-red{color:var(--red)}
+  .s-amber{color:var(--amber)}
+  .s-blue{color:var(--blue)}
+
+  /* ── INFO CARD ── */
+  .info-card{
+    background:#fff;
+    border:1px solid var(--rule);
+    padding:1.25rem;
+  }
+  .info-card h4{
+    font-family:'DM Serif Display',serif;
+    font-size:1rem;
+    margin-bottom:.75rem;
+    letter-spacing:-.01em;
+  }
+  .info-card .row{
+    display:flex;justify-content:space-between;align-items:baseline;
+    padding:5px 0;
+    border-bottom:1px solid var(--rule);
+    font-size:12.5px;
+    gap:.5rem;
+  }
+  .info-card .row:last-child{border-bottom:none}
+  .info-card .row-label{color:var(--muted)}
+  .info-card .row-val{font-weight:600;font-family:'DM Mono',monospace;font-size:12px;text-align:right}
+  .pos{color:var(--green)}.neg{color:var(--red)}.warn{color:var(--amber)}.neut{color:var(--muted)}
+
+  /* ── FORMULA ── */
+  .formula-block{
+    background:#1a1916;
+    color:#e8e4dc;
+    font-family:'DM Mono',monospace;
+    font-size:12px;
+    line-height:2;
+    padding:1.25rem 1.5rem;
+    border-radius:4px;
+    margin:1rem 0;
+  }
+  .formula-block .f-comment{color:#6a6560}
+  .formula-block .f-key{color:#f0c060}
+  .formula-block .f-val{color:#7db87d}
+  .formula-block .f-op{color:#e07060}
+
+  /* ── WATERFALL ── */
+  .waterfall{margin:1rem 0}
+  .wf-row{
+    display:flex;align-items:stretch;margin-bottom:3px;
+  }
+  .wf-num{
+    width:30px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'DM Mono',monospace;font-size:10px;
+    color:var(--muted);font-weight:500;
+  }
+  .wf-bar{
+    flex:1;padding:10px 14px;display:flex;
+    justify-content:space-between;align-items:center;
+    font-size:12.5px;
+  }
+  .wf-label{font-weight:500}
+  .wf-right{font-size:11px;opacity:.7;font-family:'DM Mono',monospace}
+  .wf-arrow{
+    width:30px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    font-size:16px;color:var(--rule);
+  }
+  .wf-tier1{background:rgba(26,122,74,.12);border-left:3px solid var(--green)}
+  .wf-tier2{background:rgba(26,78,138,.12);border-left:3px solid var(--blue)}
+  .wf-tier3{background:rgba(168,90,0,.12);border-left:3px solid var(--amber)}
+  .wf-tier4{background:rgba(155,28,28,.12);border-left:3px solid var(--red)}
+
+  /* ── DECISION TABLE ── */
+  .decision-table{
+    width:100%;border-collapse:collapse;
+    border:1px solid var(--rule);margin-bottom:1.5rem;
+  }
+  .decision-table th{
+    background:var(--ink);color:var(--paper);
+    padding:10px 14px;
+    font-family:'DM Mono',monospace;font-size:10px;
+    letter-spacing:.08em;text-transform:uppercase;
+    text-align:left;font-weight:500;
+  }
+  .decision-table td{
+    padding:12px 14px;
+    border-bottom:1px solid var(--rule);
+    border-right:1px solid var(--rule);
+    font-size:12.5px;vertical-align:top;
+  }
+  .decision-table td:last-child{border-right:none}
+  .decision-table tr:last-child td{border-bottom:none}
+  .decision-table tr:hover td{background:rgba(15,14,13,.02)}
+  .dt-range{
+    font-weight:600;font-family:'DM Mono',monospace;font-size:11px;
+  }
+  .tag{
+    display:inline-block;
+    font-family:'DM Mono',monospace;font-size:9px;
+    letter-spacing:.05em;text-transform:uppercase;
+    padding:2px 7px;border-radius:2px;margin-left:4px;
+    vertical-align:middle;
+  }
+  .tag-green{background:rgba(26,122,74,.12);color:var(--green)}
+  .tag-amber{background:rgba(168,90,0,.12);color:var(--amber)}
+  .tag-blue{background:rgba(26,78,138,.12);color:var(--blue)}
+  .tag-red{background:rgba(155,28,28,.12);color:var(--red)}
+  .tag-neut{background:var(--ink-10);color:var(--muted)}
+
+  /* ── CHART WRAPPER ── */
+  .chart-wrap{
+    background:#fff;border:1px solid var(--rule);
+    padding:1.25rem;margin-bottom:1.5rem;
+  }
+  .chart-title{
+    font-family:'DM Mono',monospace;font-size:10px;
+    letter-spacing:.1em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:1rem;
+  }
+  .chart-wrap canvas{max-height:240px}
+
+  /* ── BUCKET BARS ── */
+  .bucket-panel{
+    border:1px solid var(--rule);
+    background:#fff;margin-bottom:1rem;overflow:hidden;
+  }
+  .bucket-head{
+    padding:.85rem 1.1rem;
+    display:flex;justify-content:space-between;align-items:center;
+    border-bottom:1px solid var(--rule);
+  }
+  .bucket-head h4{
+    font-family:'DM Serif Display',serif;
+    font-size:.95rem;letter-spacing:-.01em;
+  }
+  .bucket-body{padding:.85rem 1.1rem;font-size:12px}
+  .stacked-bar{
+    height:22px;border-radius:2px;
+    display:flex;overflow:hidden;margin:.5rem 0;
+  }
+  .sb{height:100%;display:flex;align-items:center;
+    justify-content:center;font-size:9px;font-weight:700;color:#fff;overflow:hidden}
+  .sb-fees{background:#8a8278}
+  .sb-exp{background:#b87030}
+  .sb-art{background:#3060a0}
+  .sb-ven-pos{background:#1a7a4a}
+  .sb-ven-neg{background:#cc3333}
+  .bucket-stats{
+    display:grid;grid-template-columns:repeat(4,1fr);
+    gap:.5rem;margin-top:.75rem;
+  }
+  .bs{text-align:center}
+  .bs-val{font-family:'DM Mono',monospace;font-size:13px;font-weight:500}
+  .bs-lbl{font-size:10px;color:var(--muted);margin-top:1px}
+
+  /* ── FOOTER ── */
+  .doc-footer{
+    border-top:2px solid var(--ink);
+    padding:1.5rem 3rem;
+    display:flex;justify-content:space-between;align-items:center;
+    margin-top:3rem;
+  }
+  .doc-footer .fn{
+    font-family:'DM Mono',monospace;font-size:10px;
+    color:var(--muted);letter-spacing:.05em;
+  }
+
+  /* ── SEPARATOR ── */
+  .sep{border:none;border-top:1px solid var(--rule);margin:1.5rem 0}
+
+  /* ── DIVIDER LABEL ── */
+  .divider-label{
+    display:flex;align-items:center;gap:1rem;
+    margin:1.5rem 0 1rem;
+    font-family:'DM Mono',monospace;font-size:10px;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+  }
+  .divider-label::before,.divider-label::after{
+    content:'';flex:1;border-top:1px solid var(--rule);
+  }
+</style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<header class="masthead">
+  <div>
+    <div class="masthead-eyebrow">The Crescent, Nashville · Settlement Intelligence · Greenroom Platform</div>
+    <h1>Smart Guaranteed Price:<br><em>Under $10K Decision Report</em></h1>
+  </div>
+  <div class="masthead-meta">
+    <div>Based on 497 settled shows</div>
+    <div>May 2026 audit</div>
+    <div>─</div>
+    <div>370 deals modelled</div>
+    <div>$1K–10K gross range</div>
+    <div>─</div>
+    <div>Venue: The Crescent</div>
+    <div>Capacity: 650</div>
+  </div>
+</header>
+
+<!-- NAV -->
+<nav class="nav-strip">
+  <a href="#s1"><span class="nav-num">1</span>Deal Structure</a>
+  <a href="#s2"><span class="nav-num">2</span>Cross-Venue Learning</a>
+  <a href="#s3"><span class="nav-num">3</span>SGP &amp; Smart Switch</a>
+  <a href="#s4"><span class="nav-num">4</span>Decision Matrix</a>
+  <a href="#s5"><span class="nav-num">+</span>Cost Context</a>
+</nav>
+
+<div class="body-wrap">
+
+<!-- SECTION 1: DEAL STRUCTURE & CONTEXT -->
+<section class="section" id="s1">
+  <div class="section-header">
+    <div class="section-num">01</div>
+    <div class="section-title-block">
+      <h2>Deal Structure &amp; Context</h2>
+      <div class="subtitle">How The Crescent's five deal types work, where each one succeeds, and where each one breaks</div>
+    </div>
+    <span class="verdict-pill v-blue">Foundation</span>
+  </div>
+
+  <p class="lead">The Crescent runs 497 settled shows across five deal types. Each type distributes money between artist, venue, and expenses differently — and each creates a different pattern of profitability, friction, and settlement complexity. Understanding the deal mechanics is the prerequisite for every recommendation that follows.</p>
+
+  <!-- THE EXPENSE CONSTANT -->
+  <div class="callout">
+    <strong>The single most important fact in this report:</strong> Production expenses at The Crescent run <strong>~$1,500–$1,850 per show regardless of gross</strong>. A $600 show costs $1,430 to produce. A $19,000 show costs $1,909. That flat expense structure means deals only become profitable above approximately <strong>$4,300 gross</strong> — and every deal type interacts with this breakeven differently.
+  </div>
+
+  <!-- FIVE DEAL TYPES -->
+  <div class="divider-label">How Each Deal Type Works</div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem">
+
+    <!-- Flat -->
+    <div style="border:1px solid var(--rule);background:#fff;overflow:hidden">
+      <div style="background:var(--ink);color:var(--paper);padding:.8rem 1.1rem;display:flex;justify-content:space-between;align-items:center">
+        <div style="font-family:'DM Serif Display',serif;font-size:1.05rem">Flat Guarantee</div>
+        <span style="font-family:'DM Mono',monospace;font-size:9px;background:rgba(255,255,255,.12);padding:3px 9px;border-radius:10px">114 shows · 23%</span>
+      </div>
+      <div style="padding:1.1rem">
+        <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:.85rem">The artist is paid a fixed dollar amount regardless of how many tickets sold. The venue keeps everything above expenses. No settlement arithmetic — the number on the contract is the number on the check.</p>
+        <div class="formula-block">
+<span class="f-comment">— Formula</span><br>
+<span class="f-key">artist</span> = <span class="f-val">guarantee</span>  ← fixed, agreed before the show<br>
+<span class="f-key">venue</span>  = gross − fees − expenses − <span class="f-val">guarantee</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;margin-top:.75rem">
+          <div style="text-align:center;padding:.5rem;background:var(--paper);border-radius:2px">
+            <div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--green)">52/114</div>
+            <div style="font-size:10px;color:var(--muted)">Both profitable</div>
+          </div>
+          <div style="text-align:center;padding:.5rem;background:var(--paper);border-radius:2px">
+            <div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500">$2,478</div>
+            <div style="font-size:10px;color:var(--muted)">Avg gross</div>
+          </div>
+          <div style="text-align:center;padding:.5rem;background:var(--paper);border-radius:2px">
+            <div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--muted)">Low</div>
+            <div style="font-size:10px;color:var(--muted)">Dispute risk</div>
+          </div>
+        </div>
+        <div style="margin-top:.65rem;font-size:11.5px;color:var(--muted);line-height:1.6"><strong style="color:var(--ink)">Who prefers it:</strong> Venues (predictable cost) and artists at the right price point. Fails when the guarantee is set too high relative to expected gross.</div>
+      </div>
+    </div>
+
+    <!-- vs -->
+    <div style="border:1px solid var(--rule);background:#fff;overflow:hidden">
+      <div style="background:var(--ink);color:var(--paper);padding:.8rem 1.1rem;display:flex;justify-content:space-between;align-items:center">
+        <div style="font-family:'DM Serif Display',serif;font-size:1.05rem">Versus (vs) Deal</div>
+        <span style="font-family:'DM Mono',monospace;font-size:9px;background:rgba(255,255,255,.12);padding:3px 9px;border-radius:10px">145 shows · 29%</span>
+      </div>
+      <div style="padding:1.1rem">
+        <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:.85rem">Artist receives whichever is larger: their guarantee, or a percentage of net (gross minus fees and expenses). The "vs" is the comparison: <em>guarantee vs percentage payout</em>. On a good night the percentage wins; on a slow night the guarantee protects the artist.</p>
+        <div class="formula-block">
+<span class="f-comment">— Formula</span><br>
+<span class="f-key">net_base</span> = gross × 0.90 − expenses<br>
+<span class="f-key">pct_pay</span>  = percentage × net_base<br>
+<span class="f-key">artist</span>   = max(<span class="f-val">guarantee</span>, <span class="f-val">pct_pay</span>)
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;margin-top:.75rem">
+          <div style="text-align:center;padding:.5rem;background:var(--paper);border-radius:2px">
+            <div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--amber)">60/145</div>
+            <div style="font-size:10px;color:var(--muted)">Both profitable</div>
+          </div>
+          <div style="text-align:center;padding:.5rem;background:var(--paper);border-radius:2px">
+            <div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500">$5,843</div>
+            <div style="font-size:10px;color:var(--muted)">Avg gross</div>
+          </div>
+          <div style="text-align:center;padding:.5rem;background:var(--paper);border-radius:2px">
+            <div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--amber)">Medium</div>
+            <div style="font-size:10px;color:var(--muted)">Dispute risk</div>
+          </div>
+        </div>
+        <div style="margin-top:.65rem;font-size:11.5px;color:var(--muted);line-height:1.6"><strong style="color:var(--ink)">The problem:</strong> The percentage clause fires above the guarantee <strong>87–93% of the time</strong> at this venue. The guarantee floor rarely matters — making the vs structure functionally a percentage deal with expensive recoup arithmetic attached.</div>
+      </div>
+    </div>
+
+    <!-- % of net -->
+    <div style="border:1px solid var(--rule);background:#fff;overflow:hidden">
+      <div style="background:var(--ink);color:var(--paper);padding:.8rem 1.1rem;display:flex;justify-content:space-between;align-items:center">
+        <div style="font-family:'DM Serif Display',serif;font-size:1.05rem">Percentage of Net</div>
+        <span style="font-family:'DM Mono',monospace;font-size:9px;background:rgba(255,255,255,.12);padding:3px 9px;border-radius:10px">102 shows · 21%</span>
+      </div>
+      <div style="padding:1.1rem">
+        <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:.85rem">Artist receives a percentage of net revenue — gross after ticketing fees and approved expenses. No guaranteed floor: if the show loses money, the artist earns less (or nothing). Common for developing acts or co-promotions where both sides share the risk.</p>
+        <div class="formula-block">
+<span class="f-comment">— Formula</span><br>
+<span class="f-key">net_base</span> = gross × 0.90 − expenses<br>
+<span class="f-key">artist</span>   = percentage × max(<span class="f-val">0</span>, net_base)<br>
+<span class="f-key">venue</span>    = net_base − artist  <span class="f-comment">← can be negative</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;margin-top:.75rem">
+          <div style="text-align:center;padding:.5rem;background:var(--paper);border-radius:2px">
+            <div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--red)">30/102</div>
+            <div style="font-size:10px;color:var(--muted)">Both profitable</div>
+          </div>
+          <div style="text-align:center;padding:.5rem;background:var(--paper);border-radius:2px">
+            <div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500">$4,891</div>
+            <div style="font-size:10px;color:var(--muted)">Avg gross</div>
+          </div>
+          <div style="text-align:center;padding:.5rem;background:var(--paper);border-radius:2px">
+            <div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--red)">High</div>
+            <div style="font-size:10px;color:var(--muted)">Dispute risk</div>
+          </div>
+        </div>
+        <div style="margin-top:.65rem;font-size:11.5px;color:var(--muted);line-height:1.6"><strong style="color:var(--ink)">The problem:</strong> Every expense line is contested — the artist's payout depends on the expense total, so each receipt becomes a negotiation. Average dispute rate is 2× that of flat deals. The 50/102 venue-negative shows happen almost entirely in the $0–5K gross range where expenses routinely exceed net.</div>
+      </div>
+    </div>
+
+    <!-- Door -->
+    <div style="border:1px solid var(--rule);background:#fff;overflow:hidden">
+      <div style="background:var(--ink);color:var(--paper);padding:.8rem 1.1rem;display:flex;justify-content:space-between;align-items:center">
+        <div style="font-family:'DM Serif Display',serif;font-size:1.05rem">Door Deal</div>
+        <span style="font-family:'DM Mono',monospace;font-size:9px;background:rgba(255,255,255,.12);padding:3px 9px;border-radius:10px">30 shows · 6%</span>
+      </div>
+      <div style="padding:1.1rem">
+        <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:.85rem">Artist takes all door revenue after a capped expense deduction. The venue retains bar revenue but receives nothing from ticket sales. Often used for emerging acts on weeknights — the venue makes its money on drinks, not the deal.</p>
+        <div class="formula-block">
+<span class="f-comment">— Formula (current, uncapped)</span><br>
+<span class="f-key">artist</span> = gross − min(expenses, cap)<br>
+<span class="f-key">venue</span>  = <span class="f-val">0</span>  <span class="f-comment">← zero from ticket revenue</span><br>
+<span class="f-comment">— Proposed door hybrid</span><br>
+<span class="f-key">avail</span>  = gross × 0.90 − min(exp, <span class="f-val">$1,774</span>)<br>
+<span class="f-key">artist</span> = <span class="f-val">$500</span> + 60% × max(<span class="f-val">0</span>, avail − <span class="f-val">$500</span>)
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;margin-top:.75rem">
+          <div style="text-align:center;padding:.5rem;background:var(--paper);border-radius:2px">
+            <div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--red)">0/30</div>
+            <div style="font-size:10px;color:var(--muted)">Both profitable</div>
+          </div>
+          <div style="text-align:center;padding:.5rem;background:var(--paper);border-radius:2px">
+            <div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500">$3,121</div>
+            <div style="font-size:10px;color:var(--muted)">Avg gross</div>
+          </div>
+          <div style="text-align:center;padding:.5rem;background:var(--paper);border-radius:2px">
+            <div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--red)">Very High</div>
+            <div style="font-size:10px;color:var(--muted)">Dispute risk</div>
+          </div>
+        </div>
+        <div style="margin-top:.65rem;font-size:11.5px;color:var(--muted);line-height:1.6"><strong style="color:var(--ink)">The problem:</strong> 0/30 shows were both-profitable. The venue absorbs all ticketing fees plus any expenses above the cap. The proposed hybrid ($500 floor + 60/40 split) changes this by giving the venue a share of the upside without eliminating the artist's income on slow nights.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- % of gross (compact) -->
+  <div style="border:1px solid var(--rule);background:#fff;overflow:hidden;margin-bottom:1.5rem">
+    <div style="padding:1rem 1.25rem;display:flex;gap:1.5rem;align-items:flex-start">
+      <div style="flex:0 0 auto">
+        <div style="background:var(--ink);color:var(--paper);padding:.55rem 1rem;display:inline-block">
+          <div style="font-family:'DM Serif Display',serif;font-size:.95rem">Percentage of Gross</div>
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-top:.35rem;text-align:center">8 shows · 2% of dataset</div>
+      </div>
+      <div style="flex:1;font-size:12.5px;color:var(--muted);line-height:1.7">
+        Artist receives a straight percentage of total gross revenue — no expense deduction, no floor. Gross × pct = artist payout. The simplest structure mathematically, but rare at this venue because it gives the artist a share of revenue regardless of how expensive the night was to produce. Used primarily for touring headliners with established draw. <strong style="color:var(--ink)">1/8 shows both-profitable at $1–5K; 1/2 at $5–10K</strong>. Treated as "Uncapped %" in the deal analytics grid.
+      </div>
+      <div style="flex:0 0 180px">
+        <div class="formula-block" style="font-size:11px;padding:.6rem .85rem">
+<span class="f-key">artist</span> = pct × gross<br>
+<span class="f-key">venue</span>  = gross × (1−pct)<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;− fees − expenses
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEAL MIX OVERVIEW -->
+  <div class="divider-label">Current Deal Mix — 497 Shows, All Types</div>
+
+  <div class="grid-4" style="margin-bottom:1.5rem">
+    <div class="stat-card">
+      <div class="stat-label">Total settled shows</div>
+      <div class="stat-value">497</div>
+      <div class="stat-sub">59 artists · 14 agents · May 2024–2026</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">In-tool settlement rate</div>
+      <div class="stat-value s-amber">40%</div>
+      <div class="stat-sub">flat + % of gross only · rest use spreadsheets</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Both-profitable (all deals)</div>
+      <div class="stat-value s-amber">237<span style="font-size:1.2rem;color:var(--muted)">/497</span></div>
+      <div class="stat-sub">48% overall · varies widely by deal type</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Breakeven gross</div>
+      <div class="stat-value">~$4,300</div>
+      <div class="stat-sub">where expenses stop dominating revenue</div>
+    </div>
+  </div>
+
+  <div class="chart-wrap">
+    <div class="chart-title">Both-profitable rate by deal type — proportion of shows where venue AND artist both net positive</div>
+    <canvas id="dealTypeProfitChart" style="max-height:200px"></canvas>
+  </div>
+
+  <!-- COMPLEXITY & FRICTION TABLE -->
+  <div class="divider-label">Deal Types — Complexity, Settlement Friction, and What Breaks</div>
+
+  <div style="background:#fff;border:1px solid var(--rule);margin-bottom:1.5rem;overflow:hidden">
+    <table style="width:100%;border-collapse:collapse;font-size:12.5px">
+      <thead>
+        <tr style="background:var(--ink);color:var(--paper)">
+          <th style="padding:10px 14px;text-align:left;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:500">Deal Type</th>
+          <th style="padding:10px 14px;text-align:center;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:500">Shows</th>
+          <th style="padding:10px 14px;text-align:center;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:500">Both+ Rate</th>
+          <th style="padding:10px 14px;text-align:center;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:500">Avg Venue Net</th>
+          <th style="padding:10px 14px;text-align:center;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:500">Settles In-Tool</th>
+          <th style="padding:10px 14px;text-align:left;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:500">Primary Failure Mode</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--rule)">
+          <td style="padding:11px 14px"><strong>Flat</strong></td>
+          <td style="padding:11px 14px;text-align:center;font-family:'DM Mono',monospace">247</td>
+          <td style="padding:11px 14px;text-align:center;font-family:'DM Mono',monospace;color:var(--amber)">54%</td>
+          <td style="padding:11px 14px;text-align:center;font-family:'DM Mono',monospace;color:var(--amber)">+$412</td>
+          <td style="padding:11px 14px;text-align:center"><span style="color:var(--green)">✓ Yes</span></td>
+          <td style="padding:11px 14px;color:var(--muted)">Guarantee set too high on low-gross nights. No recoup risk.</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--rule)">
+          <td style="padding:11px 14px"><strong>vs</strong></td>
+          <td style="padding:11px 14px;text-align:center;font-family:'DM Mono',monospace">145</td>
+          <td style="padding:11px 14px;text-align:center;font-family:'DM Mono',monospace;color:var(--amber)">41%</td>
+          <td style="padding:11px 14px;text-align:center;font-family:'DM Mono',monospace;color:var(--amber)">+$214</td>
+          <td style="padding:11px 14px;text-align:center"><span style="color:var(--red)">✗ Spreadsheet</span></td>
+          <td style="padding:11px 14px;color:var(--muted)">Pct fires 87–93% of the time. Every recoup line is contested. Avg 45-min settlement vs 10-min flat.</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--rule)">
+          <td style="padding:11px 14px"><strong>% of net</strong></td>
+          <td style="padding:11px 14px;text-align:center;font-family:'DM Mono',monospace">102</td>
+          <td style="padding:11px 14px;text-align:center;font-family:'DM Mono',monospace;color:var(--red)">29%</td>
+          <td style="padding:11px 14px;text-align:center;font-family:'DM Mono',monospace;color:var(--red)">−$195</td>
+          <td style="padding:11px 14px;text-align:center"><span style="color:var(--red)">✗ Spreadsheet</span></td>
+          <td style="padding:11px 14px;color:var(--muted)">No floor means artist can earn nearly nothing. High dispute rate on expense lines below breakeven gross.</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--rule)">
+          <td style="padding:11px 14px"><strong>Door</strong></td>
+          <td style="padding:11px 14px;text-align:center;font-family:'DM Mono',monospace">30</td>
+          <td style="padding:11px 14px;text-align:center;font-family:'DM Mono',monospace;color:var(--red)">0%</td>
+          <td style="padding:11px 14px;text-align:center;font-family:'DM Mono',monospace;color:var(--red)">−$1,007</td>
+          <td style="padding:11px 14px;text-align:center"><span style="color:var(--red)">✗ Spreadsheet</span></td>
+          <td style="padding:11px 14px;color:var(--muted)">Venue earns nothing from ticket revenue. Absorbs all fees and expense overruns. Structurally broken at current terms.</td>
+        </tr>
+        <tr>
+          <td style="padding:11px 14px"><strong>% of gross</strong></td>
+          <td style="padding:11px 14px;text-align:center;font-family:'DM Mono',monospace">8</td>
+          <td style="padding:11px 14px;text-align:center;font-family:'DM Mono',monospace;color:var(--amber)">25%</td>
+          <td style="padding:11px 14px;text-align:center;font-family:'DM Mono',monospace;color:var(--red)">−$628</td>
+          <td style="padding:11px 14px;text-align:center"><span style="color:var(--green)">✓ Yes</span></td>
+          <td style="padding:11px 14px;color:var(--muted)">Artist payout ignores expenses entirely. Rare — used only for top-draw headliners where the venue relies on bar revenue to make up the difference.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- WHAT THIS MEANS -->
+  <div class="callout green">
+    <strong>What this sets up:</strong> Three of the five deal types (vs, % of net, door) push settlement off-tool into spreadsheets, generate the majority of disputes, and produce negative venue outcomes on 40–100% of shows. The recommendations in sections 3 and 4 are all responses to this specific failure pattern — not abstract policy, but targeted fixes to the structures that are causing the most damage. The flat deal is the reference: it's the only structure that settles in-tool, has predictable outcomes, and is already calibrated to artist history. Everything else is measured against it.
+  </div>
+</section>
+
+<!-- SECTION 2: CROSS-VENUE LEARNING -->
+<section class="section" id="s2">
+  <div class="section-header">
+    <div class="section-num">02</div>
+    <div class="section-title-block">
+      <h2>Cross-Venue Learning</h2>
+      <div class="subtitle">How platform data accumulation improves flat deal accuracy over time</div>
+    </div>
+    <span class="verdict-pill v-blue">Future Value</span>
+  </div>
+
+  <p class="lead">The Crescent is a mature venue — 100% of artists already have history, so cross-venue data adds nothing today. But every new venue joining the platform, and every first-timer artist, falls through to genre P75 or venue mean. Those fallbacks are only as accurate as the data behind them. Cross-venue sharing is what makes the whole SGP engine trustworthy from day one at any venue.</p>
+
+  <!-- THE CORE PROBLEM -->
+  <div class="divider-label">The Cold-Start Problem — What Happens Without Data</div>
+
+  <div style="background:#fff;border:1px solid var(--rule);padding:1.5rem;margin-bottom:1.5rem">
+    <div class="grid-2" style="margin:0;gap:2rem">
+      <div>
+        <p style="font-size:13px;line-height:1.8;margin-bottom:1rem">The SGP expense estimate is the single number that determines whether the flat suggestion is right or wrong. Get it wrong by $400 and you've either over-paid the artist or under-priced your insurance risk. The engine solves this by walking a <strong>priority waterfall</strong> — it always tries to use the most specific data available for this artist at this venue, and only falls back to broader pools when the specific data doesn't exist.</p>
+        <p style="font-size:13px;line-height:1.8;margin-bottom:1rem">The cold-start problem hits hardest in two scenarios: <strong>(1) a new venue</strong> that hasn't settled enough shows to have genre-level baselines, and <strong>(2) a touring artist</strong> playing their first show at any venue on the platform. In both cases, the engine has to make its best guess from thin data — and the SGP suggestion accuracy drops to 40–52%, compared to 87–93% at a mature venue with full artist history.</p>
+        <p style="font-size:13px;line-height:1.8">Cross-venue data sharing solves both problems simultaneously. An artist's expense profile becomes portable — their first show at a brand-new venue uses all their history from everywhere else on the platform. A new venue's genre baselines are populated instantly by the pooled history of every other venue that has hosted the same genre.</p>
+      </div>
+      <div>
+        <div class="waterfall" style="margin-bottom:.75rem">
+          <div class="wf-row">
+            <div class="wf-num">P1</div>
+            <div class="wf-bar wf-tier1">
+              <span class="wf-label">Artist ≥2 prior shows at this venue</span>
+              <span class="wf-right">Mean of history · most accurate</span>
+            </div>
+            <div class="wf-arrow">↑</div>
+          </div>
+          <div class="wf-row">
+            <div class="wf-num">P2</div>
+            <div class="wf-bar wf-tier2">
+              <span class="wf-label">Artist 1 prior show at this venue</span>
+              <span class="wf-right">Single data point — directional</span>
+            </div>
+            <div class="wf-arrow"></div>
+          </div>
+          <div class="wf-row">
+            <div class="wf-num">P3</div>
+            <div class="wf-bar wf-tier3">
+              <span class="wf-label">Genre P75 (≥3 shows in same genre)</span>
+              <span class="wf-right">Reliable only with enough genre shows</span>
+            </div>
+            <div class="wf-arrow">↑</div>
+          </div>
+          <div class="wf-row">
+            <div class="wf-num">P4</div>
+            <div class="wf-bar wf-tier4">
+              <span class="wf-label">Venue mean — all past shows average</span>
+              <span class="wf-right">Last resort · ignores genre entirely</span>
+            </div>
+            <div class="wf-arrow"></div>
+          </div>
+        </div>
+        <div style="font-size:11.5px;color:var(--muted);line-height:1.7">
+          P1 and P2 are <strong>artist-specific</strong> — cross-venue data makes P1 portable across venues.<br>
+          P3 is <strong>genre-pooled</strong> — cross-venue data makes it statistically robust.<br>
+          P4 is the failure mode — no cross-venue help reaches here.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHAT EACH TIER COSTS WHEN WRONG -->
+  <div class="divider-label">What a Wrong Estimate Actually Costs — Tier by Tier</div>
+
+  <div style="background:#fff;border:1px solid var(--rule);margin-bottom:1.5rem;overflow:hidden">
+    <table style="width:100%;border-collapse:collapse;font-size:12.5px">
+      <thead>
+        <tr style="background:var(--ink);color:var(--paper)">
+          <th style="padding:10px 14px;text-align:left;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:500">Tier Used</th>
+          <th style="padding:10px 14px;text-align:left;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:500">Typical Accuracy</th>
+          <th style="padding:10px 14px;text-align:left;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:500">Error When Wrong</th>
+          <th style="padding:10px 14px;text-align:left;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:500">Real-World Consequence</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--rule)">
+          <td style="padding:11px 14px"><strong style="color:var(--green)">P1: Artist ≥2 shows</strong></td>
+          <td style="padding:11px 14px;font-family:'DM Mono',monospace;color:var(--green)">87–93%</td>
+          <td style="padding:11px 14px;font-family:'DM Mono',monospace">±$80 avg</td>
+          <td style="padding:11px 14px;color:var(--muted)">Negligible. SGP flat is reliable enough to replace vs deals with confidence.</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--rule)">
+          <td style="padding:11px 14px"><strong style="color:var(--blue)">P2: Artist 1 show</strong></td>
+          <td style="padding:11px 14px;font-family:'DM Mono',monospace;color:var(--blue)">75–82%</td>
+          <td style="padding:11px 14px;font-family:'DM Mono',monospace">±$220 avg</td>
+          <td style="padding:11px 14px;color:var(--muted)">Acceptable on small deals. On a $6K show, a $220 error on the expense estimate shifts the flat by ~$190 — still defensible.</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--rule)">
+          <td style="padding:11px 14px"><strong style="color:var(--amber)">P3: Genre P75 (thin)</strong></td>
+          <td style="padding:11px 14px;font-family:'DM Mono',monospace;color:var(--amber)">52–68%</td>
+          <td style="padding:11px 14px;font-family:'DM Mono',monospace">±$380 avg</td>
+          <td style="padding:11px 14px;color:var(--muted)">On a $6K show: $380 expense error → ~$320 flat error. Venue either over-commits or under-covers. Dispute risk rises.</td>
+        </tr>
+        <tr>
+          <td style="padding:11px 14px"><strong style="color:var(--red)">P4: Venue mean</strong></td>
+          <td style="padding:11px 14px;font-family:'DM Mono',monospace;color:var(--red)">40–52%</td>
+          <td style="padding:11px 14px;font-family:'DM Mono',monospace">±$590 avg</td>
+          <td style="padding:11px 14px;color:var(--muted)">On a $6K show: $590 error → ~$500 flat error. At this variance the SGP flat is no better than Mariana's gut estimate. Suggestion should be suppressed.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FIVE WORKED EXAMPLES -->
+  <div class="divider-label">Five Worked Examples — Before and After Cross-Venue Data</div>
+
+  <!-- Examples A & B side by side -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+
+    <!-- Example A -->
+    <div style="border:1px solid var(--rule);background:#fff;overflow:hidden">
+      <div style="background:var(--ink);color:var(--paper);padding:.8rem 1.1rem;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;opacity:.55;margin-bottom:.2rem">Example A · Artist History Portability</div>
+          <div style="font-family:'DM Serif Display',serif;font-size:1.1rem;line-height:1.2">"Glass Bottle" plays a brand-new venue in Memphis</div>
+        </div>
+        <span style="font-family:'DM Mono',monospace;font-size:9px;background:rgba(255,255,255,.1);padding:3px 9px;border-radius:10px;white-space:nowrap">Tier 4 → Tier 1</span>
+      </div>
+      <div style="padding:1.1rem">
+        <p style="font-size:12.5px;color:var(--muted);margin-bottom:.85rem;line-height:1.65">Glass Bottle has played The Crescent 4 times. Expenses have been <strong>$1,200–$1,410</strong> each visit — they travel lean, two crew, minimal production rider. A new Memphis venue books them on a vs deal: $3,500 guarantee, 85%.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem">Without cross-venue</div>
+            <div style="background:rgba(155,28,28,.07);border-left:3px solid var(--red);padding:.7rem .85rem;font-size:12px;line-height:1.6">
+              <strong style="color:var(--red)">Tier 4 — Venue Mean</strong><br>
+              Memphis venue has 0 Glass Bottle history. Uses its own all-artist average: <strong>$1,650</strong>.<br><br>
+              Net base = $3,150 − $1,650 = <strong>$1,500</strong><br>
+              SGP flat = <strong>$1,500</strong>
+            </div>
+          </div>
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem">With cross-venue</div>
+            <div style="background:rgba(26,122,74,.07);border-left:3px solid var(--green);padding:.7rem .85rem;font-size:12px;line-height:1.6">
+              <strong style="color:var(--green)">Tier 1 — Artist History</strong><br>
+              Platform shares Glass Bottle's Crescent data: avg <strong>$1,310</strong>.<br><br>
+              Net base = $3,150 − $1,310 = <strong>$1,840</strong><br>
+              SGP flat = <strong>$1,850</strong> (rounded)
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:.75rem;padding:.65rem .85rem;background:var(--paper);font-size:12px;line-height:1.6;border-radius:2px">
+          <strong>What changes:</strong> +$350 higher flat. Memphis venue was about to offer $1,500 because that's what its blended expense average suggested. The real number is $1,850 — closer to what the percentage clause would have paid anyway. Without cross-venue data, the Memphis venue was offering a flat that was <em>too low</em> to be credible to Glass Bottle's agent, and may have been rejected.
+        </div>
+      </div>
+    </div>
+
+    <!-- Example B -->
+    <div style="border:1px solid var(--rule);background:#fff;overflow:hidden">
+      <div style="background:var(--ink);color:var(--paper);padding:.8rem 1.1rem;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;opacity:.55;margin-bottom:.2rem">Example B · Genre P75 Depth</div>
+          <div style="font-family:'DM Serif Display',serif;font-size:1.1rem;line-height:1.2">Brand-new psych rock band, first show anywhere</div>
+        </div>
+        <span style="font-family:'DM Mono',monospace;font-size:9px;background:rgba(255,255,255,.1);padding:3px 9px;border-radius:10px;white-space:nowrap">C-tier → B-tier</span>
+      </div>
+      <div style="padding:1.1rem">
+        <p style="font-size:12.5px;color:var(--muted);margin-bottom:.85rem;line-height:1.65">A newly signed psych rock band — no prior shows anywhere. The Crescent offers a % of net deal. The engine has no artist history, no agent history. It must use genre data only. How reliable is that?</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem">Without cross-venue (today)</div>
+            <div style="background:rgba(168,90,0,.07);border-left:3px solid var(--amber);padding:.7rem .85rem;font-size:12px;line-height:1.6">
+              <strong style="color:var(--amber)">Tier 3 — Genre P75 (thin)</strong><br>
+              Crescent has 18 psych rock shows. P75 = <strong>$1,585</strong>. Sample is thin — 3 outlier nights (tours with extra PA gear) skew it. Accuracy: ~58%. Confidence: <strong>C-tier</strong>.
+            </div>
+          </div>
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem">With 300 platform venues</div>
+            <div style="background:rgba(26,122,74,.07);border-left:3px solid var(--green);padding:.7rem .85rem;font-size:12px;line-height:1.6">
+              <strong style="color:var(--green)">Tier 3 — Genre P75 (robust)</strong><br>
+              Platform has 5,400 psych rock shows. P75 = <strong>$1,592</strong> — nearly identical, but outliers now wash out. Accuracy: ~78%. Confidence promoted to <strong>B-tier</strong>.
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:.75rem;padding:.65rem .85rem;background:var(--paper);font-size:12px;line-height:1.6;border-radius:2px">
+          <strong>What changes:</strong> Same dollar estimate ($1,585 vs $1,592) but confidence tier B vs C unlocks a more assertive SGP suggestion and drops the insurance tier from 3→2. The C-tier result would have prompted Mariana to flag this for manual review. The B-tier result settles automatically.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Examples C & D side by side -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+
+    <!-- Example C -->
+    <div style="border:1px solid var(--rule);background:#fff;overflow:hidden">
+      <div style="background:var(--ink);color:var(--paper);padding:.8rem 1.1rem;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;opacity:.55;margin-bottom:.2rem">Example C · Touring Act, First Nashville Show</div>
+          <div style="font-family:'DM Serif Display',serif;font-size:1.1rem;line-height:1.2">"Gentle Riot" — 6 shows elsewhere, 0 at Crescent</div>
+        </div>
+        <span style="font-family:'DM Mono',monospace;font-size:9px;background:rgba(255,255,255,.1);padding:3px 9px;border-radius:10px;white-space:nowrap">Tier 3 → Tier 1</span>
+      </div>
+      <div style="padding:1.1rem">
+        <p style="font-size:12.5px;color:var(--muted);margin-bottom:.85rem;line-height:1.65">Gentle Riot is an established indie rock act with 6 platform shows in Austin and Atlanta. They consistently run <strong>$1,820–$1,960</strong> per show — larger crew, full backline. Their first Nashville date: The Crescent books them on a vs deal, $4,200 guarantee, 85%.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem">Without cross-venue</div>
+            <div style="background:rgba(155,28,28,.07);border-left:3px solid var(--red);padding:.7rem .85rem;font-size:12px;line-height:1.6">
+              <strong style="color:var(--red)">Tier 3 — Genre P75</strong><br>
+              No Gentle Riot history at Crescent. Falls to indie rock genre P75: <strong>$1,707</strong>. Underestimates by ~$186.<br><br>
+              Net base = $3,780 − $1,707 = $2,073<br>
+              SGP flat = <strong>$2,100</strong>
+            </div>
+          </div>
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem">With cross-venue</div>
+            <div style="background:rgba(26,122,74,.07);border-left:3px solid var(--green);padding:.7rem .85rem;font-size:12px;line-height:1.6">
+              <strong style="color:var(--green)">Tier 1 — Artist History</strong><br>
+              Austin + Atlanta data: avg <strong>$1,893</strong>.<br><br>
+              Net base = $3,780 − $1,893 = $1,887<br>
+              SGP flat = <strong>$1,900</strong> (rounded)
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:.75rem;padding:.65rem .85rem;background:var(--paper);font-size:12px;line-height:1.6;border-radius:2px">
+          <strong>What changes:</strong> Without cross-venue data, Crescent offers a flat of $2,100 — but Gentle Riot's actual expense comes in at $1,900 on the night. The $186 expense overrun creates a recoup dispute. With cross-venue data, the flat is priced at $1,900 — exactly matching reality. The dispute never happens.
+        </div>
+      </div>
+    </div>
+
+    <!-- Example D: Agent Roster -->
+    <div style="border:1px solid var(--rule);background:#fff;overflow:hidden">
+      <div style="background:var(--ink);color:var(--paper);padding:.8rem 1.1rem;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;opacity:.55;margin-bottom:.2rem">Example D · Agent Roster Effect</div>
+          <div style="font-family:'DM Serif Display',serif;font-size:1.1rem;line-height:1.2">New artist from a well-known agent's roster</div>
+        </div>
+        <span style="font-family:'DM Mono',monospace;font-size:9px;background:rgba(255,255,255,.1);padding:3px 9px;border-radius:10px;white-space:nowrap">Tier 4 → Tier 2</span>
+      </div>
+      <div style="padding:1.1rem">
+        <p style="font-size:12.5px;color:var(--muted);margin-bottom:.85rem;line-height:1.65">A new artist — zero shows anywhere — is represented by an agent whose existing roster has played The Crescent 12 times. The SGP engine uses the agent's roster history as a proxy when the artist has no record of their own. Cross-venue data multiplies this by every show that agent's roster has played across the whole platform.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem">Without cross-venue</div>
+            <div style="background:rgba(168,90,0,.07);border-left:3px solid var(--amber);padding:.7rem .85rem;font-size:12px;line-height:1.6">
+              <strong style="color:var(--amber)">Tier 2 — Agent History (local only)</strong><br>
+              Agent has 12 shows at Crescent. Mean expense across roster: <strong>$1,480</strong>. Reasonable, but based only on Nashville behaviour. Confidence: <strong>B-tier</strong>.
+            </div>
+          </div>
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem">With cross-venue</div>
+            <div style="background:rgba(26,122,74,.07);border-left:3px solid var(--green);padding:.7rem .85rem;font-size:12px;line-height:1.6">
+              <strong style="color:var(--green)">Tier 2 — Agent History (platform-wide)</strong><br>
+              Agent's roster has 87 platform shows across 14 cities. Mean expense: <strong>$1,512</strong>. Confidence: <strong>A-tier</strong> (3+ shows, large margin).
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:.75rem;padding:.65rem .85rem;background:var(--paper);font-size:12px;line-height:1.6;border-radius:2px">
+          <strong>What changes:</strong> The estimate barely moves ($1,480 → $1,512) but confidence jumps from B → A. That matters: A-tier suggestions in the SGP engine produce insurance Tier 1 or 2, meaning lower premium recommendations. The agent's track record across the whole platform makes this new artist legible from day one.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Example E: New Venue Cold Start -->
+  <div style="border:1px solid var(--rule);background:#fff;overflow:hidden;margin-bottom:1.5rem">
+    <div style="background:var(--ink);color:var(--paper);padding:.8rem 1.1rem;display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;opacity:.55;margin-bottom:.2rem">Example E · New Venue Cold Start — Year 1 vs Year 3</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:1.1rem;line-height:1.2">A brand-new 400-cap venue in Asheville joins the platform on Day 1</div>
+      </div>
+      <span style="font-family:'DM Mono',monospace;font-size:9px;background:rgba(255,255,255,.1);padding:3px 9px;border-radius:10px;white-space:nowrap">Highest-impact case</span>
+    </div>
+    <div style="padding:1.25rem">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.25rem">
+        <div>
+          <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem;padding-bottom:.4rem;border-bottom:1px solid var(--rule)">Day 1 — No Platform Data</div>
+          <p style="font-size:12px;color:var(--muted);line-height:1.65;margin-bottom:.65rem">The Asheville venue books its first artist — a regional indie act with no Greenroom history. The engine has nothing: no artist history, no agent history, no genre baseline specific to this venue.</p>
+          <div style="background:rgba(155,28,28,.07);border-left:3px solid var(--red);padding:.65rem .8rem;font-size:12px;line-height:1.6">
+            <strong style="color:var(--red)">P4 — Venue Mean</strong><br>
+            Venue mean = $0 (no shows yet). Engine defaults to platform-wide mean if available, otherwise $1,500 static default. Accuracy: ~40%. Every SGP suggestion is a rough guess.
+          </div>
+        </div>
+        <div>
+          <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem;padding-bottom:.4rem;border-bottom:1px solid var(--rule)">Day 1 — With Platform Data</div>
+          <p style="font-size:12px;color:var(--muted);line-height:1.65;margin-bottom:.65rem">Same scenario, but the platform's 300 other venues have already settled 15,000+ shows. The regional indie act has played 8 of those shows. The genre (indie rock) has 4,200 platform data points.</p>
+          <div style="background:rgba(26,122,74,.07);border-left:3px solid var(--green);padding:.65rem .8rem;font-size:12px;line-height:1.6">
+            <strong style="color:var(--green)">P1 — Artist History (portable)</strong><br>
+            Artist's 8-show expense avg: $1,390. Genre P75 as backup: $1,615. SGP flat immediately accurate. Asheville venue gets Tier 1 accuracy on its very first booking.
+          </div>
+        </div>
+        <div>
+          <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem;padding-bottom:.4rem;border-bottom:1px solid var(--rule)">Year 3 — Compounded Learning</div>
+          <p style="font-size:12px;color:var(--muted);line-height:1.65;margin-bottom:.65rem">By Year 3, Asheville has settled 300+ shows of its own and shares its data back into the platform. Artists booked in Asheville for the first time now benefit from its local history. The loop is closed.</p>
+          <div style="background:rgba(26,78,138,.07);border-left:3px solid var(--blue);padding:.65rem .8rem;font-size:12px;line-height:1.6">
+            <strong style="color:var(--blue)">Full bilateral compounding</strong><br>
+            Asheville takes from the platform (getting Tier 1 immediately) <em>and</em> contributes back (improving accuracy for every other venue that later books the same artists).
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHAT GETS SHARED -->
+  <div class="divider-label">What Exactly Gets Shared — and What Stays Private</div>
+
+  <div class="grid-2" style="margin-bottom:1.5rem">
+    <div class="info-card">
+      <h4 style="color:var(--green)">✓ Shared across venues (anonymised)</h4>
+      <div class="row"><span class="row-label">Artist ID (hashed, not a name)</span><span class="row-val pos">Used to match artist history cross-venue</span></div>
+      <div class="row"><span class="row-label">Per-show billed expense total</span><span class="row-val pos">Single number: $1,420 — no line-item breakdown</span></div>
+      <div class="row"><span class="row-label">Genre tag</span><span class="row-val pos">For genre P75 pooling across venues</span></div>
+      <div class="row"><span class="row-label">Show date (month/year only)</span><span class="row-val pos">Enables recency weighting of older data</span></div>
+      <div class="row"><span class="row-label">Deal type</span><span class="row-val pos">vs / flat / door / % of net</span></div>
+      <div class="row"><span class="row-label">Agent ID (hashed)</span><span class="row-val pos">Enables agent roster history to be portable</span></div>
+    </div>
+    <div class="info-card">
+      <h4 style="color:var(--red)">✗ Never shared — stays venue-private</h4>
+      <div class="row"><span class="row-label">Gross box office</span><span class="row-val neg">Venue revenue is strictly confidential</span></div>
+      <div class="row"><span class="row-label">Artist payout amounts</span><span class="row-val neg">Deal economics stay private to each venue</span></div>
+      <div class="row"><span class="row-label">Guarantee or percentage terms</span><span class="row-val neg">Contract terms are never shared</span></div>
+      <div class="row"><span class="row-label">Settlement status or disputes</span><span class="row-val neg">Operational data stays at the venue level</span></div>
+      <div class="row"><span class="row-label">Venue identity behind a data point</span><span class="row-val neg">Pooled data is fully anonymised by source venue</span></div>
+      <div class="row"><span class="row-label">Expense line-item breakdown</span><span class="row-val neg">Only the total is shared — not sound vs hospitality vs production</span></div>
+    </div>
+  </div>
+
+  <!-- COMPOUNDING VALUE -->
+  <div class="callout blue">
+    <strong>The compounding effect — why this is a genuine platform moat:</strong> Every new show settled anywhere on the platform makes the SGP engine more accurate for everyone. An artist's expense history travels with them. An agent's roster credibility is portable. A genre's P75 baseline gets stronger with every venue that joins. The Crescent benefits from this today only at the margins (100% already at Tier 1), but any venue that joins after year one gets instant accuracy that would have taken 3+ years of solo operation to build. That accuracy gap is what separates Greenroom from a venue using a spreadsheet — and it widens every quarter.
+  </div>
+
+  <div class="chart-wrap">
+    <div class="chart-title">SGP flat suggestion accuracy by platform scale — three artist scenarios</div>
+    <canvas id="learningChart"></canvas>
+  </div>
+
+  <div class="grid-3">
+    <div class="stat-card">
+      <div class="stat-label">Genres at Crescent</div>
+      <div class="stat-value">14</div>
+      <div class="stat-sub">indie rock leads with 85+ shows</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Avg expense — all genres</div>
+      <div class="stat-value">$1,540</div>
+      <div class="stat-sub">flat regardless of gross level</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Genre P75 range</div>
+      <div class="stat-value">$1,585</div>
+      <div class="stat-sub">psych rock (low) → $1,869 post rock (high)</div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 3: SGP & SMART SWITCH MECHANISM -->
+<section class="section" id="s3">
+  <div class="section-header">
+    <div class="section-num">03</div>
+    <div class="section-title-block">
+      <h2>SGP &amp; Smart Switch: The Mechanism</h2>
+      <div class="subtitle">How the data-driven price suggestion engine works, and how Smart Switch converts it into a deal structure recommendation</div>
+    </div>
+    <span class="verdict-pill v-amber">Engine Detail</span>
+  </div>
+
+  <p class="lead">Two separate tools work in sequence. The <strong>Smart Guaranteed Price (SGP)</strong> engine generates a data-backed flat dollar figure by walking a seven-step waterfall of historical data. <strong>Smart Switch</strong> takes that figure and asks: "given what this deal type actually does, would replacing it with this flat suggestion make both parties better off?" For $5–10K deals, the answer is nuanced — the percentage fires 93% of the time, making a smarter hybrid structure more appropriate than a raw flat.</p>
+
+  <!-- SGP ENGINE -->
+  <div class="divider-label">Step 1 — The SGP Engine: Seven-Step Price Waterfall</div>
+
+  <div style="background:#fff;border:1px solid var(--rule);padding:1.25rem;margin-bottom:1.5rem">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+      <div>
+        <p style="font-size:13px;line-height:1.75;margin-bottom:1rem">The SGP engine produces a single suggested flat price for any non-flat deal. It works by estimating what the deal would have paid out had it already settled, using the best available historical data for this specific artist at this specific venue.</p>
+        <div class="formula-block">
+<span class="f-comment">— 7-step SGP calculation</span><br>
+<span class="f-key">step1</span> = expected_gross  <span class="f-comment">← artist/agent/genre/venue waterfall</span><br>
+<span class="f-key">step2</span> = ticketing_fees = expected_gross × <span class="f-val">0.10</span><br>
+<span class="f-key">step3</span> = net_after_fees = expected_gross − fees<br>
+<span class="f-key">step4</span> = expense_est    <span class="f-comment">← P75-capped expense waterfall</span><br>
+<span class="f-key">step5</span> = net_base = max(<span class="f-val">0</span>, net_after_fees − expense_est)<br>
+<span class="f-key">step6</span> = pct_payout = percentage × net_base<br>
+<span class="f-key">step7</span> = SGP_flat = round50(max(<span class="f-val">guarantee</span>, pct_payout))
+        </div>
+      </div>
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem">Confidence tier — how reliable is the suggestion?</div>
+        <div class="waterfall" style="margin-bottom:.75rem">
+          <div class="wf-row">
+            <div class="wf-num" style="font-size:9px">A</div>
+            <div class="wf-bar wf-tier1">
+              <span class="wf-label">Artist ≥3 shows, margin &gt;$200</span>
+              <span class="wf-right">Highest — auto-suggest</span>
+            </div>
+          </div>
+          <div class="wf-row">
+            <div class="wf-num" style="font-size:9px">B</div>
+            <div class="wf-bar wf-tier2">
+              <span class="wf-label">Artist 1–2 shows, or agent ≥3</span>
+              <span class="wf-right">Strong — suggest with note</span>
+            </div>
+          </div>
+          <div class="wf-row">
+            <div class="wf-num" style="font-size:9px">C</div>
+            <div class="wf-bar wf-tier3">
+              <span class="wf-label">Agent 1+ show, or genre data</span>
+              <span class="wf-right">Moderate — flag for review</span>
+            </div>
+          </div>
+          <div class="wf-row">
+            <div class="wf-num" style="font-size:9px">D</div>
+            <div class="wf-bar wf-tier4">
+              <span class="wf-label">No artist, agent, or genre signal</span>
+              <span class="wf-right">Low — suppress suggestion</span>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:11.5px;color:var(--muted);line-height:1.65">At The Crescent today, <strong>100% of eligible deals resolve at Tier A or B</strong> — every artist has prior show history. Confidence tier D only occurs for first-timers at new venues, which is where cross-venue data (Section 2) matters most.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SGP WORKED EXAMPLE -->
+  <div class="divider-label">SGP in practice — a $1–5K vs deal walked through</div>
+
+  <div style="background:#fff;border:1px solid var(--rule);overflow:hidden;margin-bottom:1.5rem">
+    <div style="background:var(--ink);color:#f0ede8;padding:.7rem 1.25rem;display:flex;justify-content:space-between;align-items:center">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase">Worked example · Glass Bottle · vs deal · $1–5K bracket</div>
+      <div style="font-family:'DM Mono',monospace;font-size:9px;color:#a09e98">Confidence Tier A · 4 prior shows at venue</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0">
+
+      <!-- Left: before (current vs deal) -->
+      <div style="padding:1.1rem 1.25rem;border-right:1px solid var(--rule)">
+        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem">Current — vs deal as signed</div>
+        <div style="font-size:12.5px;color:var(--muted);line-height:2;font-family:'DM Mono',monospace">
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--rule);padding:3px 0"><span>Guarantee</span><span style="color:var(--ink)">$2,000</span></div>
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--rule);padding:3px 0"><span>Percentage</span><span style="color:var(--ink)">85% of net</span></div>
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--rule);padding:3px 0"><span>Artist earns (pct fires)</span><span style="color:var(--amber);font-weight:500">$2,100</span></div>
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--rule);padding:3px 0"><span>Settlement method</span><span style="color:var(--red)">Spreadsheet + recoup</span></div>
+          <div style="display:flex;justify-content:space-between;padding:3px 0"><span>Dispute risk</span><span style="color:var(--red)">12.4% (vs baseline)</span></div>
+        </div>
+        <div style="margin-top:.85rem;font-size:11.5px;color:var(--muted);line-height:1.6">The pct fires above the $2,000 guarantee — as it does on 87% of vs deals at this venue. Settlement requires Mariana to calculate the recoup against each expense line before the number is confirmed.</div>
+      </div>
+
+      <!-- Right: SGP seven steps -->
+      <div style="padding:1.1rem 1.25rem">
+        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem">SGP engine — seven steps</div>
+        <div style="font-size:12px;line-height:2;font-family:'DM Mono',monospace;color:var(--muted)">
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--rule);padding:3px 0"><span><span style="color:var(--blue)">1</span> Expected gross</span><span style="color:var(--ink)">$4,200 <span style="font-size:10px;color:var(--muted)">(artist_at_venue · n=4)</span></span></div>
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--rule);padding:3px 0"><span><span style="color:var(--blue)">2</span> Ticketing fees (10%)</span><span style="color:var(--ink)">− $420</span></div>
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--rule);padding:3px 0"><span><span style="color:var(--blue)">3</span> Net after fees</span><span style="color:var(--ink)">$3,780</span></div>
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--rule);padding:3px 0"><span><span style="color:var(--blue)">4</span> Expense est. (capped)</span><span style="color:var(--ink)">− $1,310 <span style="font-size:10px;color:var(--muted)">(artist history · cap $1,850)</span></span></div>
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--rule);padding:3px 0"><span><span style="color:var(--blue)">5</span> Net base</span><span style="color:var(--ink)">$2,470</span></div>
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--rule);padding:3px 0"><span><span style="color:var(--blue)">6</span> Pct payout (85%)</span><span style="color:var(--ink)">$2,100</span></div>
+          <div style="display:flex;justify-content:space-between;padding:3px 0"><span><span style="color:var(--blue)">7</span> max($2,000, $2,100) → round50</span><span style="color:var(--green);font-weight:500">$2,100 flat</span></div>
+        </div>
+        <div style="margin-top:.85rem;padding:.65rem .85rem;background:rgba(26,122,74,.07);border-left:3px solid var(--green);font-size:12px;line-height:1.65">
+          <strong style="color:var(--green)">Smart Switch proposes:</strong> offer a flat guarantee of <strong>$2,100</strong> before show night. Artist earns the same amount they would have under the vs terms. Venue eliminates recoup arithmetic and drops dispute risk from 12.4% to 3.8%. The conversion is not a discount — it is the pct payout locked in early.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SMART SWITCH -->
+  <div class="divider-label">Step 2 — Smart Switch: From Suggestion to Structure Change</div>
+
+  <div style="background:#fff;border:1px solid var(--rule);padding:1.25rem;margin-bottom:1.5rem">
+    <p style="font-size:13px;line-height:1.75;margin-bottom:1rem">Smart Switch uses the SGP flat as its input and decides whether to propose replacing the deal's structure entirely. It operates cell by cell — only proposing changes where the data shows a structural improvement is safe and consistent. It intentionally suppresses suggestions where data is thin or the deal size makes a flat conversion inappropriate.</p>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem">
+      <div style="padding:1rem;background:rgba(26,122,74,.06);border:1px solid rgba(26,122,74,.2);border-radius:2px">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;color:var(--green);margin-bottom:.5rem">$1–5K · vs / % of net</div>
+        <div style="font-size:12.5px;line-height:1.65;color:var(--muted)">Smart Switch proposes a <strong style="color:var(--green)">flat at the SGP price</strong>. The percentage fires 87% of the time above guarantee — a flat at the pct_pay level is fair to the artist and eliminates settlement night arithmetic. Confidence A/B required; falls back to contract guarantee on C/D.</div>
+      </div>
+      <div style="padding:1rem;background:rgba(168,90,0,.06);border:1px solid rgba(168,90,0,.2);border-radius:2px">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;color:var(--amber);margin-bottom:.5rem">Door · Any size</div>
+        <div style="font-size:12.5px;line-height:1.65;color:var(--muted)">Smart Switch proposes a <strong style="color:var(--amber)">door hybrid</strong>: $500 floor + 60% of available pool above expenses. A dead-pool branch fires when projected pool ≤ $500 — artist gets a guaranteed floor, venue stops absorbing losses. Suppressed at $15K+ (n=1 history).</div>
+      </div>
+      <div style="padding:1rem;background:rgba(136,135,128,.08);border:1px solid rgba(136,135,128,.2);border-radius:2px">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem">Flat / % of gross · Any size</div>
+        <div style="font-size:12.5px;line-height:1.65;color:var(--muted)"><strong style="color:var(--muted)">No switch proposed.</strong> Flat deals are already priced correctly — the SGP confirms rather than replaces. % of gross deals are rare and structurally sound for the shows they're used on. No change needed.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- $5-10K SPECIAL CASE -->
+  <div class="divider-label">The $5–10K Special Case — Why a Flat Isn't Enough</div>
+
+  <div class="grid-2">
+    <div>
+      <div class="info-card" style="margin-bottom:1rem">
+        <h4>Current vs SGP flat vs Smart Hybrid</h4>
+        <div class="row"><span class="row-label">Avg artist payout — current</span><span class="row-val">$4,625</span></div>
+        <div class="row"><span class="row-label">Avg artist — SGP flat</span><span class="row-val warn">$4,114 (−$511)</span></div>
+        <div class="row"><span class="row-label">Avg artist — Smart Hybrid</span><span class="row-val warn">$3,474 (−$1,151)</span></div>
+        <div class="row"><span class="row-label">Avg venue — current</span><span class="row-val">+$336</span></div>
+        <div class="row"><span class="row-label">Avg venue — SGP flat</span><span class="row-val pos">+$847 (+$511)</span></div>
+        <div class="row"><span class="row-label">Avg venue — Smart Hybrid</span><span class="row-val pos">+$1,487 (+$1,151)</span></div>
+        <div class="row"><span class="row-label">Both-positive — current</span><span class="row-val">50/73</span></div>
+        <div class="row"><span class="row-label">Both-positive — SGP or Hybrid</span><span class="row-val pos">72/73</span></div>
+      </div>
+    </div>
+    <div>
+      <div style="background:#1a1916;padding:1.25rem 1.5rem;border-radius:4px;margin-bottom:1rem">
+        <div style="font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:#6a6560;margin-bottom:.75rem">Smart Hybrid Formula — $5–10K vs / % of net</div>
+        <div class="formula-block" style="background:transparent;padding:0">
+<span class="f-comment">— Step 1: calculate available pool</span><br>
+<span class="f-key">exp_capped</span> = min(actual_exp, <span class="f-val">$1,750</span>)  <span class="f-comment">← P75 cap</span><br>
+<span class="f-key">net_base</span>  = max(<span class="f-val">0</span>, gross × <span class="f-val">0.90</span> - exp_capped)<br>
+<span class="f-key">pct_pay</span>   = pct × net_base<br><br>
+<span class="f-comment">— Step 2: floor + split above floor</span><br>
+<span class="f-key">floor</span>     = guarantee_amount<br>
+<span class="f-key">upside</span>    = <span class="f-val">50%</span> × max(<span class="f-val">0</span>, pct_pay - floor)<br>
+<span class="f-key">artist</span>    = floor + upside<br><br>
+<span class="f-comment">— Step 3: data-backed ceiling</span><br>
+<span class="f-key">ceiling</span>   = SGP_flat × <span class="f-val">1.15</span>  <span class="f-comment">← prevents outlier payouts</span><br>
+<span class="f-key">artist</span>    = min(artist, ceiling)
+        </div>
+      </div>
+      <div class="callout amber">
+        <strong>Why hybrid beats raw flat for agents:</strong> A flat asks agents to give up all percentage upside permanently. The hybrid preserves the guarantee floor (what the artist is owed regardless) and awards 50% of any surplus above it — agents keep the upside participation argument without the 100% split that bleeds the venue.
+      </div>
+    </div>
+  </div>
+
+  <!-- SMART HYBRID WORKED EXAMPLE -->
+  <div style="background:#fff;border:1px solid var(--rule);overflow:hidden;margin-bottom:1.25rem">
+    <div style="background:var(--ink);color:#f0ede8;padding:.7rem 1.25rem;display:flex;justify-content:space-between;align-items:center">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase">Worked example · Gentle Riot · vs deal · $5–10K bracket</div>
+      <div style="font-family:'DM Mono',monospace;font-size:9px;color:#a09e98">Gross $7,500 · Guarantee $4,200 · 85% of net</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0">
+
+      <!-- Current -->
+      <div style="padding:1rem 1.1rem;border-right:1px solid var(--rule)">
+        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--red);margin-bottom:.65rem">Current — raw vs deal</div>
+        <div style="font-size:12px;font-family:'DM Mono',monospace;line-height:2;color:var(--muted)">
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--rule);padding:2px 0"><span>Gross</span><span style="color:var(--ink)">$7,500</span></div>
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--rule);padding:2px 0"><span>Fees (10%)</span><span style="color:var(--ink)">− $750</span></div>
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--rule);padding:2px 0"><span>Expenses</span><span style="color:var(--ink)">− $1,580</span></div>
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--rule);padding:2px 0"><span>Net base</span><span style="color:var(--ink)">$5,170</span></div>
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--rule);padding:2px 0"><span>Pct payout (85%)</span><span style="color:var(--ink)">$4,395</span></div>
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--rule);padding:2px 0"><span style="color:var(--amber)">Artist earns</span><span style="color:var(--amber);font-weight:500">$4,395</span></div>
+          <div style="display:flex;justify-content:space-between;padding:2px 0"><span style="color:var(--red)">Venue nets</span><span style="color:var(--red);font-weight:500">$775</span></div>
+        </div>
+        <div style="margin-top:.75rem;font-size:11px;color:var(--muted);line-height:1.55">Pct fired above guarantee. Venue keeps nothing from the $195 surplus above the floor. Recoup arithmetic required at settlement.</div>
+      </div>
+
+      <!-- SGP Flat -->
+      <div style="padding:1rem 1.1rem;border-right:1px solid var(--rule)">
+        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:.65rem">SGP Flat — max(guar, pct_pay) → $50</div>
+        <div style="font-size:12px;font-family:'DM Mono',monospace;line-height:2;color:var(--muted)">
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--rule);padding:2px 0"><span>Gross</span><span style="color:var(--ink)">$7,500</span></div>
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--rule);padding:2px 0"><span>Fees (10%)</span><span style="color:var(--ink)">− $750</span></div>
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--rule);padding:2px 0"><span>Expenses</span><span style="color:var(--ink)">− $1,580</span></div>
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--rule);padding:2px 0"><span>Pct payout</span><span style="color:var(--ink)">$4,395</span></div>
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--rule);padding:2px 0"><span>round50($4,395)</span><span style="color:var(--ink)">$4,400</span></div>
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--rule);padding:2px 0"><span style="color:var(--blue)">Artist earns</span><span style="color:var(--blue);font-weight:500">$4,400</span></div>
+          <div style="display:flex;justify-content:space-between;padding:2px 0"><span style="color:var(--green)">Venue nets</span><span style="color:var(--green);font-weight:500">$770</span></div>
+        </div>
+        <div style="margin-top:.75rem;font-size:11px;color:var(--muted);line-height:1.55">Clean settlement — no recoup. But venue still earns nothing from the surplus above the guarantee. Works, but doesn't share upside.</div>
+      </div>
+
+      <!-- Smart Hybrid -->
+      <div style="padding:1rem 1.1rem">
+        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin-bottom:.65rem">Smart Hybrid — floor + 50% upside</div>
+        <div style="font-size:12px;font-family:'DM Mono',monospace;line-height:2;color:var(--muted)">
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--rule);padding:2px 0"><span>Gross</span><span style="color:var(--ink)">$7,500</span></div>
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--rule);padding:2px 0"><span>Fees (10%)</span><span style="color:var(--ink)">− $750</span></div>
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--rule);padding:2px 0"><span>Exp capped at $1,750</span><span style="color:var(--ink)">− $1,580</span></div>
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--rule);padding:2px 0"><span>Floor (guarantee)</span><span style="color:var(--ink)">$4,200</span></div>
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--rule);padding:2px 0"><span>Upside = 50% × ($4,395 − $4,200)</span><span style="color:var(--ink)">+ $98</span></div>
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--rule);padding:2px 0"><span style="color:var(--green)">Artist earns</span><span style="color:var(--green);font-weight:500">$4,298</span></div>
+          <div style="display:flex;justify-content:space-between;padding:2px 0"><span style="color:var(--green)">Venue nets</span><span style="color:var(--green);font-weight:500">$872</span></div>
+        </div>
+        <div style="margin-top:.75rem;font-size:11px;color:var(--muted);line-height:1.55">Artist keeps their guarantee plus half the surplus. Venue keeps the other half (+$97 vs current). Agent retains upside participation — not a flat cap.</div>
+      </div>
+
+    </div>
+    <div style="padding:.75rem 1.25rem;background:rgba(26,122,74,.05);border-top:1px solid var(--rule);font-size:12px;color:var(--muted);line-height:1.65;display:flex;gap:2rem;flex-wrap:wrap">
+      <span><strong style="color:var(--ink)">Artist delta:</strong> current $4,395 → hybrid $4,298 <span style="color:var(--red)">(−$97)</span></span>
+      <span><strong style="color:var(--ink)">Venue delta:</strong> current $775 → hybrid $872 <span style="color:var(--green)">(+$97)</span></span>
+      <span><strong style="color:var(--ink)">Ceiling check:</strong> SGP flat $4,400 × 1.15 = $5,060 — hybrid $4,298 well within ceiling</span>
+    </div>
+  </div>
+
+  <div class="chart-wrap">
+    <div class="chart-title">$5–10K vs deals: actual vs SGP flat vs smart hybrid — artist and venue outcomes</div>
+    <canvas id="hybridChart"></canvas>
+  </div>
+</section>
+
+<!-- SECTION 4: DECISION MATRIX -->
+<section class="section" id="s4">
+  <div class="section-header">
+    <div class="section-num">04</div>
+    <div class="section-title-block">
+      <h2>Final Recommendations &amp; Decision Matrix</h2>
+      <div class="subtitle">What to do for every deal type and gross range under $10K — six scenarios, six distinct responses</div>
+    </div>
+    <span class="verdict-pill v-green">Actionable</span>
+  </div>
+
+  <p class="lead">The five deal types described in Section 1 create six distinct problem scenarios under $10K. Each has a different structural root cause and a different optimal fix. These recommendations flow directly from the expense data (Section 5), the SGP engine mechanics (Section 3), and the cross-venue baseline data (Section 2). They are not policy opinions — they are the output of applying the data to each deal structure.</p>
+
+  <table class="decision-table">
+    <thead>
+      <tr>
+        <th>Range &amp; Deal Type</th>
+        <th>Current State</th>
+        <th>Root Cause of Problem</th>
+        <th>Recommended Action</th>
+        <th>Expected Outcome</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="dt-range">$1–5K</span><br><span class="tag tag-neut">Flat</span></td>
+        <td>52/114 both+<br><span style="color:var(--muted);font-size:11px">Venue avg −$178</span></td>
+        <td>Expenses exceed gross on low-gross nights. Structural — no deal fix possible below ~$3,500 gross.</td>
+        <td><span class="tag tag-green">Keep as-is</span><br>Mariana's guarantee-setting is already SGP-calibrated. 114/114 match within ±$50.</td>
+        <td><span style="color:var(--muted);font-size:12px">No change. Add SGP confidence chip to UI only.</span></td>
+      </tr>
+      <tr>
+        <td><span class="dt-range">$1–5K</span><br><span class="tag tag-blue">vs / % of net</span></td>
+        <td>16/87 both+<br><span style="color:var(--muted);font-size:11px">Venue avg −$580</span></td>
+        <td>Artificially low deal caps inflate % of net payout. Guarantee never wins on vs deals (87% fire rate).</td>
+        <td><span class="tag tag-blue">Smart Switch</span><br>Expand to all vs/pn at $1–5K. Fix exp cap from $800 → $1,729 (P75). Use guarantee as flat anchor on low-confidence deals.</td>
+        <td class="pos"><strong>52/87 both+</strong><br>$100,619 transferred to venue over 2yrs across all $1–5K deal types.</td>
+      </tr>
+      <tr>
+        <td><span class="dt-range">$1–5K</span><br><span class="tag tag-amber">Door</span></td>
+        <td>0/19 both+<br><span style="color:var(--muted);font-size:11px">Venue avg −$1,429</span></td>
+        <td>Artist takes 100% of gross minus capped expenses. Venue absorbs fees + all expense overruns.</td>
+        <td><span class="tag tag-amber">Door Hybrid</span><br>$500 floor + 60/40 split above floor. $1,774 uniform expense cap. Dead-pool branch when avail ≤ $500.</td>
+        <td class="pos"><strong>0→2 both+</strong> on viable shows. Venue recovers +$1,144 avg on dead-pool shows.</td>
+      </tr>
+      <tr>
+        <td><span class="dt-range">$5–10K</span><br><span class="tag tag-neut">Flat</span></td>
+        <td>36/36 both+<br><span style="color:var(--muted);font-size:11px">Venue avg +$2,689</span></td>
+        <td>No problem. Flat deals at $5–10K are the healthiest structure on the platform.</td>
+        <td><span class="tag tag-green">Keep as-is</span><br>SGP provides confidence display and catches outlier over-guarantees. No structural change needed.</td>
+        <td><span style="color:var(--muted);font-size:12px">No change to profitability.</span></td>
+      </tr>
+      <tr>
+        <td><span class="dt-range">$5–10K</span><br><span class="tag tag-amber">vs / % of net</span></td>
+        <td>50/73 + 24/30 both+<br><span style="color:var(--muted);font-size:11px">Pct fires 93%</span></td>
+        <td>Pct fires almost every night (+$2,263 avg above guarantee). Venue gives up all surplus above floor.</td>
+        <td><span class="tag tag-amber">Smart Hybrid</span><br>Guarantee floor + 50% of upside above floor. Ceiling at SGP×1.15. Agents keep upside participation.</td>
+        <td class="pos"><strong>72/73 both+</strong><br>Venue avg +$1,487 (vs +$336 current). Artists keep guarantee + half upside.</td>
+      </tr>
+      <tr>
+        <td><span class="dt-range">$5–10K</span><br><span class="tag tag-red">Door</span></td>
+        <td>3 shows only<br><span style="color:var(--muted);font-size:11px">n too small</span></td>
+        <td>Insufficient history to project hybrid math on 3 data points.</td>
+        <td><span class="tag tag-neut">Maintain Suppressed</span><br>Smart Switch correctly refuses projection. Talk to agent directly. $500 floor baseline recommended.</td>
+        <td><span style="color:var(--muted);font-size:12px">Correct decision. No change.</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <strong>Summary answer to "change everything under $10K to SGP flat":</strong> For $1–5K vs/pn deals — yes, SGP flat (Smart Switch) is the right tool and already works. For $1–5K door — the hybrid replaces it. For $5–10K vs/pn — the Smart Hybrid is strictly better than raw SGP flat because it preserves agent relationships while achieving the same profitability outcome. For all flat deals — no action needed; they're already priced correctly. The irreducible 109 shows that lose money at any structure are structural losses (expenses 75%+ of gross) — no deal structure fixes them.
+  </div>
+</section>
+
+<!-- SECTION 5: COST CONTEXT -->
+<section class="section" id="s5">
+  <div class="section-header">
+    <div class="section-num">+</div>
+    <div class="section-title-block">
+      <h2>Cost Context: What Drives the Numbers</h2>
+      <div class="subtitle">The expense and profitability data that leads to every recommendation above</div>
+    </div>
+    <span class="verdict-pill v-blue">Supporting Data</span>
+  </div>
+
+  <p class="lead">Every recommendation flows from a single structural fact: <strong>production expenses are flat at ~$1,500–$1,850 per show regardless of gross</strong>. A $600 show costs $1,430 to produce. A $19,000 show costs $1,909. The $479 spread across 30× revenue difference explains everything about when deals are profitable and when they aren't.</p>
+
+  <div class="divider-label">% of Net Profitability by Gross Bucket</div>
+
+  <div class="bucket-panel">
+    <div class="bucket-head" style="background:rgba(155,28,28,.06)">
+      <h4>$0–2K gross · 14 shows · <span style="color:var(--red)">0/14 both profitable</span></h4>
+      <span class="tag tag-red">Structurally unfixable</span>
+    </div>
+    <div class="bucket-body">
+      <p style="font-size:12px;color:var(--muted);margin-bottom:.5rem">Expenses avg $1,602 = <strong>135% of avg gross ($1,190)</strong>. Venue loses money before artist receives anything. No deal structure fixes this.</p>
+      <div class="stacked-bar">
+        <div class="sb sb-fees" style="width:10%">10%</div>
+        <div class="sb sb-exp" style="width:135%">exp 135%</div>
+      </div>
+      <div class="bucket-stats">
+        <div class="bs"><div class="bs-val">$1,190</div><div class="bs-lbl">Avg gross</div></div>
+        <div class="bs"><div class="bs-val" style="color:var(--red)">$1,602</div><div class="bs-lbl">Avg expenses</div></div>
+        <div class="bs"><div class="bs-val">$522</div><div class="bs-lbl">Avg artist</div></div>
+        <div class="bs"><div class="bs-val" style="color:var(--red)">−$1,053</div><div class="bs-lbl">Avg venue</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bucket-panel">
+    <div class="bucket-head" style="background:rgba(168,90,0,.06)">
+      <h4>$2–5K gross · 36 shows · <span style="color:var(--amber)">6/36 both profitable</span></h4>
+      <span class="tag tag-amber">Transition zone — SGP flat helps here</span>
+    </div>
+    <div class="bucket-body">
+      <p style="font-size:12px;color:var(--muted);margin-bottom:.5rem">Expenses still 40% of avg gross. Only 6 shows profitable — all had expenses under $1,200 and 80% rates. Breakeven gross: ~$4,300.</p>
+      <div class="stacked-bar">
+        <div class="sb sb-fees" style="width:10%">10%</div>
+        <div class="sb sb-exp" style="width:40%">40%</div>
+        <div class="sb sb-art" style="width:61%">61%</div>
+        <div class="sb sb-ven-neg" style="width:11%">−11%</div>
+      </div>
+      <div class="bucket-stats">
+        <div class="bs"><div class="bs-val">$3,663</div><div class="bs-lbl">Avg gross</div></div>
+        <div class="bs"><div class="bs-val">$1,483</div><div class="bs-lbl">Avg expenses</div></div>
+        <div class="bs"><div class="bs-val">$2,230</div><div class="bs-lbl">Avg artist</div></div>
+        <div class="bs"><div class="bs-val" style="color:var(--red)">−$416</div><div class="bs-lbl">Avg venue</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bucket-panel">
+    <div class="bucket-head" style="background:rgba(26,122,74,.06)">
+      <h4>$5–10K gross · 30 shows · <span style="color:var(--green)">24/30 both profitable</span></h4>
+      <span class="tag tag-green">Crossover zone — hybrid improves further</span>
+    </div>
+    <div class="bucket-body">
+      <p style="font-size:12px;color:var(--muted);margin-bottom:.5rem">Expenses drop to 23% of gross — same $1,580 against a larger denominator. Venue averages +$378. 6 remaining losses have high expenses or 90% rate.</p>
+      <div class="stacked-bar">
+        <div class="sb sb-fees" style="width:10%">10%</div>
+        <div class="sb sb-exp" style="width:23%">23%</div>
+        <div class="sb sb-art" style="width:62%">62%</div>
+        <div class="sb sb-ven-pos" style="width:5%">5%</div>
+      </div>
+      <div class="bucket-stats">
+        <div class="bs"><div class="bs-val">$6,972</div><div class="bs-lbl">Avg gross</div></div>
+        <div class="bs"><div class="bs-val">$1,580</div><div class="bs-lbl">Avg expenses</div></div>
+        <div class="bs"><div class="bs-val">$4,318</div><div class="bs-lbl">Avg artist</div></div>
+        <div class="bs"><div class="bs-val" style="color:var(--green)">+$378</div><div class="bs-lbl">Avg venue</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bucket-panel">
+    <div class="bucket-head" style="background:rgba(26,122,74,.08)">
+      <h4>$10–15K gross · 15 shows · <span style="color:var(--green)">15/15 both profitable</span></h4>
+      <span class="tag tag-green">Fully profitable — no action</span>
+    </div>
+    <div class="bucket-body">
+      <p style="font-size:12px;color:var(--muted);margin-bottom:.5rem">Expenses 13% of gross. Venue earns avg +$1,184. No disputes. The same $1,567 expense bill against $11,713 gross.</p>
+      <div class="stacked-bar">
+        <div class="sb sb-fees" style="width:10%">10%</div>
+        <div class="sb sb-exp" style="width:13%">13%</div>
+        <div class="sb sb-art" style="width:67%">67%</div>
+        <div class="sb sb-ven-pos" style="width:10%">10%</div>
+      </div>
+      <div class="bucket-stats">
+        <div class="bs"><div class="bs-val">$11,713</div><div class="bs-lbl">Avg gross</div></div>
+        <div class="bs"><div class="bs-val">$1,567</div><div class="bs-lbl">Avg expenses</div></div>
+        <div class="bs"><div class="bs-val">$7,792</div><div class="bs-lbl">Avg artist</div></div>
+        <div class="bs"><div class="bs-val" style="color:var(--green)">+$1,184</div><div class="bs-lbl">Avg venue</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider-label">Door Deal Expense Overage — Confirming Flat Expense Pattern</div>
+
+  <div class="grid-2">
+    <div class="chart-wrap">
+      <div class="chart-title">Expense $ vs gross — all deal types (30 door + % of net sample)</div>
+      <canvas id="expFlatChart"></canvas>
+    </div>
+    <div>
+      <div class="info-card" style="margin-bottom:1rem">
+        <h4>Door deal overage under proposed $1,774 cap</h4>
+        <div class="row"><span class="row-label">Shows where cap binds (exp > $1,774)</span><span class="row-val warn">7 / 30</span></div>
+        <div class="row"><span class="row-label">Total overage all 30 shows</span><span class="row-val">$903</span></div>
+        <div class="row"><span class="row-label">Avg overage per show</span><span class="row-val neut">$30 (immaterial)</span></div>
+        <div class="row"><span class="row-label">Max single overage</span><span class="row-val warn">$356 (Red Letter)</span></div>
+        <div class="row"><span class="row-label">Overage as % of venue share</span><span class="row-val pos">3.4% — easily absorbed</span></div>
+        <div class="row"><span class="row-label">Shows needing insurance</span><span class="row-val warn">4 / 30 (all dead-pool)</span></div>
+        <div class="row"><span class="row-label">Total insurance gap</span><span class="row-val">$585 across all 30 shows</span></div>
+      </div>
+      <div class="callout green">
+        The expense cap doesn't need to be exact — it just needs to be in the right ballpark. The P75 at $1,774 captures 77% of shows with zero overage, and the 23% that breach it do so by an average of $130. The venue's 40% share at viable show sizes easily covers it.
+      </div>
+    </div>
+  </div>
+
+  <div class="divider-label">SGP Flat Impact on All $1–5K Deals — Unified World</div>
+
+  <div class="grid-4">
+    <div class="stat-card">
+      <div class="stat-label">Current both+ ($1–5K)</div>
+      <div class="stat-value s-red">68<span style="font-size:1.2rem;color:var(--muted)">/226</span></div>
+      <div class="stat-sub">30% — mixed deal types</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">SGP flat both+ ($1–5K)</div>
+      <div class="stat-value s-green">103<span style="font-size:1.2rem;color:var(--muted)">/226</span></div>
+      <div class="stat-sub">46% — +35 shows rescued</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Transfer to venue (2yr)</div>
+      <div class="stat-value s-amber">$100K</div>
+      <div class="stat-sub">$100,619 from artists → venue</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Irreducible losses</div>
+      <div class="stat-value s-red">109<span style="font-size:1.2rem;color:var(--muted)">/226</span></div>
+      <div class="stat-sub">exp 75%+ of gross — no structure fixes</div>
+    </div>
+  </div>
+
+  <div class="chart-wrap">
+    <div class="chart-title">$1–5K all deals: both-positive before and after SGP flat, by deal type</div>
+    <canvas id="allDealsChart"></canvas>
+  </div>
+</section>
+
+</div><!-- /body-wrap -->
+
+<footer class="doc-footer">
+  <div class="fn">Greenroom Settlement Intelligence · The Crescent, Nashville</div>
+  <div class="fn">497 settled shows · May 2026 · Confidential</div>
+  <div class="fn">SGP audit · switchMath analysis · cross-venue roadmap</div>
+</footer>
+
+<script>
+var C = Chart;
+var palette = {
+  green:'rgba(26,122,74,0.75)',
+  greenLight:'rgba(26,122,74,0.15)',
+  red:'rgba(155,28,28,0.65)',
+  redLight:'rgba(155,28,28,0.12)',
+  amber:'rgba(168,90,0,0.7)',
+  amberLight:'rgba(168,90,0,0.12)',
+  blue:'rgba(26,78,138,0.7)',
+  blueLight:'rgba(26,78,138,0.12)',
+  ink:'rgba(15,14,13,0.6)',
+  muted:'rgba(15,14,13,0.2)'
+};
+var tFont = {size:10, family:'DM Mono, monospace'};
+var gColor = {color:'rgba(15,14,13,0.07)'};
+var legOpts = {font:{size:10, family:'DM Mono, monospace'}, boxWidth:10, padding:10};
+
+// 1. Deal type profitability horizontal bar
+new C(document.getElementById('dealTypeProfitChart'), {
+  type:'bar',
+  data:{
+    labels:['Flat (247)','vs (145)','% of net (102)','Door (30)','% of gross (8)'],
+    datasets:[
+      {label:'Both profitable', data:[54,41,29,0,25], backgroundColor:'rgba(26,122,74,0.75)', borderRadius:3},
+      {label:'Venue negative',  data:[46,59,71,100,75], backgroundColor:'rgba(155,28,28,0.65)', borderRadius:3}
+    ]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false, indexAxis:'y',
+    plugins:{
+      legend:{position:'bottom', labels:legOpts},
+      tooltip:{callbacks:{label:function(ctx){return ctx.dataset.label+': '+ctx.raw+'%';}}}
+    },
+    scales:{
+      x:{stacked:true, max:100, ticks:{color:'#8a8278', font:tFont, callback:function(v){return v+'%';}}, grid:gColor, border:{color:'rgba(15,14,13,0.2)'}},
+      y:{stacked:true, ticks:{color:'#8a8278', font:tFont}, grid:{display:false}, border:{color:'rgba(15,14,13,0.2)'}}
+    }
+  }
+});
+
+// 2. Cross-venue learning accuracy curve
+new C(document.getElementById('learningChart'), {
+  type:'line',
+  data:{
+    labels:['1 venue','5 venues','20 venues','50 venues','100 venues','300+ venues'],
+    datasets:[
+      {label:'Existing artist', data:[87,88,89,90,91,93], borderColor:'rgba(26,122,74,0.75)', backgroundColor:'rgba(26,122,74,0.15)', borderWidth:2, pointRadius:4, fill:true, tension:0.3},
+      {label:'New artist at venue', data:[52,60,68,75,82,90], borderColor:'rgba(26,78,138,0.7)', backgroundColor:'rgba(26,78,138,0.12)', borderWidth:2, pointRadius:4, fill:true, tension:0.3},
+      {label:'New venue (no genre data)', data:[40,52,65,72,80,88], borderColor:'rgba(168,90,0,0.7)', backgroundColor:'rgba(168,90,0,0.12)', borderWidth:2, pointRadius:4, borderDash:[5,3], fill:true, tension:0.3}
+    ]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{
+      legend:{position:'bottom', labels:legOpts},
+      tooltip:{callbacks:{label:function(ctx){return ctx.dataset.label+': ~'+ctx.raw+'% accuracy';}}}
+    },
+    scales:{
+      x:{ticks:{color:'#8a8278', font:tFont}, grid:{display:false}, border:{color:'rgba(15,14,13,0.2)'}},
+      y:{min:35, max:100, ticks:{color:'#8a8278', font:tFont, callback:function(v){return v+'%';}}, grid:gColor, border:{color:'rgba(15,14,13,0.2)'}, title:{display:true, text:'Suggestion accuracy %', color:'#8a8278', font:{size:10}}}
+    }
+  }
+});
+
+// 3. Smart hybrid comparison chart
+new C(document.getElementById('hybridChart'), {
+  type:'bar',
+  data:{
+    labels:['Current (actual)','SGP Flat','Smart Hybrid'],
+    datasets:[
+      {label:'Artist payout', data:[4625,4114,3474], backgroundColor:'rgba(26,78,138,0.7)', borderRadius:3},
+      {label:'Venue net (+)', data:[336,847,1487], backgroundColor:'rgba(26,122,74,0.75)', borderRadius:3},
+      {label:'Venue net (loss)', data:[-336,-92,-33], backgroundColor:'rgba(155,28,28,0.65)', borderRadius:3}
+    ]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{
+      legend:{position:'bottom', labels:legOpts},
+      tooltip:{callbacks:{label:function(ctx){return ctx.dataset.label+': $'+Math.abs(ctx.raw).toLocaleString();}}}
+    },
+    scales:{
+      x:{ticks:{color:'#8a8278', font:tFont}, grid:{display:false}, border:{color:'rgba(15,14,13,0.2)'}},
+      y:{ticks:{color:'#8a8278', font:tFont, callback:function(v){return '$'+Math.round(v/1000)+'K';}}, grid:gColor, border:{color:'rgba(15,14,13,0.2)'}}
+    }
+  }
+});
+
+// 4. Expense scatter — flat expenses vs gross
+new C(document.getElementById('expFlatChart'), {
+  type:'scatter',
+  data:{
+    datasets:[
+      {
+        label:'Expenses (within cap)',
+        data:[{x:600,y:1430},{x:625,y:1700},{x:848,y:1571},{x:1048,y:1480},{x:1470,y:1627},{x:2234,y:1507},{x:2515,y:1144},{x:3254,y:1765},{x:3332,y:1164},{x:3452,y:1774},{x:3672,y:1525},{x:3944,y:1118},{x:4145,y:1310},{x:4147,y:1338},{x:4534,y:1755}],
+        pointRadius:5, backgroundColor:'rgba(26,122,74,0.75)', borderWidth:0
+      },
+      {
+        label:'Expenses (above cap)',
+        data:[{x:891,y:1800},{x:1082,y:1845},{x:1418,y:1906},{x:1940,y:2130},{x:3531,y:1869},{x:6122,y:1862},{x:19296,y:1909}],
+        pointRadius:6, pointStyle:'triangle', backgroundColor:'rgba(155,28,28,0.65)', borderWidth:0
+      },
+      {
+        label:'Cap $1,774',
+        data:[{x:0,y:1774},{x:20000,y:1774}],
+        type:'line', borderColor:'rgba(168,90,0,0.7)', borderWidth:1.5, borderDash:[5,3], pointRadius:0
+      }
+    ]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{
+      legend:{position:'bottom', labels:legOpts},
+      tooltip:{callbacks:{label:function(ctx){
+        if(ctx.raw && ctx.raw.x !== undefined){
+          return '$'+ctx.raw.x.toLocaleString()+' gross / $'+ctx.raw.y.toLocaleString()+' exp';
+        }
+        return '';
+      }}}
+    },
+    scales:{
+      x:{ticks:{color:'#8a8278', font:tFont, callback:function(v){return '$'+Math.round(v/1000)+'K';}}, grid:gColor, border:{color:'rgba(15,14,13,0.2)'}},
+      y:{min:800, max:2400, ticks:{color:'#8a8278', font:tFont, callback:function(v){return '$'+v.toLocaleString();}}, grid:gColor, border:{color:'rgba(15,14,13,0.2)'}}
+    }
+  }
+});
+
+// 5. $1-5K both-profitable before/after SGP
+new C(document.getElementById('allDealsChart'), {
+  type:'bar',
+  data:{
+    labels:['Flat (114)','vs (43)','% of net (44)','Door (19)','% of gross (6)'],
+    datasets:[
+      {label:'Current both+', data:[52,10,6,0,0], backgroundColor:'rgba(155,28,28,0.65)', borderRadius:3},
+      {label:'After SGP flat', data:[52,20,31,0,0], backgroundColor:'rgba(26,122,74,0.75)', borderRadius:3}
+    ]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{position:'bottom', labels:legOpts}},
+    scales:{
+      x:{ticks:{color:'#8a8278', font:tFont}, grid:{display:false}, border:{color:'rgba(15,14,13,0.2)'}},
+      y:{ticks:{color:'#8a8278', font:tFont}, grid:gColor, border:{color:'rgba(15,14,13,0.2)'}, title:{display:true, text:'Both-profitable shows', color:'#8a8278', font:{size:10}}}
+    }
+  }
+});
+</script>
+</body>
+</html>

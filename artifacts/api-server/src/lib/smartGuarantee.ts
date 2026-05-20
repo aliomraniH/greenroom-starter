@@ -448,32 +448,52 @@ export async function generateGuarantee(
     (suggestedPrice + expenseEstimate) / (1 - TICKETING_FEE_RATE);
 
   // Projected venue net under each deal structure, computed off the *same*
-  // expected gross + net-after-fees so the two numbers are directly
-  // comparable. Persisted on the row so Reports / Deal Analysis / Insights
-  // can read them without re-deriving the math.
+  // expected gross + actual-expense baseline so the two numbers are
+  // directly comparable. Persisted on the row so Reports / Deal Analysis
+  // / Insights can read them without re-deriving the math.
   //
-  // SGP path: tight, structural — flat artist payment + expense capped at
-  // the engine's effective cap (`min(deal cap, bucket default)`).
+  // Critical: per the SGP decision report's canonical formulas (and the
+  // settled-show `computeNetToVenue = gross − toArtist − totalExpenses`),
+  // the venue ALWAYS pays actual expenses. The deal's `expenseCap` only
+  // protects the artist's net-base calculation in settlement — it never
+  // caps what the venue pays out. Both projections therefore subtract
+  // the same `expenseEstimate` (our P75-capped, artist+venue-aware
+  // forecast of actuals); the differentiator is the artist payout.
   //
-  // Current-deal path: model the deal as written. Use the deal's own
-  // expense cap as the worst-case expense pass-through (no cap → assume the
-  // SGP-tightened figure as a neutral fallback). Artist payout is deal-type
-  // specific: vs / %net = max(guarantee, pct × net base); %gross = pct ×
-  // gross; door = pct × net base (we don't model door-floor edge cases
-  // here — door deals get their own surface via Smart Switch).
-  const projectedVenueNetSgp = netAfterFees - expenseEstimate - suggestedPrice;
-  const currentDealExpense = deal.expenseCap ?? expenseEstimate;
-  const currentNetBase = Math.max(0, netAfterFees - currentDealExpense);
+  // Tight `expenseCap` on a vs/%net deal is asymmetric: it shrinks the
+  // venue's deductible while leaving overrun on the venue's books. That
+  // shows up as a real dollar win for the SGP flat, which doesn't need
+  // the cap dance at all.
+  const artistDeductibleExpense = Math.min(
+    expenseEstimate,
+    deal.expenseCap ?? expenseEstimate,
+  );
+  const currentArtistNetBase = Math.max(0, netAfterFees - artistDeductibleExpense);
   let currentArtistPayout: number;
-  if (deal.dealType === "percentage_of_gross") {
-    currentArtistPayout = pct * expectedGross;
-  } else if (deal.dealType === "door") {
-    currentArtistPayout = (pct || DEFAULT_DOOR_SPLIT) * currentNetBase;
-  } else {
-    currentArtistPayout = Math.max(guarantee, pct * currentNetBase);
+  switch (deal.dealType) {
+    case "flat":
+      currentArtistPayout = guarantee;
+      break;
+    case "vs":
+      currentArtistPayout = Math.max(guarantee, pct * currentArtistNetBase);
+      break;
+    case "percentage_of_net":
+      currentArtistPayout = pct * currentArtistNetBase;
+      break;
+    case "percentage_of_gross":
+      currentArtistPayout = pct * expectedGross;
+      break;
+    case "door":
+      // Door: artist = gross − min(actual_expenses, cap). Venue eats
+      // fees + any overrun. Pre-show projection assumes actual ≈ est.
+      currentArtistPayout = expectedGross - artistDeductibleExpense;
+      break;
+    default:
+      currentArtistPayout = Math.max(guarantee, pct * currentArtistNetBase);
   }
+  const projectedVenueNetSgp = netAfterFees - expenseEstimate - suggestedPrice;
   const projectedVenueNetCurrent =
-    netAfterFees - currentDealExpense - currentArtistPayout;
+    netAfterFees - expenseEstimate - currentArtistPayout;
 
   // Familiarity counts
   const artistShowCount = ctx.rows.filter(
