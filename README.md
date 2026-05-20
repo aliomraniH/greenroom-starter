@@ -14,6 +14,11 @@ This repo is a fork of
 restructure, recommendation engines, settlement wizard, Insights pipeline,
 test suite, and design documents — was added on top.
 
+> **In a hurry?** [`OVERVIEW.md`](./OVERVIEW.md) is the one-page version —
+> the problem we're solving, what Greenroom does about it, and what
+> success looks like. Read that first, then come back here for the
+> feature-by-feature walkthrough.
+
 ## Quickstart
 
 ```bash
@@ -172,15 +177,29 @@ returns plain values. Highlights:
 
 Run with `pnpm --filter @workspace/api-server test`.
 
-### Design documents (`exports/`)
+### Design documents (`exports/` and `docs/`)
+
+The full design argument is split across seven layered PDFs plus two
+short markdown notes. Read them in roughly this order:
 
 | File | What it is |
 |---|---|
-| `greenroom-settlement-redesign-v2.pdf` | **Settlement Redesign · v2.1** (May 2026). The three-phase argument — simplify the deal types Smart Switch already covers, then layer Improve-Deal caps and insurance on top. Every figure sourced from the live API. |
-| `greenroom-supporting-document.pdf` | Engineering and analytical companion: every tab, every API endpoint, every backend lib module, with a direct mapping from each surface to the claim it supplies in the redesign report. |
-| `greenroom-insurance-pricing.pdf` | Pricing brief for two Phase-3 insurance products. Per-show expected-cost derivation from `/api/reports` (Product 1) and a 12-mo SGP backtest (Product 2). Tier ladder, two-sided discount math, bundles, platform revenue model, sensitivity bands. |
+| `exports/greenroom-project-overview.pdf` | **Project overview.** Problem framing, target outcome, success metric. The "why this exists" doc. Same ground covered by [`OVERVIEW.md`](./OVERVIEW.md) at the repo root. |
+| `exports/greenroom-settlement-redesign-v2.pdf` | **Settlement Redesign · v2.1** (May 2026). Three-phase argument — simplify the deal types Smart Switch already covers, then layer Improve-Deal caps and insurance on top. Every figure sourced from the live API. |
+| `exports/greenroom-settlement-final.pdf` | **Settlement Redesign · Final memo.** Case-study deliverable for the Applied AI PM assignment — condenses v2.1 into a recommendation-grade document. |
+| `exports/greenroom-supporting-document.pdf` | **Supporting document.** Engineering + analytical companion: every tab, every API endpoint, every backend lib module, mapped to the claim it supplies in the redesign report. |
+| `exports/greenroom-supporting-document-changes.{pdf,md}` | **Supporting document · changelog.** Tracks what changed between revisions of the supporting document, so reviewers can diff the argument without diffing PDFs. |
+| `exports/greenroom-insurance-pricing.pdf` | **Insurance Products 1 & 2 · Pricing brief.** Per-show expected-cost derivation from `/api/reports` (Product 1) and a 12-mo SGP backtest (Product 2). Tier ladder, two-sided discount math, bundles, platform revenue model, sensitivity bands. |
+| `exports/greenroom-sgp-vs-flat.pdf` | **SGP vs flat · backtest narrative.** Side-by-side: what Smart Guaranteed Price would have paid vs. the flat guarantees actually written, on 12 months of historical data. |
+| `exports/greenroom-interview-prep.pdf` | **Interview prep.** Working notes for the case-study presentation — talking points, anticipated questions, and the data behind each answer. |
+| `docs/smart-switch-vs-improve-deal.md` | Engine-boundary doc. Why Smart Switch owns full shape conversion while Improve Deal is caps-only, and which cells each covers. |
+| `docs/settlement-redesign-supporting-data.md` | Raw figures and per-cell tables backing the settlement-redesign argument. |
 
-HTML sources sit next to each PDF; re-export with WeasyPrint.
+HTML sources sit next to each PDF; re-export with WeasyPrint:
+
+```bash
+python3 -c "from weasyprint import HTML; HTML('exports/<name>.html').write_pdf('exports/<name>.pdf')"
+```
 
 ### Code-review bundle (`code-review/`)
 
@@ -253,9 +272,14 @@ structural data change with
 
 ## Pointers
 
+- [`OVERVIEW.md`](./OVERVIEW.md) — one-page "what we're trying to
+  achieve" doc. Start here if you've never seen the project before.
 - `replit.md` — long-form agent README with every tab's formula and
   every architecture decision in detail.
-- `exports/` — the design argument and the engineering companion.
-- `code-review/` — for offline review by an external agent.
+- `exports/` — the design argument and the engineering companion (seven
+  PDFs, listed under *Design documents* above).
+- `docs/` — short markdown notes (engine boundaries, supporting data).
+- `code-review/` — self-contained dataset + schema snapshot for offline
+  review by an external agent.
 - See the `pnpm-workspace` skill in `.local/skills/` for workspace
   structure, TypeScript setup, and package details.
