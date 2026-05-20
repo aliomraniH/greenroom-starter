@@ -219,6 +219,13 @@ export const guaranteeSuggestions = sqliteTable("guarantee_suggestions", {
   insuranceTier: integer("insurance_tier").notNull(),
   basis: text("basis").notNull(),
   auditJson: text("audit_json").notNull(),
+  // Persisted projected venue net under each deal structure so Reports /
+  // Deal Analysis / Insights can read the same number the show-detail
+  // panel renders, without re-deriving the math in every consumer. Stored
+  // nullable so an `ALTER ADD COLUMN` against legacy rows is a no-op until
+  // a regeneration runs (`generateAndPersistGuarantee` always writes both).
+  projectedVenueNetSgp: real("projected_venue_net_sgp"),
+  projectedVenueNetCurrent: real("projected_venue_net_current"),
 });
 
 export type User = typeof users.$inferSelect;

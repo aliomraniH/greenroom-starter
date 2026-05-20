@@ -759,58 +759,97 @@ function SmartSwitchPanel({
                     the contract guarantee), so we hide it to avoid the
                     impression that a different number is being projected. */}
                 {sug.source === "sgp_engine" && sug.suggestedFlat != null && sgp && (
-                  <div className="pt-3 border-t border-ink-200/40 space-y-2">
+                  <div className="pt-3 border-t border-ink-200/40 space-y-3">
                     <div className="eyebrow text-[10px] text-ink-500">
                       How we got there
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                       <div className="rounded-lg bg-white/60 ring-1 ring-ink-200/50 p-2.5">
                         <div className="eyebrow text-[10px] text-ink-500 mb-1">Expected gross</div>
                         <div className="font-mono tabular text-[14px] text-ink-900">{formatMoney(sgp.expectedGross)}</div>
                       </div>
                       <div className="rounded-lg bg-white/60 ring-1 ring-ink-200/50 p-2.5">
-                        <div className="eyebrow text-[10px] text-ink-500 mb-1">Capped expenses</div>
+                        <div className="eyebrow text-[10px] text-ink-500 mb-1">Capped expenses (SGP)</div>
                         <div className="font-mono tabular text-[14px] text-ink-900">{formatMoney(sgp.expenseEstimate)}</div>
                       </div>
                       <div className="rounded-lg bg-white/60 ring-1 ring-ink-200/50 p-2.5">
                         <div className="eyebrow text-[10px] text-ink-500 mb-1">Breakeven gross</div>
                         <div className="font-mono tabular text-[14px] text-ink-900">{formatMoney(sgp.breakevenGross)}</div>
                       </div>
-                      {(() => {
-                        // Projected venue net = (gross − fees) − expenses − flat.
-                        // Same cushion math as `computeInsuranceTier`. We
-                        // anchor the flat to the Smart Switch suggestion
-                        // (`sug.suggestedFlat`), not to `sgp.suggestedPrice`,
-                        // so the tile always reflects the headline number
-                        // shown at the top of the card — even in the rare
-                        // race where the two persisted rows haven't been
-                        // refreshed against the exact same context yet.
-                        const flat = sug.suggestedFlat as number;
-                        const projected = sgp.netAfterFees - sgp.expenseEstimate - flat;
-                        const positive = projected >= 0;
+                    </div>
+                    {/* Side-by-side projected venue net — sourced from the
+                        persisted `projectedVenueNet{Sgp,Current}` columns so
+                        every consumer (this card, Reports, Deal Analysis,
+                        Insights) reads from one truth. The flat for SGP is
+                        re-anchored to `sug.suggestedFlat` only so the tile
+                        agrees with the headline if the two persisted rows
+                        haven't been regenerated against the exact same
+                        context yet; the current-deal projection has no such
+                        race and is read straight from the persisted value. */}
+                    {(() => {
+                      const flat = sug.suggestedFlat as number;
+                      const projSgp = sgp.projectedVenueNetSgp != null
+                        ? sgp.netAfterFees - sgp.expenseEstimate - flat
+                        : sgp.netAfterFees - sgp.expenseEstimate - sgp.suggestedPrice;
+                      const projCurrent = sgp.projectedVenueNetCurrent
+                        ?? (sgp.netAfterFees - sgp.expenseEstimate - sgp.suggestedPrice);
+                      const sgpWins = projSgp > projCurrent + 1;
+                      const delta = projSgp - projCurrent;
+                      const tile = (label: string, val: number, isSgp: boolean, isWinner: boolean) => {
+                        const positive = val >= 0;
                         return (
                           <div
-                            className={`rounded-lg p-2.5 ring-1 ${
-                              positive
-                                ? "bg-emerald-50/70 ring-emerald-200/70"
-                                : "bg-rose-50/70 ring-rose-200/70"
+                            className={`rounded-lg p-3 ring-1 ${
+                              isWinner
+                                ? "bg-emerald-50/80 ring-emerald-300/80"
+                                : positive
+                                  ? "bg-white/70 ring-ink-200/60"
+                                  : "bg-rose-50/70 ring-rose-200/70"
                             }`}
                           >
-                            <div className="eyebrow text-[10px] text-ink-500 mb-1">
-                              Projected venue net
+                            <div className="flex items-center justify-between mb-1">
+                              <div className="eyebrow text-[10px] text-ink-500">{label}</div>
+                              {isSgp && isWinner && (
+                                <span className="text-[9px] font-semibold uppercase tracking-wider text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">
+                                  Winner
+                                </span>
+                              )}
                             </div>
                             <div
-                              className={`font-mono tabular text-[14px] font-semibold ${
-                                positive ? "text-emerald-800" : "text-rose-800"
+                              className={`font-mono tabular text-[20px] font-semibold leading-none ${
+                                isWinner
+                                  ? "text-emerald-800"
+                                  : positive
+                                    ? "text-ink-800"
+                                    : "text-rose-800"
                               }`}
                             >
-                              {positive ? "" : "−"}
-                              {formatMoney(Math.abs(projected))}
+                              {positive ? "" : "−"}{formatMoney(Math.abs(val))}
+                            </div>
+                            <div className="text-[10.5px] text-ink-500 mt-1.5 leading-tight">
+                              {isSgp
+                                ? "Flat artist payment + SGP-capped expenses"
+                                : "Deal as written: max(guarantee, %) + deal cap"}
                             </div>
                           </div>
                         );
-                      })()}
-                    </div>
+                      };
+                      return (
+                        <div className="space-y-2">
+                          <div className="grid grid-cols-2 gap-3">
+                            {tile("Projected venue net · current deal", projCurrent, false, !sgpWins && delta < -1)}
+                            {tile("Projected venue net · SGP flat", projSgp, true, sgpWins)}
+                          </div>
+                          {Math.abs(delta) >= 50 && (
+                            <div className={`text-[11.5px] leading-tight ${sgpWins ? "text-emerald-700" : "text-rose-700"}`}>
+                              {sgpWins
+                                ? `Switching to the SGP flat captures an additional ${formatMoney(delta)} of venue net under the same expected gross, mostly by tightening expense pass-through.`
+                                : `Current deal projects ${formatMoney(-delta)} more venue net than the SGP flat — keeping the existing structure is the better call on these inputs.`}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
 
@@ -1005,52 +1044,81 @@ function SmartGuaranteedPricePanel({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-1">
                 <div className="rounded-lg bg-white/60 ring-1 ring-ink-200/50 p-2.5">
                   <div className="eyebrow text-[10px] text-ink-500 mb-1">Expected gross</div>
                   <div className="font-mono tabular text-[14px] text-ink-900">{formatMoney(sug.expectedGross)}</div>
                 </div>
                 <div className="rounded-lg bg-white/60 ring-1 ring-ink-200/50 p-2.5">
-                  <div className="eyebrow text-[10px] text-ink-500 mb-1">Capped expenses</div>
+                  <div className="eyebrow text-[10px] text-ink-500 mb-1">Capped expenses (SGP)</div>
                   <div className="font-mono tabular text-[14px] text-ink-900">{formatMoney(sug.expenseEstimate)}</div>
                 </div>
                 <div className="rounded-lg bg-white/60 ring-1 ring-ink-200/50 p-2.5">
                   <div className="eyebrow text-[10px] text-ink-500 mb-1">Breakeven gross</div>
                   <div className="font-mono tabular text-[14px] text-ink-900">{formatMoney(sug.breakevenGross)}</div>
                 </div>
-                {(() => {
-                  const projected = sug.netAfterFees - sug.expenseEstimate - sug.suggestedPrice;
-                  const isConfident = sug.confidenceTier === "A" || sug.confidenceTier === "B";
-                  const positive = projected >= 0;
+              </div>
+              {/* Side-by-side projected venue net — same persisted-column
+                  pattern as the Smart Switch panel; this lean SGP-only
+                  surface gets the same comparison so deals outside the
+                  $1–5K switch window still show the structural delta. */}
+              {(() => {
+                const projSgp = sug.projectedVenueNetSgp
+                  ?? (sug.netAfterFees - sug.expenseEstimate - sug.suggestedPrice);
+                const projCurrent = sug.projectedVenueNetCurrent ?? projSgp;
+                const sgpWins = projSgp > projCurrent + 1;
+                const delta = projSgp - projCurrent;
+                const tile = (label: string, val: number, isSgp: boolean, isWinner: boolean) => {
+                  const positive = val >= 0;
                   return (
                     <div
-                      className={`rounded-lg p-2.5 ring-1 ${
-                        isConfident
-                          ? positive
-                            ? "bg-emerald-50/70 ring-emerald-200/70"
+                      className={`rounded-lg p-3 ring-1 ${
+                        isWinner
+                          ? "bg-emerald-50/80 ring-emerald-300/80"
+                          : positive
+                            ? "bg-white/70 ring-ink-200/60"
                             : "bg-rose-50/70 ring-rose-200/70"
-                          : "bg-white/60 ring-ink-200/50"
                       }`}
                     >
-                      <div className="eyebrow text-[10px] text-ink-500 mb-1">
-                        Projected venue net{!isConfident ? " (low confidence)" : ""}
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="eyebrow text-[10px] text-ink-500">{label}</div>
+                        {isSgp && isWinner && (
+                          <span className="text-[9px] font-semibold uppercase tracking-wider text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">
+                            Winner
+                          </span>
+                        )}
                       </div>
                       <div
-                        className={`font-mono tabular text-[14px] font-semibold ${
-                          isConfident
-                            ? positive
-                              ? "text-emerald-800"
-                              : "text-rose-800"
-                            : "text-ink-700"
+                        className={`font-mono tabular text-[20px] font-semibold leading-none ${
+                          isWinner ? "text-emerald-800" : positive ? "text-ink-800" : "text-rose-800"
                         }`}
                       >
-                        {positive ? "" : "−"}
-                        {formatMoney(Math.abs(projected))}
+                        {positive ? "" : "−"}{formatMoney(Math.abs(val))}
+                      </div>
+                      <div className="text-[10.5px] text-ink-500 mt-1.5 leading-tight">
+                        {isSgp
+                          ? "Flat artist payment + SGP-capped expenses"
+                          : "Deal as written: max(guarantee, %) + deal cap"}
                       </div>
                     </div>
                   );
-                })()}
-              </div>
+                };
+                return (
+                  <div className="space-y-2 pt-1">
+                    <div className="grid grid-cols-2 gap-3">
+                      {tile("Projected venue net · current deal", projCurrent, false, !sgpWins && delta < -1)}
+                      {tile("Projected venue net · SGP flat", projSgp, true, sgpWins)}
+                    </div>
+                    {Math.abs(delta) >= 50 && (
+                      <div className={`text-[11.5px] leading-tight ${sgpWins ? "text-emerald-700" : "text-rose-700"}`}>
+                        {sgpWins
+                          ? `Switching to the SGP flat captures an additional ${formatMoney(delta)} of venue net under the same expected gross.`
+                          : `Current deal projects ${formatMoney(-delta)} more venue net than the SGP flat under these inputs.`}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
               <div className="text-[13px] text-ink-700 leading-relaxed pt-3 border-t border-ink-200/40">
                 {sug.basis}

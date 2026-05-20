@@ -223,6 +223,12 @@ export interface GuaranteeSuggestion {
   insuranceTier: number;
   basis: string;
   auditJson: string;
+  // Projected venue net under each deal structure, computed at SGP-generation
+  // time so every consumer (show-detail, Reports, Deal Analysis, Insights)
+  // shares one truth instead of re-deriving the math. Nullable for legacy
+  // rows persisted before these columns existed.
+  projectedVenueNetSgp: number | null;
+  projectedVenueNetCurrent: number | null;
 }
 
 export type ImprovementKind = "add_expense_cap" | "add_hospitality_cap";

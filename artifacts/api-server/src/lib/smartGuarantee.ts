@@ -447,6 +447,34 @@ export async function generateGuarantee(
   const breakevenGross =
     (suggestedPrice + expenseEstimate) / (1 - TICKETING_FEE_RATE);
 
+  // Projected venue net under each deal structure, computed off the *same*
+  // expected gross + net-after-fees so the two numbers are directly
+  // comparable. Persisted on the row so Reports / Deal Analysis / Insights
+  // can read them without re-deriving the math.
+  //
+  // SGP path: tight, structural — flat artist payment + expense capped at
+  // the engine's effective cap (`min(deal cap, bucket default)`).
+  //
+  // Current-deal path: model the deal as written. Use the deal's own
+  // expense cap as the worst-case expense pass-through (no cap → assume the
+  // SGP-tightened figure as a neutral fallback). Artist payout is deal-type
+  // specific: vs / %net = max(guarantee, pct × net base); %gross = pct ×
+  // gross; door = pct × net base (we don't model door-floor edge cases
+  // here — door deals get their own surface via Smart Switch).
+  const projectedVenueNetSgp = netAfterFees - expenseEstimate - suggestedPrice;
+  const currentDealExpense = deal.expenseCap ?? expenseEstimate;
+  const currentNetBase = Math.max(0, netAfterFees - currentDealExpense);
+  let currentArtistPayout: number;
+  if (deal.dealType === "percentage_of_gross") {
+    currentArtistPayout = pct * expectedGross;
+  } else if (deal.dealType === "door") {
+    currentArtistPayout = (pct || DEFAULT_DOOR_SPLIT) * currentNetBase;
+  } else {
+    currentArtistPayout = Math.max(guarantee, pct * currentNetBase);
+  }
+  const projectedVenueNetCurrent =
+    netAfterFees - currentDealExpense - currentArtistPayout;
+
   // Familiarity counts
   const artistShowCount = ctx.rows.filter(
     (r) => r.artistId === show.artistId && r.date < show.date,
@@ -557,6 +585,8 @@ export async function generateGuarantee(
     insuranceTier,
     basis,
     auditJson: JSON.stringify(audit),
+    projectedVenueNetSgp,
+    projectedVenueNetCurrent,
   };
 
   return { suggestion };

@@ -94,4 +94,8 @@ export const migrationsReady = (async () => {
   await ensureColumn("switch_suggestions", "source", "TEXT");
   await ensureColumn("switch_suggestions", "band_width", "REAL");
   await ensureColumn("switch_suggestions", "artist_shows_at_venue", "INTEGER");
+  // Projected venue net columns — see schema.ts comment. Nullable on
+  // existing DBs; populated on the next `generateAndPersistGuarantee`.
+  await ensureColumn("guarantee_suggestions", "projected_venue_net_sgp", "REAL");
+  await ensureColumn("guarantee_suggestions", "projected_venue_net_current", "REAL");
 })();

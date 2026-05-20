@@ -1,6 +1,7 @@
 import { db } from "../src/db";
 import {
-  artists, shows, deals, settlements, switchSuggestions, venues,
+  artists, shows, deals, settlements, switchSuggestions,
+  guaranteeSuggestions, venues,
 } from "../src/db/schema";
 import { eq, like, inArray } from "drizzle-orm";
 import { generateAndPersist } from "../src/lib/smartSwitch";
@@ -22,9 +23,15 @@ type Spec = {
 };
 
 const SPECS: Spec[] = [
-  // vs $1-5K (Smart Switch eligible) — 3 shows
-  { artist: "Atlas Court",        genre: "Indie Rock",  daysOut: 22, dealType: "vs", guarantee: 2000, percentage: 0.80, basis: "net", expectedGross: 2400, expenseCap: 1850, hospitalityCap: null, settleStatus: "draft" },
-  { artist: "Bramble Hollow",     genre: "Folk",        daysOut: 31, dealType: "vs", guarantee: 3500, percentage: 0.80, basis: "net", expectedGross: 4200, expenseCap: 1850, hospitalityCap: 400,  settleStatus: "submitted" },
+  // vs $1-5K (Smart Switch eligible) — 3 shows.
+  // Atlas Court + Bramble Hollow are the two tier-A "SGP beats current"
+  // demos: their deal-expense caps are intentionally loose ($2,500) vs the
+  // engine's tighter cell-P75 estimate (~$1,500), so the side-by-side
+  // projected-venue-net tiles on show-detail show ~$600–$700 of structural
+  // upside from switching to a flat. Bramble's priorShows is bumped to 3
+  // in `seedSgpRangeDemo.ts` to lift it from Tier B to Tier A.
+  { artist: "Atlas Court",        genre: "Indie Rock",  daysOut: 22, dealType: "vs", guarantee: 2000, percentage: 0.80, basis: "net", expectedGross: 5000, expenseCap: 2500, hospitalityCap: null, settleStatus: "draft" },
+  { artist: "Bramble Hollow",     genre: "Folk",        daysOut: 31, dealType: "vs", guarantee: 2000, percentage: 0.85, basis: "net", expectedGross: 4700, expenseCap: 2500, hospitalityCap: 400,  settleStatus: "submitted" },
   { artist: "Cinder Path",        genre: "Garage Rock", daysOut: 45, dealType: "vs", guarantee: 4500, percentage: 0.85, basis: "net", expectedGross: 4800, expenseCap: null, hospitalityCap: null, settleStatus: "in_review" },
   // vs $5-15K (Improve Deal — caps only) — 2 shows
   { artist: "Driftline",          genre: "Indie Rock",  daysOut: 18, dealType: "vs", guarantee: 7000,  percentage: 0.80, basis: "net", expectedGross: 9500,  expenseCap: null, hospitalityCap: null, settleStatus: "draft" },
@@ -69,6 +76,11 @@ async function main() {
     const sIds = oldShows.map((s) => s.id);
     if (sIds.length > 0) {
       await db.delete(switchSuggestions).where(inArray(switchSuggestions.showId, sIds));
+      // Must also wipe guarantee_suggestions: it FKs to deals.id, so the
+      // deals delete below would FK-violate on any show that already had
+      // an SGP suggestion persisted (same drift root cause that bit us in
+      // seedSgpRangeDemo before we added the both-tables sweep).
+      await db.delete(guaranteeSuggestions).where(inArray(guaranteeSuggestions.showId, sIds));
       await db.delete(settlements).where(inArray(settlements.showId, sIds));
       await db.delete(deals).where(inArray(deals.showId, sIds));
       await db.delete(shows).where(inArray(shows.id, sIds));
@@ -113,7 +125,11 @@ async function main() {
       setTime: "21:00",
       openerArtistId: null,
       roomConfig: "standing",
-      internalNotes: `${NEW_DEMO_TAG} Pre-show proposal in ${spec.settleStatus.replace("_", " ")} stage. Expected gross $${spec.expectedGross.toLocaleString()}.`,
+      // Spec.expectedGross is the *agent's* projection from the proposal
+      // packet, not the engine's. Label it explicitly so it doesn't read as
+      // a competing source of truth against the SGP-computed expected gross
+      // (which comes from artist history / agent history / cell stats).
+      internalNotes: `${NEW_DEMO_TAG} Pre-show proposal in ${spec.settleStatus.replace("_", " ")} stage. Agent's projected gross $${spec.expectedGross.toLocaleString()}.`,
       createdAt: now,
     });
 

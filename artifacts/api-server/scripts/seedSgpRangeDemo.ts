@@ -59,10 +59,13 @@ const PLANS: Plan[] = [
   { artistId: "artist_newdemo_atlas_court",    showId: "show_newdemo_atlas_court",
     setAgent: ESTABLISHED_AGENT, priorShows: 3, priorDealLike: "vs" },
 
-  // Tier B via agent: agentShowCount >= 3 from Jordan Wells (86 past shows
-  // in the corpus), zero artist history.
+  // Second Tier A demo (added May 2026): bumped from 0 → 3 prior shows so
+  // the "SGP beats current venue net" story has two high-confidence
+  // exemplars instead of just one. Agent + 3 artist shows clears both the
+  // artistShowCount ≥ 3 and winnerMargin > 200 thresholds in
+  // computeConfidenceTier.
   { artistId: "artist_newdemo_bramble_hollow", showId: "show_newdemo_bramble_hollow",
-    setAgent: ESTABLISHED_AGENT, priorShows: 0, priorDealLike: "vs" },
+    setAgent: ESTABLISHED_AGENT, priorShows: 3, priorDealLike: "vs" },
 
   // Tier B via artist: 1 prior settled show for the artist, no agent.
   { artistId: "artist_newdemo_cinder_path",    showId: "show_newdemo_cinder_path",
