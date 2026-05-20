@@ -401,7 +401,7 @@ describe("Step 4 – expense waterfall and cap behavior", () => {
     expect(r.suggestion?.expenseEstimate).toBe(1250);
   });
 
-  it("clamps the expense estimate to the smaller of deal cap and bucket default", async () => {
+  it("ignores the deal cap when clamping the venue's expense estimate (only the engine ceiling applies)", async () => {
     // Artist history says expenses run at $5,000.
     await addPastShow({
       daysBack: 30,
@@ -413,15 +413,18 @@ describe("Step 4 – expense waterfall and cap behavior", () => {
       settlement: { status: "signed", grossBoxOffice: 10000, totalToArtist: 5000 },
       expenseTotal: 5000,
     });
-    // Deal cap is 1200; default bucket cap for $1–5K is 1500. Min = 1200.
+    // Deal cap is 1200; default bucket cap for $1–5K is 1500. The deal
+    // cap is artist-side only (it limits the artist's expense-recoup
+    // line), so the venue's projected expenseEstimate should clamp to
+    // the bucket default 1500, NOT to the tighter deal cap.
     const id = await addUpcomingShow({
       deal: {
         dealType: "vs", guaranteeAmount: 2000, percentage: 0.85, expenseCap: 1200,
       },
     });
     const r = await generateGuarantee(id);
-    expect(r.suggestion?.expenseCap).toBe(1200);
-    expect(r.suggestion?.expenseEstimate).toBe(1200);
+    expect(r.suggestion?.expenseCap).toBe(1500);
+    expect(r.suggestion?.expenseEstimate).toBe(1500);
   });
 
   it("uses the bucket default cap when no deal cap is set", async () => {
@@ -713,7 +716,9 @@ describe("Audit + breakeven sanity", () => {
     expect(audit.step1_expectedGross.source).toBe("artist_at_venue");
     expect(audit.step2_ticketingFees.rate).toBe(0.1);
     expect(audit.step3_netAfterFees).toBe(9000);
-    expect(audit.step4_expense.effectiveCap).toBe(1000);
+    // effectiveCap is the engine safety ceiling (defaultCap for the
+    // $5–15K bucket = 1500), no longer clamped by the deal cap.
+    expect(audit.step4_expense.effectiveCap).toBe(1500);
     expect(audit.step4_expense.cappedValue).toBe(800);
     expect(audit.step5_netBase).toBe(8200);
     expect(audit.step6_percentagePayout.basis).toBe(8200);

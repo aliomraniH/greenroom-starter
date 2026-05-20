@@ -395,11 +395,25 @@ export async function generateGuarantee(
   const netAfterFees = expectedGross - ticketingFees;
 
   // STEP 4: capped expense
+  // `expenseEstimate` is what we actually expect the venue to spend on
+  // this show — P75 by genre/agent bucket, with an engine-side safety
+  // ceiling (`defaultCap`) so adversarial / sparse seed data can't blow
+  // it up. Crucially this is INDEPENDENT of the deal's `expenseCap`:
+  // the deal cap is an artist-side construct (it limits what comes off
+  // the top in the artist's net-base calc); it does NOT reduce what the
+  // venue actually pays out. Clamping the venue's expense baseline by
+  // the deal cap was the bug that collapsed projVenueNet_current onto
+  // projVenueNet_sgp for tight-cap deals and made SGP look like a fake
+  // winner. With this fix, `expenseEstimate` reflects venue actuals
+  // and `artistDeductibleExpense` (below) reflects the artist-side cap.
   const expenseInfo = resolveExpense(ctx, show, agentId, genre);
   const dealExpenseCap = deal.expenseCap;
   const defaultCap = DEFAULT_EXPENSE_CAP_BY_BUCKET[bucket] ?? 1500;
-  const effectiveCap = dealExpenseCap != null ? Math.min(dealExpenseCap, defaultCap) : defaultCap;
-  const expenseEstimate = Math.min(expenseInfo.value, effectiveCap);
+  const expenseEstimate = Math.min(expenseInfo.value, defaultCap);
+  // `effectiveCap` is retained for the persisted audit row — it now
+  // means "engine safety ceiling actually applied", independent of the
+  // deal cap. The deal cap is recorded separately via `dealExpenseCap`.
+  const effectiveCap = defaultCap;
 
   // STEP 5: net base
   const netBase = Math.max(0, netAfterFees - expenseEstimate);
@@ -447,23 +461,22 @@ export async function generateGuarantee(
   const breakevenGross =
     (suggestedPrice + expenseEstimate) / (1 - TICKETING_FEE_RATE);
 
-  // Projected venue net under each deal structure, computed off the *same*
-  // expected gross + actual-expense baseline so the two numbers are
-  // directly comparable. Persisted on the row so Reports / Deal Analysis
-  // / Insights can read them without re-deriving the math.
+  // Projected venue net under each deal structure. Both projections
+  // subtract the same actual-expense baseline (`expenseEstimate`, the
+  // venue's P75 forecast — see STEP 4) because the venue ALWAYS pays
+  // its actuals regardless of what cap the agent negotiated. The two
+  // numbers diverge through the ARTIST payout:
   //
-  // Critical: per the SGP decision report's canonical formulas (and the
-  // settled-show `computeNetToVenue = gross − toArtist − totalExpenses`),
-  // the venue ALWAYS pays actual expenses. The deal's `expenseCap` only
-  // protects the artist's net-base calculation in settlement — it never
-  // caps what the venue pays out. Both projections therefore subtract
-  // the same `expenseEstimate` (our P75-capped, artist+venue-aware
-  // forecast of actuals); the differentiator is the artist payout.
+  // - Current deal: artist's % comes off the cap-deflated net base
+  //   (`artistDeductibleExpense = min(actuals, dealCap)`). A tight cap
+  //   inflates the artist take above the fair number because the
+  //   "expenses recouped" line in settlement is artificially small.
+  // - SGP flat: artist gets a flat price derived from the unconstrained
+  //   P75 net base — no cap dance, no overrun exposure for the venue.
   //
-  // Tight `expenseCap` on a vs/%net deal is asymmetric: it shrinks the
-  // venue's deductible while leaving overrun on the venue's books. That
-  // shows up as a real dollar win for the SGP flat, which doesn't need
-  // the cap dance at all.
+  // The dollar delta on tight-cap vs/%net deals is the venue's overrun
+  // exposure. On loose-cap or no-cap deals the two converge (we surface
+  // the qualitative SGP value in the UI tie copy).
   const artistDeductibleExpense = Math.min(
     expenseEstimate,
     deal.expenseCap ?? expenseEstimate,

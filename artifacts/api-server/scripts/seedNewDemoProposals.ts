@@ -30,7 +30,7 @@ const SPECS: Spec[] = [
   // projected-venue-net tiles on show-detail show ~$600–$700 of structural
   // upside from switching to a flat. Bramble's priorShows is bumped to 3
   // in `seedSgpRangeDemo.ts` to lift it from Tier B to Tier A.
-  { artist: "Atlas Court",        genre: "Indie Rock",  daysOut: 22, dealType: "vs", guarantee: 2000, percentage: 0.80, basis: "net", expectedGross: 5000, expenseCap: 2500, hospitalityCap: null, settleStatus: "draft" },
+  { artist: "Atlas Court",        genre: "Indie Rock",  daysOut: 22, dealType: "vs", guarantee: 2000, percentage: 0.80, basis: "net", expectedGross: 5000, expenseCap: 800,  hospitalityCap: null, settleStatus: "draft" },
   { artist: "Bramble Hollow",     genre: "Folk",        daysOut: 31, dealType: "vs", guarantee: 2000, percentage: 0.90, basis: "net", expectedGross: 4700, expenseCap: 1000, hospitalityCap: 400,  settleStatus: "submitted" },
   { artist: "Cinder Path",        genre: "Garage Rock", daysOut: 45, dealType: "vs", guarantee: 4500, percentage: 0.85, basis: "net", expectedGross: 4800, expenseCap: null, hospitalityCap: null, settleStatus: "in_review" },
   // vs $5-15K (Improve Deal — caps only) — 2 shows
