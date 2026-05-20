@@ -436,12 +436,27 @@ function PeerComparisonChart({
                 />
               ))}
             </Bar>
-            <Bar dataKey="peerMean" fill="#cbd5e1" radius={[3, 3, 0, 0]} />
+            <Bar dataKey="peerMean" fill="#f59e0b" fillOpacity={0.85} radius={[3, 3, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
-      <div className="mt-2 text-[10.5px] text-ink-400">
-        Purple bars turn red when this artist runs &gt;15% above peers, green when &gt;15% below.
+      <div className="mt-2 flex items-center gap-3 flex-wrap text-[10.5px] text-ink-500">
+        <span className="inline-flex items-center gap-1.5">
+          <span className="inline-block h-2 w-2 rounded-sm bg-[#7c3aed]" />
+          This artist
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="inline-block h-2 w-2 rounded-sm bg-[#dc2626]" />
+          &gt;15% above {peerLabel.toLowerCase()}
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="inline-block h-2 w-2 rounded-sm bg-[#059669]" />
+          &gt;15% below {peerLabel.toLowerCase()}
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="inline-block h-2 w-2 rounded-sm bg-[#f59e0b]" />
+          {peerLabel}
+        </span>
       </div>
     </div>
   );

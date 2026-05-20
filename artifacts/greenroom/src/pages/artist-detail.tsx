@@ -113,11 +113,11 @@ function Profile({ data }: { data: ArtistProfile }) {
         <StatCard label="Paid to artist" value={formatMoneyCompact(stats.totalPaidToArtist)} mono />
       </div>
 
-      <ArtistExpenseProfileCard artistId={artist.id} />
-
       <div className="mb-10">
         <AiPrompt scope="artist" id={artist.id} variant="inline" title={`Ask about ${artist.name}`} />
       </div>
+
+      <ArtistExpenseProfileCard artistId={artist.id} />
 
       {stats.dealTypes.length > 0 && (
         <section className="mb-12">
