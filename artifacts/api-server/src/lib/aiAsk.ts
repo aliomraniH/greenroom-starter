@@ -9,7 +9,19 @@ import {
   getArtistExpenseProfile,
   type Confidence,
 } from "./calibration";
-import { getArtistProfile, getNeedsAttention } from "./queries";
+import {
+  getArtistProfile,
+  getNeedsAttention,
+  computeNetToVenue,
+  isDisputedSettlement,
+} from "./queries";
+
+// Single source of truth for the "this is calibration-grounded MVP data,
+// don't bet a contract on the answer" disclaimer. The LLM is told about
+// this in the primer AND the server appends a parsed/normalized copy to
+// every AskResult so the UI can render it consistently.
+const DATA_DISCLAIMER =
+  "Answers are calibration-grounded but provisional — financial figures come from settlement totals (last 6 months for account-scope questions), exclude unsettled shows, and may shift as more data lands. Don't paste numbers into a contract without spot-checking the source rows.";
 
 export type AskScope = "account" | "show" | "artist";
 
@@ -27,6 +39,10 @@ export type AskResult = {
   id?: string;
   model?: string;
   warning?: string;
+  // Standing data-confidence disclaimer attached to every successful
+  // answer. Kept separate from `answer` so the UI can style it as a
+  // muted footnote rather than inline body copy.
+  disclaimer?: string;
 };
 
 // Calibration-aware system primer. Encodes the response rules called out in
@@ -49,6 +65,24 @@ Calibration-aware response rules:
 - Round dollar caps to nearest $50; round percentages to whole numbers.
 - If the data does not support a confident answer, say so plainly. Never
   invent expense lines, deal terms, or settlement numbers.
+
+Data window & restrictions (read carefully — the UI will also surface this
+to the user, so your answer must be consistent with it):
+- For account-scope questions you receive a \`last6MonthsShowsFinance\`
+  array: one row per show settled in the last 6 months with id, date,
+  artistId/name, dealType, gross, toArtist, totalExpenses, netToVenue,
+  isDisputed, and trimmed positive/negative summary text. This is your
+  ONLY per-show financial source for account-scope answers — older shows
+  are not in context. If the user asks something that needs deeper
+  history, say so and answer from what you do have.
+- "Negative shows" = shows with negativeSummary text present OR
+  netToVenue < 0. State which definition you used.
+- "Recurring artist" = an artist with 2+ shows in the
+  \`last6MonthsShowsFinance\` window unless the user specifies otherwise.
+- Unsettled shows (settlement = null) are excluded from financial recaps;
+  don't infer numbers for them.
+- Never claim more precision than the data supports — round to the
+  nearest $50 / whole percent as above.
 
 Anchor links (REQUIRED whenever you reference a specific show, deal, or
 artist by id):
@@ -76,6 +110,14 @@ Output FORMAT (strict, machine-parseable):
 <one of: high | med | low | none>
 `;
 
+function trimSummary(text: string | null, max = 140): string | null {
+  if (!text) return null;
+  const t = text.trim();
+  if (!t) return null;
+  if (t.length <= max) return t;
+  return t.slice(0, max - 1).trimEnd() + "…";
+}
+
 async function buildAccountContext(): Promise<{
   payload: unknown;
   summary: string;
@@ -87,25 +129,76 @@ async function buildAccountContext(): Promise<{
   ]);
   await migrationsReady;
   const today = new Date().toISOString().slice(0, 10);
-  const allShowsRows = await db.select().from(shows);
+
+  const [allShowsRows, allArtists, allDeals, settlementsRows] = await Promise.all([
+    db.select().from(shows),
+    db.select().from(artists),
+    db.select().from(deals),
+    db.select().from(settlements),
+  ]);
+
+  const artistById = new Map(allArtists.map((a) => [a.id, a]));
+  const dealByShowId = new Map(allDeals.map((d) => [d.showId, d]));
+  const settlementByShowId = new Map(settlementsRows.map((s) => [s.showId, s]));
+
   const last30Cutoff = new Date();
   last30Cutoff.setDate(last30Cutoff.getDate() - 30);
   const last30Iso = last30Cutoff.toISOString().slice(0, 10);
   const last30Shows = allShowsRows
     .filter((s) => s.date <= today && s.date >= last30Iso)
     .map((s) => ({ id: s.id, date: s.date, artistId: s.artistId }));
-  const settlementsRows = await db.select().from(settlements);
+
+  // -------- Last 6 months show-finance recap --------
+  // MVP shortcut: instead of giving the LLM tool-calling access to the
+  // API, we hand it a flat per-show financial table for the recent
+  // window. Covers the questions Deal Analysis users actually ask
+  // ("top recurring artists with most negative shows", "where are we
+  // losing money", etc.) without a second round-trip.
+  const last6Cutoff = new Date();
+  last6Cutoff.setMonth(last6Cutoff.getMonth() - 6);
+  const last6Iso = last6Cutoff.toISOString().slice(0, 10);
+  const last6MonthsShowsFinance = allShowsRows
+    .filter((s) => s.date <= today && s.date >= last6Iso)
+    .map((s) => {
+      const st = settlementByShowId.get(s.id) ?? null;
+      const dl = dealByShowId.get(s.id) ?? null;
+      const ar = s.artistId ? artistById.get(s.artistId) ?? null : null;
+      return {
+        showId: s.id,
+        date: s.date,
+        artistId: s.artistId,
+        artistName: ar?.name ?? null,
+        dealType: dl?.dealType ?? null,
+        settlementStatus: st?.status ?? null,
+        gross: st?.grossBoxOffice ?? null,
+        toArtist: st?.totalToArtist ?? null,
+        totalExpenses: st?.totalExpenses ?? null,
+        netToVenue: computeNetToVenue(st),
+        isDisputed: isDisputedSettlement(st),
+        positiveSummary: trimSummary(st?.positiveSummary ?? null),
+        negativeSummary: trimSummary(st?.negativeSummary ?? null),
+      };
+    })
+    .sort((a, b) => (a.date < b.date ? 1 : -1));
+
+  const settledLast6 = last6MonthsShowsFinance.filter((s) => s.gross != null);
   const openSettlements = settlementsRows
     .filter((s) => ["draft", "submitted", "in_review", "disputed", "revised"].includes(s.status))
     .map((s) => ({ showId: s.showId, status: s.status }));
+
   const payload = {
     calibration: calib,
     accountHealth: health,
     last30DaysShows: last30Shows,
+    last6MonthsShowsFinance,
     openSettlements,
     needsAttention: attention.slice(0, 12),
   };
-  const summary = `account-wide · maturity stage ${calib.maturity.stage} (n=${calib.maturity.settledN}) · ${last30Shows.length} shows in last 30d · ${openSettlements.length} open settlements · ${attention.length} attention items`;
+  const summary =
+    `account-wide · maturity stage ${calib.maturity.stage} (n=${calib.maturity.settledN}) · ` +
+    `${last30Shows.length} shows in last 30d · ` +
+    `${settledLast6.length}/${last6MonthsShowsFinance.length} settled shows in last 6mo · ` +
+    `${openSettlements.length} open settlements · ${attention.length} attention items`;
   return { payload, summary };
 }
 
@@ -233,5 +326,6 @@ Respond using the strict [ANSWER]/[CONTEXT_SUMMARY]/[CONFIDENCE] format above.`;
     confidence: parsed.confidence,
     scope: input.scope,
     id: input.id,
+    disclaimer: DATA_DISCLAIMER,
   };
 }

@@ -53,6 +53,7 @@ export function AiPrompt({
   const [answer, setAnswer] = useState<string | null>(null);
   const [contextSummary, setContextSummary] = useState<string | null>(null);
   const [confidence, setConfidence] = useState<string | null>(null);
+  const [disclaimer, setDisclaimer] = useState<string | null>(null);
   const [warning, setWarning] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -64,6 +65,7 @@ export function AiPrompt({
     setAnswer(null);
     setContextSummary(null);
     setConfidence(null);
+    setDisclaimer(null);
     setWarning(null);
     setError(null);
     try {
@@ -71,6 +73,7 @@ export function AiPrompt({
       setAnswer(out.answer);
       setContextSummary(out.contextSummary || null);
       setConfidence(out.confidence || null);
+      setDisclaimer(out.disclaimer ?? null);
       setWarning(out.warning ?? null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Ask failed");
@@ -171,6 +174,11 @@ export function AiPrompt({
                 </span>
               )}
               {contextSummary && <span>· {contextSummary}</span>}
+            </div>
+          )}
+          {disclaimer && (
+            <div className="mt-2 pt-2 border-t border-ink-100/70 text-[10.5px] leading-snug text-ink-500 italic">
+              {disclaimer}
             </div>
           )}
         </div>

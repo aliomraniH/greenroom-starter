@@ -839,6 +839,9 @@ export interface AskResult {
   scope: AskScope;
   id?: string;
   warning?: string;
+  // Standing data-confidence disclaimer the UI should render alongside
+  // every successful answer. Server is the source of truth for the text.
+  disclaimer?: string;
 }
 
 export interface DealAnalysis {
