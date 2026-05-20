@@ -34,11 +34,20 @@ export function AiPrompt({
   id,
   variant = "inline",
   title,
+  subtitle,
+  placeholder,
+  suggestions,
 }: {
   scope: AskScope;
   id?: string;
   variant?: "inline" | "prominent";
   title?: string;
+  subtitle?: string;
+  placeholder?: string;
+  // Override the default suggestion chips for this scope. Useful when the
+  // same scope (e.g. `account`) is reused on a tab with a more specific
+  // analytical focus, like Deal Analysis.
+  suggestions?: string[];
 }) {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState<string | null>(null);
@@ -82,7 +91,8 @@ export function AiPrompt({
           </div>
           {isProminent && (
             <div className="text-[11px] text-ink-500">
-              Single-turn, grounded in venue-calibrated baselines and live deal data.
+              {subtitle ??
+                "Single-turn, grounded in venue-calibrated baselines and live deal data."}
             </div>
           )}
         </div>
@@ -98,7 +108,7 @@ export function AiPrompt({
           type="text"
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
-          placeholder={`Ask about ${SCOPE_LABEL[scope]}…`}
+          placeholder={placeholder ?? `Ask about ${SCOPE_LABEL[scope]}…`}
           className={`flex-1 px-3 py-2 text-[12.5px] bg-white rounded-md ring-1 ring-ink-200 focus:ring-violet-300 focus:outline-none ${
             isProminent ? "" : ""
           }`}
@@ -116,7 +126,7 @@ export function AiPrompt({
 
       {!answer && !error && !warning && !loading && (
         <div className="mt-2.5 flex flex-wrap gap-1.5">
-          {SUGGESTIONS[scope].slice(0, 3).map((s) => (
+          {(suggestions ?? SUGGESTIONS[scope]).slice(0, 4).map((s) => (
             <button
               key={s}
               type="button"

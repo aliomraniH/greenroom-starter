@@ -4,7 +4,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { formatMoney, formatMoneyCompact } from "@/lib/format";
 import { useApiData, LoadingState } from "@/hooks/useApiData";
 import { CalibrationSection } from "@/components/calibration-section";
+import { AiPrompt } from "@/components/ai-prompt";
 import type { DealAnalysis, AttentionKind } from "@/lib/types";
+
+const DEAL_ANALYSIS_PROMPTS = [
+  "Which deal-type × size cell is bleeding the most money — and why?",
+  "Where are disputes concentrated, and what's driving them?",
+  "Which deal types are running over their expense baselines most often?",
+  "Are flat deals or Vs deals more profitable for us this year?",
+  "Which repeat artists deserve better terms, and which need tighter caps?",
+  "What's the realized payout gap between our biggest and smallest shows?",
+];
 
 const COMPLEXITY_META: Record<
   "simple" | "medium" | "complex",
@@ -100,6 +110,15 @@ export default function DealAnalysisPage() {
           to see the shows behind it.
         </p>
       </div>
+
+      <AiPrompt
+        scope="account"
+        variant="prominent"
+        title="Dig into the deal analysis"
+        subtitle="Ask follow-up questions about any pattern you see below — grounded in the same 24-month deal data."
+        placeholder="Ask about a deal type, size bucket, dispute pattern…"
+        suggestions={DEAL_ANALYSIS_PROMPTS}
+      />
 
       <ComplexitySection data={d} />
       <SizeSection data={d} />
