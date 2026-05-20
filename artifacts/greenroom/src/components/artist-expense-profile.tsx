@@ -1,4 +1,10 @@
-import { Activity, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Activity, TrendingUp, TrendingDown, Minus, Info } from "lucide-react";
+import {
+  Tooltip as UiTooltip,
+  TooltipContent as UiTooltipContent,
+  TooltipProvider as UiTooltipProvider,
+  TooltipTrigger as UiTooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   Bar,
   BarChart,
@@ -90,6 +96,7 @@ export function ArtistExpenseProfileCard({ artistId }: { artistId: string }) {
   return (
     <Card className="mb-10">
       <CardContent>
+       <UiTooltipProvider delayDuration={150}>
         <div className="flex items-center gap-2 mb-4">
           <Activity className="h-4 w-4 text-brand-700" />
           <h3 className="text-[14px] font-semibold text-ink-900">
@@ -119,18 +126,44 @@ export function ArtistExpenseProfileCard({ artistId }: { artistId: string }) {
             peerN={p.categoryComparison.peerN}
           />
         )}
+       </UiTooltipProvider>
       </CardContent>
     </Card>
   );
 }
 
+const DEAL_TYPE_LABEL: Record<string, string> = {
+  flat: "Flat",
+  percentage_of_gross: "% of gross",
+  percentage_of_net: "% of net",
+  vs: "Vs deal",
+  door: "Door",
+};
+
 function StatsRow({ profile }: { profile: ArtistExpenseProfile }) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-5 gap-px bg-ink-200/40 rounded-md overflow-hidden">
-      <Stat label="Weighted mean" value={fmtMoney(profile.totalExpensesWeightedMean)} hint="recency-decayed" />
-      <Stat label="P75" value={fmtMoney(profile.totalExpensesP75)} />
-      <Stat label="Max" value={fmtMoney(profile.totalExpensesMax)} />
-      <Stat label="Stddev" value={fmtMoney(profile.totalExpensesStddev)} />
+      <Stat
+        label="Weighted mean"
+        value={fmtMoney(profile.totalExpensesWeightedMean)}
+        hint="recency-decayed"
+        explain="Average total expenses per settled show with this artist, with newer shows weighted more heavily than older ones (six-month half-life). A better single number than a flat mean when costs have been drifting up or down."
+      />
+      <Stat
+        label="P75"
+        value={fmtMoney(profile.totalExpensesP75)}
+        explain="75th-percentile total expenses across this artist's settled shows: three out of four nights came in at or below this number. Use it as the upper end of 'normal' for setting expense caps."
+      />
+      <Stat
+        label="Max"
+        value={fmtMoney(profile.totalExpensesMax)}
+        explain="The single highest total expense across this artist's settled shows here. Useful for spotting blow-out nights worth investigating in the show detail."
+      />
+      <Stat
+        label="Stddev"
+        value={fmtMoney(profile.totalExpensesStddev)}
+        explain="How much the per-show expense total varies from the mean. Low stddev = predictable nights; high stddev = costs swing widely, so caps matter more."
+      />
       <Stat
         label="Top category"
         value={
@@ -139,6 +172,7 @@ function StatsRow({ profile }: { profile: ArtistExpenseProfile }) {
             : "—"
         }
         mono={false}
+        explain="The expense bucket this artist costs the most in on average per show, plus the average dollar amount in that bucket. The line to focus on when negotiating per-category caps."
       />
     </div>
   );
@@ -198,6 +232,10 @@ function GrowthChart({ shows }: { shows: LastShow[] }) {
     date: s.date,
     label: formatShowDate(s.date),
     total: s.total,
+    gross: s.gross,
+    venueNet: s.venueNet,
+    toArtist: s.toArtist,
+    dealType: s.dealType,
   }));
   const first = shows[0]?.total ?? 0;
   const last = shows[shows.length - 1]?.total ?? 0;
@@ -212,6 +250,9 @@ function GrowthChart({ shows }: { shows: LastShow[] }) {
       : "text-emerald-700";
   const TrendIcon = delta == null || Math.abs(delta) < 0.05 ? Minus : delta > 0 ? TrendingUp : TrendingDown;
 
+  const hasGross = data.some((d) => d.gross != null);
+  const hasNet = data.some((d) => d.venueNet != null);
+
   return (
     <div className="rounded-md ring-1 ring-ink-200/60 bg-white p-3">
       <div className="flex items-center justify-between mb-2">
@@ -225,7 +266,7 @@ function GrowthChart({ shows }: { shows: LastShow[] }) {
           </span>
         )}
       </div>
-      <div className="h-[160px]">
+      <div className="h-[180px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
@@ -242,15 +283,19 @@ function GrowthChart({ shows }: { shows: LastShow[] }) {
               tickFormatter={(v) => fmtMoneyCompact(Number(v))}
               width={48}
             />
-            <Tooltip
-              formatter={(v: number) => [fmtMoney(v), "Total"]}
-              contentStyle={{
-                fontSize: 11,
-                borderRadius: 6,
-                border: "1px solid #e5e7eb",
-                padding: "6px 8px",
-              }}
-            />
+            <Tooltip content={<SpendTrendTooltip />} />
+            {hasGross && (
+              <Line
+                type="monotone"
+                dataKey="gross"
+                stroke="#0ea5e9"
+                strokeWidth={2}
+                dot={{ r: 3, fill: "#0ea5e9" }}
+                activeDot={{ r: 4 }}
+                connectNulls
+                name="Gross"
+              />
+            )}
             <Line
               type="monotone"
               dataKey="total"
@@ -258,9 +303,100 @@ function GrowthChart({ shows }: { shows: LastShow[] }) {
               strokeWidth={2}
               dot={{ r: 3, fill: "#7c3aed" }}
               activeDot={{ r: 4 }}
+              name="Expenses"
             />
+            {hasNet && (
+              <Line
+                type="monotone"
+                dataKey="venueNet"
+                stroke="#059669"
+                strokeWidth={2}
+                strokeDasharray="4 3"
+                dot={{ r: 3, fill: "#059669" }}
+                activeDot={{ r: 4 }}
+                connectNulls
+                name="Venue net"
+              />
+            )}
           </LineChart>
         </ResponsiveContainer>
+      </div>
+      <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1 text-[10px] text-ink-600">
+        {hasGross && (
+          <span className="inline-flex items-center gap-1">
+            <span className="inline-block h-2 w-2 rounded-sm bg-[#0ea5e9]" />
+            Gross
+          </span>
+        )}
+        <span className="inline-flex items-center gap-1">
+          <span className="inline-block h-2 w-2 rounded-sm bg-[#7c3aed]" />
+          Expenses
+        </span>
+        {hasNet && (
+          <span className="inline-flex items-center gap-1">
+            <span className="inline-block h-2 w-2 rounded-sm bg-[#059669]" />
+            Venue net (gross − expenses − payout)
+          </span>
+        )}
+        <span className="text-ink-400">· hover a point for the deal type</span>
+      </div>
+    </div>
+  );
+}
+
+// Custom Recharts tooltip so we can show the deal type for the hovered show
+// alongside the numeric series. Recharts passes the active payload here.
+function SpendTrendTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: Array<{ payload: LastShow & { label: string } }>;
+  label?: string;
+}) {
+  if (!active || !payload || payload.length === 0) return null;
+  const row = payload[0].payload;
+  return (
+    <div className="rounded-md border border-ink-200 bg-white px-2.5 py-2 text-[11px] shadow-sm">
+      <div className="font-semibold text-ink-900 mb-1">{label}</div>
+      {row.gross != null && (
+        <div className="flex items-center justify-between gap-3">
+          <span className="inline-flex items-center gap-1.5 text-ink-600">
+            <span className="inline-block h-2 w-2 rounded-sm bg-[#0ea5e9]" /> Gross
+          </span>
+          <span className="font-mono tabular text-ink-900">{fmtMoney(row.gross)}</span>
+        </div>
+      )}
+      <div className="flex items-center justify-between gap-3">
+        <span className="inline-flex items-center gap-1.5 text-ink-600">
+          <span className="inline-block h-2 w-2 rounded-sm bg-[#7c3aed]" /> Expenses
+        </span>
+        <span className="font-mono tabular text-ink-900">{fmtMoney(row.total)}</span>
+      </div>
+      {row.toArtist != null && (
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-ink-600">To artist</span>
+          <span className="font-mono tabular text-ink-900">{fmtMoney(row.toArtist)}</span>
+        </div>
+      )}
+      {row.venueNet != null && (
+        <div className="flex items-center justify-between gap-3">
+          <span className="inline-flex items-center gap-1.5 text-ink-600">
+            <span className="inline-block h-2 w-2 rounded-sm bg-[#059669]" /> Venue net
+          </span>
+          <span
+            className={`font-mono tabular ${row.venueNet < 0 ? "text-rose-700" : "text-ink-900"}`}
+          >
+            {fmtMoney(row.venueNet)}
+          </span>
+        </div>
+      )}
+      <div className="mt-1 pt-1 border-t border-ink-100 text-[10.5px] text-ink-500">
+        Deal type:{" "}
+        <span className="text-ink-900 font-medium">
+          {row.dealType ? DEAL_TYPE_LABEL[row.dealType] ?? row.dealType : "—"}
+        </span>
       </div>
     </div>
   );
@@ -466,15 +602,17 @@ function Stat({
   label,
   value,
   hint,
+  explain,
   mono = true,
 }: {
   label: string;
   value: string;
   hint?: string;
+  explain?: string;
   mono?: boolean;
 }) {
-  return (
-    <div className="bg-white px-4 py-3">
+  const inner = (
+    <div className="bg-white px-4 py-3 h-full">
       <div
         className={`text-[18px] font-medium text-ink-900 leading-tight ${
           mono ? "font-mono tabular" : "font-display"
@@ -482,10 +620,31 @@ function Stat({
       >
         {value}
       </div>
-      <div className="text-[10px] font-medium text-ink-400 uppercase tracking-[0.06em] mt-1.5">
-        {label}
-        {hint && <span className="ml-1 normal-case text-ink-300">· {hint}</span>}
+      <div className="flex items-center gap-1 text-[10px] font-medium text-ink-400 uppercase tracking-[0.06em] mt-1.5">
+        <span>
+          {label}
+          {hint && <span className="ml-1 normal-case text-ink-300">· {hint}</span>}
+        </span>
+        {explain && <Info className="h-2.5 w-2.5 text-ink-300" aria-hidden />}
       </div>
     </div>
+  );
+  if (!explain) return inner;
+  return (
+    <UiTooltip delayDuration={150}>
+      <UiTooltipTrigger asChild>
+        <button
+          type="button"
+          className="text-left cursor-help focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40"
+          aria-label={`${label} explanation`}
+        >
+          {inner}
+        </button>
+      </UiTooltipTrigger>
+      <UiTooltipContent side="top" className="max-w-[260px] whitespace-normal">
+        <div className="font-semibold mb-0.5">{label}</div>
+        <div className="font-normal leading-relaxed">{explain}</div>
+      </UiTooltipContent>
+    </UiTooltip>
   );
 }

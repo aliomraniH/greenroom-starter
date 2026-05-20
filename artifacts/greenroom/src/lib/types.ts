@@ -806,6 +806,10 @@ export interface ArtistExpenseProfile {
     date: string;
     total: number;
     byCategory: Partial<Record<ExpenseCategory, number>>;
+    gross: number | null;
+    toArtist: number | null;
+    venueNet: number | null;
+    dealType: "flat" | "percentage_of_gross" | "percentage_of_net" | "vs" | "door" | null;
   }>;
   categoryComparison: {
     peerLabel: string;

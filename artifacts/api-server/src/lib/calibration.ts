@@ -814,6 +814,13 @@ export type ArtistExpenseProfile = {
     date: string;
     total: number;
     byCategory: Partial<Record<ExpenseCategory, number>>;
+    // Settlement context — populated when a settlement row exists for the
+    // show. Powers the gross/net overlays and deal-type hover on the
+    // spend-trend chart.
+    gross: number | null;
+    toArtist: number | null;
+    venueNet: number | null;
+    dealType: "flat" | "percentage_of_gross" | "percentage_of_net" | "vs" | "door" | null;
   }>;
   // Per-category comparison vs a peer group (same-genre artists, falling
   // back to the venue-wide average when the artist has no genre on file
@@ -843,6 +850,9 @@ export async function getArtistExpenseProfile(
     db.select().from(expenses),
   ]);
   const settlementsRows = await db.select().from(settlements);
+  const dealRows = await db.select().from(deals);
+  const settlementByShow = new Map(settlementsRows.map((s) => [s.showId, s]));
+  const dealByShow = new Map(dealRows.map((d) => [d.showId, d]));
   const settledShowIdSet = new Set(
     allShows
       .filter((s) => s.date <= today && isSettledShowStatus(s.status))
@@ -892,14 +902,37 @@ export async function getArtistExpenseProfile(
     .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
     .slice(0, 5)
     .reverse()
-    .map((s) => ({
-      showId: s.showId,
-      date: s.date,
-      total: Math.round(s.total),
-      byCategory: Object.fromEntries(
-        Object.entries(s.byCategory).map(([k, v]) => [k, Math.round(v as number)]),
-      ) as Partial<Record<ExpenseCategory, number>>,
-    }));
+    .map((s) => {
+      const st = settlementByShow.get(s.showId);
+      const dl = dealByShow.get(s.showId);
+      const gross = st?.grossBoxOffice ?? null;
+      const toArtist = st?.totalToArtist ?? null;
+      // Venue net = gross minus expenses minus payout to artist. We use
+      // the settlement's grossBoxOffice (authoritative when present) and
+      // subtract the expense total + payout. Null if gross is missing.
+      const venueNet =
+        gross != null
+          ? Math.round(gross - s.total - (toArtist ?? 0))
+          : null;
+      return {
+        showId: s.showId,
+        date: s.date,
+        total: Math.round(s.total),
+        byCategory: Object.fromEntries(
+          Object.entries(s.byCategory).map(([k, v]) => [k, Math.round(v as number)]),
+        ) as Partial<Record<ExpenseCategory, number>>,
+        gross: gross != null ? Math.round(gross) : null,
+        toArtist: toArtist != null ? Math.round(toArtist) : null,
+        venueNet,
+        dealType: (dl?.dealType ?? null) as
+          | "flat"
+          | "percentage_of_gross"
+          | "percentage_of_net"
+          | "vs"
+          | "door"
+          | null,
+      };
+    });
 
   // -------- Peer category comparison --------
   // Peers = settled shows of OTHER artists in the same genre. Falls back
