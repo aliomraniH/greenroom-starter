@@ -925,7 +925,7 @@ function SmartGuaranteedPricePanel({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-1">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
                 <div className="rounded-lg bg-white/60 ring-1 ring-ink-200/50 p-2.5">
                   <div className="eyebrow text-[10px] text-ink-500 mb-1">Expected gross</div>
                   <div className="font-mono tabular text-[14px] text-ink-900">{formatMoney(sug.expectedGross)}</div>
@@ -938,6 +938,48 @@ function SmartGuaranteedPricePanel({
                   <div className="eyebrow text-[10px] text-ink-500 mb-1">Breakeven gross</div>
                   <div className="font-mono tabular text-[14px] text-ink-900">{formatMoney(sug.breakevenGross)}</div>
                 </div>
+                {(() => {
+                  // Projected venue net at the suggested flat. Uses the same
+                  // cushion math as `computeInsuranceTier`: net-of-fees minus
+                  // expense estimate minus the SGP-suggested payout. Only
+                  // shown for Tier A / B (the data-safe tiers) — at C / D
+                  // the projection rests on too-thin samples to publish.
+                  const projected =
+                    sug.netAfterFees != null
+                      ? sug.netAfterFees - sug.expenseEstimate - sug.suggestedPrice
+                      : null;
+                  const isConfident =
+                    sug.confidenceTier === "A" || sug.confidenceTier === "B";
+                  if (projected == null) return null;
+                  const positive = projected >= 0;
+                  return (
+                    <div
+                      className={`rounded-lg p-2.5 ring-1 ${
+                        isConfident
+                          ? positive
+                            ? "bg-emerald-50/70 ring-emerald-200/70"
+                            : "bg-rose-50/70 ring-rose-200/70"
+                          : "bg-white/60 ring-ink-200/50"
+                      }`}
+                    >
+                      <div className="eyebrow text-[10px] text-ink-500 mb-1">
+                        Projected venue net{!isConfident ? " (low confidence)" : ""}
+                      </div>
+                      <div
+                        className={`font-mono tabular text-[14px] font-semibold ${
+                          isConfident
+                            ? positive
+                              ? "text-emerald-800"
+                              : "text-rose-800"
+                            : "text-ink-700"
+                        }`}
+                      >
+                        {positive ? "" : "−"}
+                        {formatMoney(Math.abs(projected))}
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
 
               <div className="text-[13px] text-ink-700 leading-relaxed pt-3 border-t border-ink-200/40">

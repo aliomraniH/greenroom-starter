@@ -1,13 +1,31 @@
 /**
- * Idempotent: gives the 5 vs/pn $1–5K NEW DEMO shows a clean range of SGP
- * confidence outcomes so Smart Switch demonstrates the full engine, not just
- * the "guarantee_amount" fallback path.
+ * Idempotent: gives the 5 vs/pn $1–5K NEW DEMO shows a clean range of Smart
+ * Switch confidence outcomes so the demo shows the full engine ladder, not
+ * just the "guarantee_amount" fallback path.
  *
- *   atlas_court    → Tier A         (Jordan Wells + 3 prior settled vs shows)
+ * Smart Switch is *intentionally* A/B-only: per the Apr-2026 audit, only
+ * tier A and B SGP reads are deemed data-safe enough to surface a "switch
+ * to flat" recommendation. SGP tier C/D suggestions fall through to the
+ * `guarantee_amount` fallback (or to "no suggestion") so the booker sees
+ * the conservative read, not a confident-looking switch.
+ *
+ *   atlas_court    → Tier A         (Jordan Wells + 3 prior settled vs shows,
+ *                                    each settled with a POSITIVE venue net
+ *                                    — the backing history must demonstrate
+ *                                    that the cell actually pays profitably
+ *                                    at the recommended $2K guarantee, or
+ *                                    the "Tier A high confidence" claim is
+ *                                    self-defeating.)
  *   bramble_hollow → Tier B (agent) (Jordan Wells, no prior artist shows)
- *   cinder_path    → Tier B (artist)(no agent, 1 prior settled vs show)
- *   gilded_fern    → Tier C (genre) (no agent, Folk has corpus coverage)
- *   hollow_bay     → Tier D         (no agent, rare/unseen genre)
+ *   cinder_path    → Tier B (artist)(no agent, 1 prior settled vs show
+ *                                    with positive venue net)
+ *   gilded_fern    → Tier D / "no switch" (no agent, no priors — SGP
+ *                                    returns C via genre but Smart Switch
+ *                                    falls through to guarantee_amount;
+ *                                    proves the engine refuses to switch
+ *                                    on thin samples)
+ *   hollow_bay     → Tier D         (no agent, rare/unseen genre — full
+ *                                    "don't switch" demo)
  *
  * Run with:
  *   pnpm --filter @workspace/api-server exec tsx scripts/seedSgpRangeDemo.ts
@@ -92,12 +110,20 @@ async function createHistoryShow(opts: {
   const showId = `show_sgphist_${opts.artistId.replace("artist_newdemo_", "")}_${opts.index}`;
   const now = new Date();
 
-  // vs $1–5K shape: $2,500 guarantee + 80% net, capped expenses.
-  // pn $1–5K shape: $2,500 guarantee + 75% net.
-  const guarantee = 2500;
+  // vs $1–5K shape: $2,000 guarantee + 80% net, capped expenses.
+  // pn $1–5K shape: $2,000 guarantee + 75% net.
+  //
+  // Guarantee + grossBoxOffice tuned so venue nets POSITIVELY on every
+  // synthetic prior show. Earlier values (gross $3.2–3.7K with a $2.5K
+  // guarantee on $1.7K expenses) forced venue net to −$500…−$1,000, which
+  // made the Tier-A demo backing look like "high-confidence loses money."
+  // Range here: gross $4.4K–$5.0K, $2K guarantee, expenses $1.7K
+  // → venue net $700–$1,300 per show. Matches Atlas Court's $2,000 SGP
+  // suggestion so the historical claim and the suggested flat are coherent.
+  const guarantee = 2000;
   const percentage = opts.dealLike === "vs" ? 0.80 : 0.75;
   const dealType = opts.dealLike === "vs" ? "vs" as const : "percentage_of_net" as const;
-  const grossBoxOffice = 3200 + opts.index * 250;   // ~3.2–3.7K
+  const grossBoxOffice = 4400 + opts.index * 300;   // ~4.4–5.0K
   const totalExpenses = 1700;
   const netBoxOffice = grossBoxOffice - totalExpenses;
   // settled payout: max(guarantee, percentage * net)
