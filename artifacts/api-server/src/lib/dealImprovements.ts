@@ -8,18 +8,13 @@ import {
 } from "../db/schema";
 import { eq, lte } from "drizzle-orm";
 import { classifyAnalyticsSizeBucket } from "./queries";
+import { getExpenseCaps } from "./expenseCaps";
 
-// P75-flat defaults derived from the 497-show audit (Apr 2026). Expenses at
-// this venue cluster around $1,500–$1,850 regardless of gross — they don't
-// scale with size — so a single per-bucket flat covers ~75% of nights without
-// the 10× over/undershoot the old bucket-scaled defaults caused.
-const DEFAULT_EXPENSE_CAP_BY_BUCKET: Record<string, number> = {
-  "$0–1K": 1700,
-  "$1–5K": 1850,
-  "$5–15K": 1750,
-  "$15K+": 1650,
-  "Uncapped %": 1750,
-};
+// Per-bucket expense caps are derived from live data via `expenseCaps.ts`
+// (P75 of historical billed expenses per analytics bucket). The previous
+// hardcoded table here would have drifted from reality every time a
+// settlement was logged. Both this module and the SGP engine now read
+// from the same source so they can never disagree.
 
 // Audit also showed hospitality is flat ~$304/show across every bucket — the
 // $50 spread between old bucket defaults wasn't supported by the data. Use
@@ -172,7 +167,10 @@ export async function getDealImprovements(showId: string): Promise<DealImproveme
   }
 
   const bucket = classifyBucket(dealRow);
-  const ctx = await loadComparables(dealRow, bucket);
+  const [ctx, caps] = await Promise.all([
+    loadComparables(dealRow, bucket),
+    getExpenseCaps(),
+  ]);
 
   const improvements: DealImprovement[] = [];
 
@@ -182,7 +180,7 @@ export async function getDealImprovements(showId: string): Promise<DealImproveme
     dealRow.expenseCap == null &&
     (dealRow.dealType === "vs" || dealRow.dealType === "percentage_of_net" || dealRow.dealType === "door")
   ) {
-    const proposed = DEFAULT_EXPENSE_CAP_BY_BUCKET[bucket] ?? 1750;
+    const proposed = caps.byBucket[bucket] ?? caps.venueP75 ?? 1750;
     improvements.push({
       kind: "add_expense_cap",
       title: `Add a ${fmtMoney(proposed)} expense cap`,
@@ -277,6 +275,5 @@ export async function applyDealImprovements(
 }
 
 export const __TEST_CONSTANTS__ = {
-  DEFAULT_EXPENSE_CAP_BY_BUCKET,
   HOSPITALITY_CAP_DEFAULT,
 };

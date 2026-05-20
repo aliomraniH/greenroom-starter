@@ -5,7 +5,8 @@ import {
   shows, artists, agents, deals, settlements, expenses, venues,
   guaranteeSuggestions, type Deal, type Show, type Artist,
 } from "../db/schema";
-import { classifySizeBucket } from "./queries";
+import { classifySizeBucket, classifyAnalyticsSizeBucket } from "./queries";
+import { getExpenseCaps, clearExpenseCapsCache } from "./expenseCaps";
 
 export type ConfidenceTier = "A" | "B" | "C" | "D";
 
@@ -30,13 +31,11 @@ export type Winner = "guarantee" | "percentage" | "tie";
 
 const TICKETING_FEE_RATE = 0.10;
 const DEFAULT_DOOR_SPLIT = 0.70;
-const DEFAULT_EXPENSE_CAP_BY_BUCKET: Record<string, number> = {
-  "$0–1K": 800,
-  "$1–5K": 1500,
-  "$5–15K": 3500,
-  "$15K+": 7500,
-  "Uncapped %": 1500,
-};
+// Per-bucket expense ceiling is now derived from live data via
+// `expenseCaps.ts` (P75 of historical billed expenses per analytics
+// bucket). The previous hardcoded table here (e.g. $5–15K = $3,500)
+// went stale relative to the actual ~$1,750 P75 the data shows, and
+// disagreed with the parallel constant in dealImprovements.ts.
 const CAPACITY_PROXY_TICKET_PRICE = 30;
 const CAPACITY_PROXY_LOAD = 0.6;
 
@@ -64,6 +63,7 @@ const CTX_TTL_MS = 5 * 60 * 1000;
 
 export function clearGuaranteeCache(): void {
   ctxCache = null;
+  clearExpenseCapsCache();
 }
 
 function todayDateString(): string {
@@ -408,7 +408,15 @@ export async function generateGuarantee(
   // and `artistDeductibleExpense` (below) reflects the artist-side cap.
   const expenseInfo = resolveExpense(ctx, show, agentId, genre);
   const dealExpenseCap = deal.expenseCap;
-  const defaultCap = DEFAULT_EXPENSE_CAP_BY_BUCKET[bucket] ?? 1500;
+  const caps = await getExpenseCaps();
+  // Use the analytics classifier for the cap lookup so the bucket key
+  // matches how `expenseCaps.ts` *derived* its P75 distribution. Without
+  // this, zero-guarantee vs/door/percentage_of_net deals would hit the
+  // legacy `Uncapped %` key here while the cap module had filed their
+  // siblings under `$0–1K`, re-introducing the cross-module disagreement
+  // this refactor was meant to eliminate.
+  const capBucket = classifyAnalyticsSizeBucket(deal);
+  const defaultCap = caps.byBucket[capBucket] ?? caps.venueP75 ?? 1750;
   const expenseEstimate = Math.min(expenseInfo.value, defaultCap);
   // `effectiveCap` is retained for the persisted audit row — it now
   // means "engine safety ceiling actually applied", independent of the

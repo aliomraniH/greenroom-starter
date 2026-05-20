@@ -413,18 +413,24 @@ describe("Step 4 – expense waterfall and cap behavior", () => {
       settlement: { status: "signed", grossBoxOffice: 10000, totalToArtist: 5000 },
       expenseTotal: 5000,
     });
-    // Deal cap is 1200; default bucket cap for $1–5K is 1500. The deal
-    // cap is artist-side only (it limits the artist's expense-recoup
-    // line), so the venue's projected expenseEstimate should clamp to
-    // the bucket default 1500, NOT to the tighter deal cap.
+    // Deal cap is 1200; the engine's bucket cap is now derived from
+    // historical expense data (via lib/expenseCaps.ts). The deal cap is
+    // artist-side only — the venue's projected expenseEstimate should
+    // clamp to the engine cap, NOT to the tighter deal cap. With
+    // expenseTotal=5000 across the two past shows the venue P75 fallback
+    // is well above the $1,200 deal cap, so we assert the engine cap is
+    // used and is not equal to the deal cap.
     const id = await addUpcomingShow({
       deal: {
         dealType: "vs", guaranteeAmount: 2000, percentage: 0.85, expenseCap: 1200,
       },
     });
     const r = await generateGuarantee(id);
-    expect(r.suggestion?.expenseCap).toBe(1500);
-    expect(r.suggestion?.expenseEstimate).toBe(1500);
+    expect(r.suggestion).not.toBeNull();
+    expect(r.suggestion!.expenseCap).not.toBe(1200);
+    expect(r.suggestion!.expenseCap).toBeGreaterThan(1200);
+    // Engine clamps expenseEstimate to its own cap, not the deal cap.
+    expect(r.suggestion!.expenseEstimate).toBe(r.suggestion!.expenseCap);
   });
 
   it("uses the bucket default cap when no deal cap is set", async () => {
@@ -438,13 +444,23 @@ describe("Step 4 – expense waterfall and cap behavior", () => {
       settlement: { status: "signed", grossBoxOffice: 10000, totalToArtist: 5000 },
       expenseTotal: 9999,
     });
-    // $5–15K bucket → default cap 3500.
+    // $5–15K bucket. No deal cap is set, so the engine uses its own
+    // data-derived ceiling. With actual expenses (9999) far above the
+    // P75-derived ceiling, expenseEstimate must clamp to the cap.
     const id = await addUpcomingShow({
       deal: { dealType: "vs", guaranteeAmount: 8000, percentage: 0.85 },
     });
     const r = await generateGuarantee(id);
-    expect(r.suggestion?.expenseCap).toBe(3500);
-    expect(r.suggestion?.expenseEstimate).toBe(3500);
+    expect(r.suggestion).not.toBeNull();
+    // The engine emits a cap derived from data and applies it as a
+    // ceiling on the expense estimate. The exact ceiling depends on
+    // the seeded distribution; the invariant under test is that *some*
+    // engine cap was used (no deal cap was provided) and expenseEstimate
+    // never exceeds it.
+    expect(r.suggestion!.expenseCap).toBeGreaterThan(0);
+    expect(r.suggestion!.expenseEstimate).toBeLessThanOrEqual(
+      r.suggestion!.expenseCap!,
+    );
   });
 });
 
@@ -716,9 +732,15 @@ describe("Audit + breakeven sanity", () => {
     expect(audit.step1_expectedGross.source).toBe("artist_at_venue");
     expect(audit.step2_ticketingFees.rate).toBe(0.1);
     expect(audit.step3_netAfterFees).toBe(9000);
-    // effectiveCap is the engine safety ceiling (defaultCap for the
-    // $5–15K bucket = 1500), no longer clamped by the deal cap.
-    expect(audit.step4_expense.effectiveCap).toBe(1500);
+    // effectiveCap is the engine safety ceiling, now derived from
+    // historical data (lib/expenseCaps.ts), no longer clamped by the
+    // deal cap. The cappedValue must be the lesser of the actual
+    // expense (800) and the effectiveCap. Since the actual is small
+    // relative to any sane cap, cappedValue should equal 800.
+    expect(audit.step4_expense.effectiveCap).toBeGreaterThan(0);
+    expect(audit.step4_expense.cappedValue).toBe(
+      Math.min(800, audit.step4_expense.effectiveCap),
+    );
     expect(audit.step4_expense.cappedValue).toBe(800);
     expect(audit.step5_netBase).toBe(8200);
     expect(audit.step6_percentagePayout.basis).toBe(8200);
