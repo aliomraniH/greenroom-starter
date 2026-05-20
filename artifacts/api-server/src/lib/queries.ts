@@ -39,6 +39,27 @@ export function isDisputedSettlement(
   );
 }
 
+/**
+ * Net to venue per show = grossBoxOffice − totalToArtist − totalExpenses.
+ *
+ * The venue's bottom-line keep isn't stored on the `settlements` row
+ * (only its inputs are), so we derive it consistently in one place and
+ * attach it to every show-shaped payload the API returns. Returns `null`
+ * when the show hasn't been settled yet or `grossBoxOffice` is missing.
+ * Missing `totalToArtist` / `totalExpenses` are treated as 0 so a
+ * partially-filled settlement still produces a usable number.
+ */
+export function computeNetToVenue(
+  settlement: typeof settlements.$inferSelect | null,
+): number | null {
+  if (!settlement) return null;
+  const gross = settlement.grossBoxOffice;
+  if (gross == null) return null;
+  const toArtist = settlement.totalToArtist ?? 0;
+  const exp = settlement.totalExpenses ?? 0;
+  return Math.round(gross - toArtist - exp);
+}
+
 export async function getAllShows() {
   const today = todayDateString();
   const rows = await db
@@ -80,6 +101,7 @@ export async function getAllShows() {
       tense: (r.show.date > today ? "upcoming" : r.show.date === today ? "today" : "past") as "past" | "today" | "upcoming",
       switchStatus: switchStatusByShowId.get(r.show.id) ?? null,
       guaranteeSuggestion: guaranteeByShowId.get(r.show.id) ?? null,
+      netToVenue: computeNetToVenue(r.settlement),
       expenseCategories: Array.from(
         expenseCategoriesByShowId.get(r.show.id) ?? [],
       ),
@@ -146,6 +168,7 @@ export async function getShowById(id: string) {
     guaranteeSuggestion,
     isUnsupportedDeal: isUnsupportedDeal(row.deal),
     isDisputed: isDisputedSettlement(row.settlement),
+    netToVenue: computeNetToVenue(row.settlement),
   };
 }
 
@@ -314,6 +337,7 @@ export async function getArtistProfile(artistId: string) {
       tense,
       isUnsupportedDeal: isUnsupportedDeal(r.deal),
       isDisputed: isDisputedSettlement(r.settlement),
+      netToVenue: computeNetToVenue(r.settlement),
       recoupCategories: Array.from(new Set(recoups.map((x) => x.category))),
       disputedRecoupCategories: Array.from(
         new Set(recoups.filter((x) => x.status === "disputed").map((x) => x.category)),

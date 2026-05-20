@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db, migrationsReady } from "../db";
 import { shows, deals, settlements, expenses, artists, ticketSales, guaranteeSuggestions } from "../db/schema";
-import { classifyAnalyticsSizeBucket } from "./queries";
+import { classifyAnalyticsSizeBucket, computeNetToVenue } from "./queries";
 
 const DEAL_TYPES = ["flat", "percentage_of_gross", "percentage_of_net", "vs", "door"] as const;
 type DealType = (typeof DEAL_TYPES)[number];
@@ -907,13 +907,13 @@ export async function getArtistExpenseProfile(
       const dl = dealByShow.get(s.showId);
       const gross = st?.grossBoxOffice ?? null;
       const toArtist = st?.totalToArtist ?? null;
-      // Venue net = gross minus expenses minus payout to artist. We use
-      // the settlement's grossBoxOffice (authoritative when present) and
-      // subtract the expense total + payout. Null if gross is missing.
-      const venueNet =
-        gross != null
-          ? Math.round(gross - s.total - (toArtist ?? 0))
-          : null;
+      // Venue net uses the canonical helper so this chart agrees with the
+      // `netToVenue` field exposed on every show payload. Note `s.total`
+      // (used for the per-category breakdown above) intentionally excludes
+      // `absorbedByVenue` expenses, while `computeNetToVenue` uses the
+      // settlement-line `totalExpenses` so the venue's bottom-line keep
+      // includes absorbed costs.
+      const venueNet = computeNetToVenue(st ?? null);
       return {
         showId: s.showId,
         date: s.date,

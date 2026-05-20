@@ -147,6 +147,9 @@ export interface ShowListRow {
   tense: ShowTense;
   switchStatus: SwitchStatus | null;
   guaranteeSuggestion: { suggestedPrice: number; delta: number } | null;
+  // Calculated venue keep = grossBoxOffice − totalToArtist − totalExpenses.
+  // Null when the show isn't settled or gross is missing.
+  netToVenue: number | null;
   expenseCategories: string[];
   recoupCategories: string[];
   disputedRecoupCategories: string[];
@@ -266,6 +269,8 @@ export interface ShowDetail {
   guaranteeSuggestion: GuaranteeSuggestion | null;
   isUnsupportedDeal: boolean;
   isDisputed: boolean;
+  // Calculated venue keep — see ShowListRow.netToVenue.
+  netToVenue: number | null;
 }
 
 export type AttentionKind =
@@ -561,6 +566,8 @@ export interface ArtistProfileShow {
   tense: "past" | "today" | "upcoming";
   isUnsupportedDeal: boolean;
   isDisputed: boolean;
+  // Calculated venue keep — see ShowListRow.netToVenue.
+  netToVenue: number | null;
   recoupCategories: string[];
   disputedRecoupCategories: string[];
 }
