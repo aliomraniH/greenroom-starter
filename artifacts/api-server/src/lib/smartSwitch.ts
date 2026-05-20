@@ -7,6 +7,7 @@ import {
 } from "../db/schema";
 import { classifyAnalyticsSizeBucket as classifySizeBucket } from "./queries";
 import { generateGuarantee } from "./smartGuarantee";
+import { getExpenseCapForBucket } from "./expenseCaps";
 
 export type ConfidenceTier = "A" | "B" | "C" | "D";
 
@@ -173,7 +174,6 @@ export function deriveIsDeadPool(source: SwitchSource | null | undefined): boole
 
 const DOOR_FLOOR = 500;
 const DOOR_SPLIT_PCT = 0.6;
-const DOOR_EXPENSE_CAP = 1500;
 // Audit threshold: when the cell payout band is wider than $1,000 (P10–P90),
 // a single-number "flat at $X" promise is dishonest. Demote display tier so
 // the UI renders a range ($X ± $Y) instead.
@@ -332,8 +332,9 @@ export async function generateSuggestion(
       };
     }
 
-    const avgExp = cell?.avgExpenses ?? DOOR_EXPENSE_CAP;
-    const cap = Math.min(DOOR_EXPENSE_CAP, Math.round(avgExp));
+    const expCapCeiling = await getExpenseCapForBucket(bucket);
+    const avgExp = cell?.avgExpenses ?? expCapCeiling;
+    const cap = Math.min(expCapCeiling, Math.round(avgExp));
     const projectedAvail = avgGross * 0.9 - cap;
 
     // Audit fix #6: dead-pool branch. When the available pool after expenses
