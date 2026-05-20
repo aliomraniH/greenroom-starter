@@ -25319,591 +25319,6 @@
     }
   },
   {
-    "settlementId": "settlement_newdemo_atlas_court",
-    "showId": "show_newdemo_atlas_court",
-    "showDate": "2026-06-04",
-    "showStatus": "booked",
-    "settlementStatus": "draft",
-    "artist": {
-      "id": "artist_newdemo_atlas_court",
-      "name": "[NEW DEMO] Atlas Court",
-      "genre": "Indie Rock"
-    },
-    "agent": null,
-    "deal": {
-      "id": "deal_newdemo_atlas_court",
-      "dealType": "vs",
-      "guaranteeAmount": 2000,
-      "percentage": 0.8,
-      "percentageBasis": "net",
-      "expenseCap": 1850,
-      "hospitalityCap": null,
-      "bonuses": null,
-      "notes": null
-    },
-    "settlementFinancials": {
-      "grossBoxOffice": null,
-      "totalToArtist": null,
-      "totalExpenses": null,
-      "recoups": []
-    },
-    "rawText": {
-      "notes": "[NEW DEMO] Pre-show settlement placeholder for the proposal stage.",
-      "signoffText": null
-    },
-    "extractedInsight": {
-      "positiveSummary": null,
-      "negativeSummary": null,
-      "hasSummary": false
-    }
-  },
-  {
-    "settlementId": "settlement_newdemo_bramble_hollow",
-    "showId": "show_newdemo_bramble_hollow",
-    "showDate": "2026-06-13",
-    "showStatus": "booked",
-    "settlementStatus": "submitted",
-    "artist": {
-      "id": "artist_newdemo_bramble_hollow",
-      "name": "[NEW DEMO] Bramble Hollow",
-      "genre": "Folk"
-    },
-    "agent": null,
-    "deal": {
-      "id": "deal_newdemo_bramble_hollow",
-      "dealType": "vs",
-      "guaranteeAmount": 3500,
-      "percentage": 0.8,
-      "percentageBasis": "net",
-      "expenseCap": 1850,
-      "hospitalityCap": 400,
-      "bonuses": null,
-      "notes": null
-    },
-    "settlementFinancials": {
-      "grossBoxOffice": null,
-      "totalToArtist": null,
-      "totalExpenses": null,
-      "recoups": []
-    },
-    "rawText": {
-      "notes": "[NEW DEMO] Pre-show settlement placeholder for the proposal stage.",
-      "signoffText": null
-    },
-    "extractedInsight": {
-      "positiveSummary": null,
-      "negativeSummary": null,
-      "hasSummary": false
-    }
-  },
-  {
-    "settlementId": "settlement_newdemo_cinder_path",
-    "showId": "show_newdemo_cinder_path",
-    "showDate": "2026-06-27",
-    "showStatus": "booked",
-    "settlementStatus": "in_review",
-    "artist": {
-      "id": "artist_newdemo_cinder_path",
-      "name": "[NEW DEMO] Cinder Path",
-      "genre": "Garage Rock"
-    },
-    "agent": null,
-    "deal": {
-      "id": "deal_newdemo_cinder_path",
-      "dealType": "vs",
-      "guaranteeAmount": 4500,
-      "percentage": 0.85,
-      "percentageBasis": "net",
-      "expenseCap": null,
-      "hospitalityCap": null,
-      "bonuses": null,
-      "notes": null
-    },
-    "settlementFinancials": {
-      "grossBoxOffice": null,
-      "totalToArtist": null,
-      "totalExpenses": null,
-      "recoups": []
-    },
-    "rawText": {
-      "notes": "[NEW DEMO] Pre-show settlement placeholder for the proposal stage.",
-      "signoffText": null
-    },
-    "extractedInsight": {
-      "positiveSummary": null,
-      "negativeSummary": null,
-      "hasSummary": false
-    }
-  },
-  {
-    "settlementId": "settlement_newdemo_driftline",
-    "showId": "show_newdemo_driftline",
-    "showDate": "2026-05-31",
-    "showStatus": "booked",
-    "settlementStatus": "draft",
-    "artist": {
-      "id": "artist_newdemo_driftline",
-      "name": "[NEW DEMO] Driftline",
-      "genre": "Indie Rock"
-    },
-    "agent": null,
-    "deal": {
-      "id": "deal_newdemo_driftline",
-      "dealType": "vs",
-      "guaranteeAmount": 7000,
-      "percentage": 0.8,
-      "percentageBasis": "net",
-      "expenseCap": null,
-      "hospitalityCap": null,
-      "bonuses": null,
-      "notes": null
-    },
-    "settlementFinancials": {
-      "grossBoxOffice": null,
-      "totalToArtist": null,
-      "totalExpenses": null,
-      "recoups": []
-    },
-    "rawText": {
-      "notes": "[NEW DEMO] Pre-show settlement placeholder for the proposal stage.",
-      "signoffText": null
-    },
-    "extractedInsight": {
-      "positiveSummary": null,
-      "negativeSummary": null,
-      "hasSummary": false
-    }
-  },
-  {
-    "settlementId": "settlement_newdemo_echo_bramble",
-    "showId": "show_newdemo_echo_bramble",
-    "showDate": "2026-07-08",
-    "showStatus": "booked",
-    "settlementStatus": "submitted",
-    "artist": {
-      "id": "artist_newdemo_echo_bramble",
-      "name": "[NEW DEMO] Echo Bramble",
-      "genre": "Americana"
-    },
-    "agent": null,
-    "deal": {
-      "id": "deal_newdemo_echo_bramble",
-      "dealType": "vs",
-      "guaranteeAmount": 12000,
-      "percentage": 0.85,
-      "percentageBasis": "net",
-      "expenseCap": 1750,
-      "hospitalityCap": null,
-      "bonuses": null,
-      "notes": null
-    },
-    "settlementFinancials": {
-      "grossBoxOffice": null,
-      "totalToArtist": null,
-      "totalExpenses": null,
-      "recoups": []
-    },
-    "rawText": {
-      "notes": "[NEW DEMO] Pre-show settlement placeholder for the proposal stage.",
-      "signoffText": null
-    },
-    "extractedInsight": {
-      "positiveSummary": null,
-      "negativeSummary": null,
-      "hasSummary": false
-    }
-  },
-  {
-    "settlementId": "settlement_newdemo_foxglove_society",
-    "showId": "show_newdemo_foxglove_society",
-    "showDate": "2026-07-23",
-    "showStatus": "booked",
-    "settlementStatus": "in_review",
-    "artist": {
-      "id": "artist_newdemo_foxglove_society",
-      "name": "[NEW DEMO] Foxglove Society",
-      "genre": "Indie Rock"
-    },
-    "agent": null,
-    "deal": {
-      "id": "deal_newdemo_foxglove_society",
-      "dealType": "vs",
-      "guaranteeAmount": 18000,
-      "percentage": 0.85,
-      "percentageBasis": "net",
-      "expenseCap": null,
-      "hospitalityCap": null,
-      "bonuses": null,
-      "notes": null
-    },
-    "settlementFinancials": {
-      "grossBoxOffice": null,
-      "totalToArtist": null,
-      "totalExpenses": null,
-      "recoups": []
-    },
-    "rawText": {
-      "notes": "[NEW DEMO] Pre-show settlement placeholder for the proposal stage.",
-      "signoffText": null
-    },
-    "extractedInsight": {
-      "positiveSummary": null,
-      "negativeSummary": null,
-      "hasSummary": false
-    }
-  },
-  {
-    "settlementId": "settlement_newdemo_gilded_fern",
-    "showId": "show_newdemo_gilded_fern",
-    "showDate": "2026-06-09",
-    "showStatus": "booked",
-    "settlementStatus": "draft",
-    "artist": {
-      "id": "artist_newdemo_gilded_fern",
-      "name": "[NEW DEMO] Gilded Fern",
-      "genre": "Folk"
-    },
-    "agent": null,
-    "deal": {
-      "id": "deal_newdemo_gilded_fern",
-      "dealType": "percentage_of_net",
-      "guaranteeAmount": 2500,
-      "percentage": 0.75,
-      "percentageBasis": "net",
-      "expenseCap": 1850,
-      "hospitalityCap": null,
-      "bonuses": null,
-      "notes": null
-    },
-    "settlementFinancials": {
-      "grossBoxOffice": null,
-      "totalToArtist": null,
-      "totalExpenses": null,
-      "recoups": []
-    },
-    "rawText": {
-      "notes": "[NEW DEMO] Pre-show settlement placeholder for the proposal stage.",
-      "signoffText": null
-    },
-    "extractedInsight": {
-      "positiveSummary": null,
-      "negativeSummary": null,
-      "hasSummary": false
-    }
-  },
-  {
-    "settlementId": "settlement_newdemo_hollow_bay",
-    "showId": "show_newdemo_hollow_bay",
-    "showDate": "2026-06-20",
-    "showStatus": "booked",
-    "settlementStatus": "submitted",
-    "artist": {
-      "id": "artist_newdemo_hollow_bay",
-      "name": "[NEW DEMO] Hollow Bay",
-      "genre": "Indie Pop"
-    },
-    "agent": null,
-    "deal": {
-      "id": "deal_newdemo_hollow_bay",
-      "dealType": "percentage_of_net",
-      "guaranteeAmount": 4000,
-      "percentage": 0.8,
-      "percentageBasis": "net",
-      "expenseCap": null,
-      "hospitalityCap": 400,
-      "bonuses": null,
-      "notes": null
-    },
-    "settlementFinancials": {
-      "grossBoxOffice": null,
-      "totalToArtist": null,
-      "totalExpenses": null,
-      "recoups": []
-    },
-    "rawText": {
-      "notes": "[NEW DEMO] Pre-show settlement placeholder for the proposal stage.",
-      "signoffText": null
-    },
-    "extractedInsight": {
-      "positiveSummary": null,
-      "negativeSummary": null,
-      "hasSummary": false
-    }
-  },
-  {
-    "settlementId": "settlement_newdemo_iron_lattice",
-    "showId": "show_newdemo_iron_lattice",
-    "showDate": "2026-05-27",
-    "showStatus": "booked",
-    "settlementStatus": "in_review",
-    "artist": {
-      "id": "artist_newdemo_iron_lattice",
-      "name": "[NEW DEMO] Iron Lattice",
-      "genre": "Indie Rock"
-    },
-    "agent": null,
-    "deal": {
-      "id": "deal_newdemo_iron_lattice",
-      "dealType": "percentage_of_net",
-      "guaranteeAmount": null,
-      "percentage": 0.7,
-      "percentageBasis": "net",
-      "expenseCap": null,
-      "hospitalityCap": null,
-      "bonuses": null,
-      "notes": null
-    },
-    "settlementFinancials": {
-      "grossBoxOffice": null,
-      "totalToArtist": null,
-      "totalExpenses": null,
-      "recoups": []
-    },
-    "rawText": {
-      "notes": "[NEW DEMO] Pre-show settlement placeholder for the proposal stage.",
-      "signoffText": null
-    },
-    "extractedInsight": {
-      "positiveSummary": null,
-      "negativeSummary": null,
-      "hasSummary": false
-    }
-  },
-  {
-    "settlementId": "settlement_newdemo_juniper_cove",
-    "showId": "show_newdemo_juniper_cove",
-    "showDate": "2026-07-01",
-    "showStatus": "booked",
-    "settlementStatus": "draft",
-    "artist": {
-      "id": "artist_newdemo_juniper_cove",
-      "name": "[NEW DEMO] Juniper Cove",
-      "genre": "Americana"
-    },
-    "agent": null,
-    "deal": {
-      "id": "deal_newdemo_juniper_cove",
-      "dealType": "percentage_of_net",
-      "guaranteeAmount": null,
-      "percentage": 0.8,
-      "percentageBasis": "net",
-      "expenseCap": 1750,
-      "hospitalityCap": null,
-      "bonuses": null,
-      "notes": null
-    },
-    "settlementFinancials": {
-      "grossBoxOffice": null,
-      "totalToArtist": null,
-      "totalExpenses": null,
-      "recoups": []
-    },
-    "rawText": {
-      "notes": "[NEW DEMO] Pre-show settlement placeholder for the proposal stage.",
-      "signoffText": null
-    },
-    "extractedInsight": {
-      "positiveSummary": null,
-      "negativeSummary": null,
-      "hasSummary": false
-    }
-  },
-  {
-    "settlementId": "settlement_newdemo_kestrel_lane",
-    "showId": "show_newdemo_kestrel_lane",
-    "showDate": "2026-05-25",
-    "showStatus": "booked",
-    "settlementStatus": "submitted",
-    "artist": {
-      "id": "artist_newdemo_kestrel_lane",
-      "name": "[NEW DEMO] Kestrel Lane",
-      "genre": "Garage Rock"
-    },
-    "agent": null,
-    "deal": {
-      "id": "deal_newdemo_kestrel_lane",
-      "dealType": "door",
-      "guaranteeAmount": null,
-      "percentage": null,
-      "percentageBasis": null,
-      "expenseCap": 1700,
-      "hospitalityCap": null,
-      "bonuses": null,
-      "notes": null
-    },
-    "settlementFinancials": {
-      "grossBoxOffice": null,
-      "totalToArtist": null,
-      "totalExpenses": null,
-      "recoups": []
-    },
-    "rawText": {
-      "notes": "[NEW DEMO] Pre-show settlement placeholder for the proposal stage.",
-      "signoffText": null
-    },
-    "extractedInsight": {
-      "positiveSummary": null,
-      "negativeSummary": null,
-      "hasSummary": false
-    }
-  },
-  {
-    "settlementId": "settlement_newdemo_lantern_mile",
-    "showId": "show_newdemo_lantern_mile",
-    "showDate": "2026-06-15",
-    "showStatus": "booked",
-    "settlementStatus": "in_review",
-    "artist": {
-      "id": "artist_newdemo_lantern_mile",
-      "name": "[NEW DEMO] Lantern Mile",
-      "genre": "Punk"
-    },
-    "agent": null,
-    "deal": {
-      "id": "deal_newdemo_lantern_mile",
-      "dealType": "door",
-      "guaranteeAmount": null,
-      "percentage": null,
-      "percentageBasis": null,
-      "expenseCap": 1850,
-      "hospitalityCap": 400,
-      "bonuses": null,
-      "notes": null
-    },
-    "settlementFinancials": {
-      "grossBoxOffice": null,
-      "totalToArtist": null,
-      "totalExpenses": null,
-      "recoups": []
-    },
-    "rawText": {
-      "notes": "[NEW DEMO] Pre-show settlement placeholder for the proposal stage.",
-      "signoffText": null
-    },
-    "extractedInsight": {
-      "positiveSummary": null,
-      "negativeSummary": null,
-      "hasSummary": false
-    }
-  },
-  {
-    "settlementId": "settlement_newdemo_mast_marrow",
-    "showId": "show_newdemo_mast_marrow",
-    "showDate": "2026-07-12",
-    "showStatus": "booked",
-    "settlementStatus": "draft",
-    "artist": {
-      "id": "artist_newdemo_mast_marrow",
-      "name": "[NEW DEMO] Mast & Marrow",
-      "genre": "Indie Rock"
-    },
-    "agent": null,
-    "deal": {
-      "id": "deal_newdemo_mast_marrow",
-      "dealType": "door",
-      "guaranteeAmount": null,
-      "percentage": null,
-      "percentageBasis": null,
-      "expenseCap": 1750,
-      "hospitalityCap": null,
-      "bonuses": null,
-      "notes": null
-    },
-    "settlementFinancials": {
-      "grossBoxOffice": null,
-      "totalToArtist": null,
-      "totalExpenses": null,
-      "recoups": []
-    },
-    "rawText": {
-      "notes": "[NEW DEMO] Pre-show settlement placeholder for the proposal stage.",
-      "signoffText": null
-    },
-    "extractedInsight": {
-      "positiveSummary": null,
-      "negativeSummary": null,
-      "hasSummary": false
-    }
-  },
-  {
-    "settlementId": "settlement_newdemo_nightingale_press",
-    "showId": "show_newdemo_nightingale_press",
-    "showDate": "2026-06-07",
-    "showStatus": "booked",
-    "settlementStatus": "submitted",
-    "artist": {
-      "id": "artist_newdemo_nightingale_press",
-      "name": "[NEW DEMO] Nightingale Press",
-      "genre": "Indie Pop"
-    },
-    "agent": null,
-    "deal": {
-      "id": "deal_newdemo_nightingale_press",
-      "dealType": "percentage_of_gross",
-      "guaranteeAmount": null,
-      "percentage": 0.85,
-      "percentageBasis": "gross",
-      "expenseCap": null,
-      "hospitalityCap": null,
-      "bonuses": null,
-      "notes": null
-    },
-    "settlementFinancials": {
-      "grossBoxOffice": null,
-      "totalToArtist": null,
-      "totalExpenses": null,
-      "recoups": []
-    },
-    "rawText": {
-      "notes": "[NEW DEMO] Pre-show settlement placeholder for the proposal stage.",
-      "signoffText": null
-    },
-    "extractedInsight": {
-      "positiveSummary": null,
-      "negativeSummary": null,
-      "hasSummary": false
-    }
-  },
-  {
-    "settlementId": "settlement_newdemo_oakshade_theory",
-    "showId": "show_newdemo_oakshade_theory",
-    "showDate": "2026-06-24",
-    "showStatus": "booked",
-    "settlementStatus": "in_review",
-    "artist": {
-      "id": "artist_newdemo_oakshade_theory",
-      "name": "[NEW DEMO] Oakshade Theory",
-      "genre": "Folk"
-    },
-    "agent": null,
-    "deal": {
-      "id": "deal_newdemo_oakshade_theory",
-      "dealType": "percentage_of_gross",
-      "guaranteeAmount": null,
-      "percentage": 0.9,
-      "percentageBasis": "gross",
-      "expenseCap": 1750,
-      "hospitalityCap": 400,
-      "bonuses": null,
-      "notes": null
-    },
-    "settlementFinancials": {
-      "grossBoxOffice": null,
-      "totalToArtist": null,
-      "totalExpenses": null,
-      "recoups": []
-    },
-    "rawText": {
-      "notes": "[NEW DEMO] Pre-show settlement placeholder for the proposal stage.",
-      "signoffText": null
-    },
-    "extractedInsight": {
-      "positiveSummary": null,
-      "negativeSummary": null,
-      "hasSummary": false
-    }
-  },
-  {
     "settlementId": "set_show_demohist_north_frontier_0",
     "showId": "show_demohist_north_frontier_0",
     "showDate": "2026-02-03",
@@ -26130,6 +25545,896 @@
     "rawText": {
       "notes": null,
       "signoffText": null
+    },
+    "extractedInsight": {
+      "positiveSummary": null,
+      "negativeSummary": null,
+      "hasSummary": false
+    }
+  },
+  {
+    "settlementId": "settlement_newdemo_atlas_court",
+    "showId": "show_newdemo_atlas_court",
+    "showDate": "2026-06-11",
+    "showStatus": "booked",
+    "settlementStatus": "draft",
+    "artist": {
+      "id": "artist_newdemo_atlas_court",
+      "name": "[NEW DEMO] Atlas Court",
+      "genre": "Indie Rock"
+    },
+    "agent": {
+      "id": "agent_jordan_wells",
+      "name": "Jordan Wells",
+      "agency": "Independent"
+    },
+    "deal": {
+      "id": "deal_newdemo_atlas_court",
+      "dealType": "vs",
+      "guaranteeAmount": 2000,
+      "percentage": 0.8,
+      "percentageBasis": "net",
+      "expenseCap": 800,
+      "hospitalityCap": null,
+      "bonuses": null,
+      "notes": null
+    },
+    "settlementFinancials": {
+      "grossBoxOffice": null,
+      "totalToArtist": null,
+      "totalExpenses": null,
+      "recoups": []
+    },
+    "rawText": {
+      "notes": "[NEW DEMO] Pre-show settlement placeholder for the proposal stage.",
+      "signoffText": null
+    },
+    "extractedInsight": {
+      "positiveSummary": null,
+      "negativeSummary": null,
+      "hasSummary": false
+    }
+  },
+  {
+    "settlementId": "settlement_newdemo_bramble_hollow",
+    "showId": "show_newdemo_bramble_hollow",
+    "showDate": "2026-06-20",
+    "showStatus": "booked",
+    "settlementStatus": "submitted",
+    "artist": {
+      "id": "artist_newdemo_bramble_hollow",
+      "name": "[NEW DEMO] Bramble Hollow",
+      "genre": "Folk"
+    },
+    "agent": {
+      "id": "agent_jordan_wells",
+      "name": "Jordan Wells",
+      "agency": "Independent"
+    },
+    "deal": {
+      "id": "deal_newdemo_bramble_hollow",
+      "dealType": "vs",
+      "guaranteeAmount": 2000,
+      "percentage": 0.9,
+      "percentageBasis": "net",
+      "expenseCap": 1000,
+      "hospitalityCap": 400,
+      "bonuses": null,
+      "notes": null
+    },
+    "settlementFinancials": {
+      "grossBoxOffice": null,
+      "totalToArtist": null,
+      "totalExpenses": null,
+      "recoups": []
+    },
+    "rawText": {
+      "notes": "[NEW DEMO] Pre-show settlement placeholder for the proposal stage.",
+      "signoffText": null
+    },
+    "extractedInsight": {
+      "positiveSummary": null,
+      "negativeSummary": null,
+      "hasSummary": false
+    }
+  },
+  {
+    "settlementId": "settlement_newdemo_cinder_path",
+    "showId": "show_newdemo_cinder_path",
+    "showDate": "2026-07-04",
+    "showStatus": "booked",
+    "settlementStatus": "in_review",
+    "artist": {
+      "id": "artist_newdemo_cinder_path",
+      "name": "[NEW DEMO] Cinder Path",
+      "genre": "Garage Rock"
+    },
+    "agent": null,
+    "deal": {
+      "id": "deal_newdemo_cinder_path",
+      "dealType": "vs",
+      "guaranteeAmount": 4500,
+      "percentage": 0.85,
+      "percentageBasis": "net",
+      "expenseCap": null,
+      "hospitalityCap": null,
+      "bonuses": null,
+      "notes": null
+    },
+    "settlementFinancials": {
+      "grossBoxOffice": null,
+      "totalToArtist": null,
+      "totalExpenses": null,
+      "recoups": []
+    },
+    "rawText": {
+      "notes": "[NEW DEMO] Pre-show settlement placeholder for the proposal stage.",
+      "signoffText": null
+    },
+    "extractedInsight": {
+      "positiveSummary": null,
+      "negativeSummary": null,
+      "hasSummary": false
+    }
+  },
+  {
+    "settlementId": "settlement_newdemo_driftline",
+    "showId": "show_newdemo_driftline",
+    "showDate": "2026-06-07",
+    "showStatus": "booked",
+    "settlementStatus": "draft",
+    "artist": {
+      "id": "artist_newdemo_driftline",
+      "name": "[NEW DEMO] Driftline",
+      "genre": "Indie Rock"
+    },
+    "agent": null,
+    "deal": {
+      "id": "deal_newdemo_driftline",
+      "dealType": "vs",
+      "guaranteeAmount": 7000,
+      "percentage": 0.8,
+      "percentageBasis": "net",
+      "expenseCap": null,
+      "hospitalityCap": null,
+      "bonuses": null,
+      "notes": null
+    },
+    "settlementFinancials": {
+      "grossBoxOffice": null,
+      "totalToArtist": null,
+      "totalExpenses": null,
+      "recoups": []
+    },
+    "rawText": {
+      "notes": "[NEW DEMO] Pre-show settlement placeholder for the proposal stage.",
+      "signoffText": null
+    },
+    "extractedInsight": {
+      "positiveSummary": null,
+      "negativeSummary": null,
+      "hasSummary": false
+    }
+  },
+  {
+    "settlementId": "settlement_newdemo_echo_bramble",
+    "showId": "show_newdemo_echo_bramble",
+    "showDate": "2026-07-15",
+    "showStatus": "booked",
+    "settlementStatus": "submitted",
+    "artist": {
+      "id": "artist_newdemo_echo_bramble",
+      "name": "[NEW DEMO] Echo Bramble",
+      "genre": "Americana"
+    },
+    "agent": null,
+    "deal": {
+      "id": "deal_newdemo_echo_bramble",
+      "dealType": "vs",
+      "guaranteeAmount": 12000,
+      "percentage": 0.85,
+      "percentageBasis": "net",
+      "expenseCap": 1750,
+      "hospitalityCap": null,
+      "bonuses": null,
+      "notes": null
+    },
+    "settlementFinancials": {
+      "grossBoxOffice": null,
+      "totalToArtist": null,
+      "totalExpenses": null,
+      "recoups": []
+    },
+    "rawText": {
+      "notes": "[NEW DEMO] Pre-show settlement placeholder for the proposal stage.",
+      "signoffText": null
+    },
+    "extractedInsight": {
+      "positiveSummary": null,
+      "negativeSummary": null,
+      "hasSummary": false
+    }
+  },
+  {
+    "settlementId": "settlement_newdemo_foxglove_society",
+    "showId": "show_newdemo_foxglove_society",
+    "showDate": "2026-07-30",
+    "showStatus": "booked",
+    "settlementStatus": "in_review",
+    "artist": {
+      "id": "artist_newdemo_foxglove_society",
+      "name": "[NEW DEMO] Foxglove Society",
+      "genre": "Indie Rock"
+    },
+    "agent": null,
+    "deal": {
+      "id": "deal_newdemo_foxglove_society",
+      "dealType": "vs",
+      "guaranteeAmount": 18000,
+      "percentage": 0.85,
+      "percentageBasis": "net",
+      "expenseCap": null,
+      "hospitalityCap": null,
+      "bonuses": null,
+      "notes": null
+    },
+    "settlementFinancials": {
+      "grossBoxOffice": null,
+      "totalToArtist": null,
+      "totalExpenses": null,
+      "recoups": []
+    },
+    "rawText": {
+      "notes": "[NEW DEMO] Pre-show settlement placeholder for the proposal stage.",
+      "signoffText": null
+    },
+    "extractedInsight": {
+      "positiveSummary": null,
+      "negativeSummary": null,
+      "hasSummary": false
+    }
+  },
+  {
+    "settlementId": "settlement_newdemo_gilded_fern",
+    "showId": "show_newdemo_gilded_fern",
+    "showDate": "2026-06-16",
+    "showStatus": "booked",
+    "settlementStatus": "draft",
+    "artist": {
+      "id": "artist_newdemo_gilded_fern",
+      "name": "[NEW DEMO] Gilded Fern",
+      "genre": "Folk"
+    },
+    "agent": null,
+    "deal": {
+      "id": "deal_newdemo_gilded_fern",
+      "dealType": "percentage_of_net",
+      "guaranteeAmount": 2500,
+      "percentage": 0.75,
+      "percentageBasis": "net",
+      "expenseCap": 1850,
+      "hospitalityCap": null,
+      "bonuses": null,
+      "notes": null
+    },
+    "settlementFinancials": {
+      "grossBoxOffice": null,
+      "totalToArtist": null,
+      "totalExpenses": null,
+      "recoups": []
+    },
+    "rawText": {
+      "notes": "[NEW DEMO] Pre-show settlement placeholder for the proposal stage.",
+      "signoffText": null
+    },
+    "extractedInsight": {
+      "positiveSummary": null,
+      "negativeSummary": null,
+      "hasSummary": false
+    }
+  },
+  {
+    "settlementId": "settlement_newdemo_hollow_bay",
+    "showId": "show_newdemo_hollow_bay",
+    "showDate": "2026-06-27",
+    "showStatus": "booked",
+    "settlementStatus": "submitted",
+    "artist": {
+      "id": "artist_newdemo_hollow_bay",
+      "name": "[NEW DEMO] Hollow Bay",
+      "genre": "Experimental Drone"
+    },
+    "agent": null,
+    "deal": {
+      "id": "deal_newdemo_hollow_bay",
+      "dealType": "percentage_of_net",
+      "guaranteeAmount": 4000,
+      "percentage": 0.8,
+      "percentageBasis": "net",
+      "expenseCap": null,
+      "hospitalityCap": 400,
+      "bonuses": null,
+      "notes": null
+    },
+    "settlementFinancials": {
+      "grossBoxOffice": null,
+      "totalToArtist": null,
+      "totalExpenses": null,
+      "recoups": []
+    },
+    "rawText": {
+      "notes": "[NEW DEMO] Pre-show settlement placeholder for the proposal stage.",
+      "signoffText": null
+    },
+    "extractedInsight": {
+      "positiveSummary": null,
+      "negativeSummary": null,
+      "hasSummary": false
+    }
+  },
+  {
+    "settlementId": "settlement_newdemo_iron_lattice",
+    "showId": "show_newdemo_iron_lattice",
+    "showDate": "2026-06-03",
+    "showStatus": "booked",
+    "settlementStatus": "in_review",
+    "artist": {
+      "id": "artist_newdemo_iron_lattice",
+      "name": "[NEW DEMO] Iron Lattice",
+      "genre": "Indie Rock"
+    },
+    "agent": null,
+    "deal": {
+      "id": "deal_newdemo_iron_lattice",
+      "dealType": "percentage_of_net",
+      "guaranteeAmount": null,
+      "percentage": 0.7,
+      "percentageBasis": "net",
+      "expenseCap": null,
+      "hospitalityCap": null,
+      "bonuses": null,
+      "notes": null
+    },
+    "settlementFinancials": {
+      "grossBoxOffice": null,
+      "totalToArtist": null,
+      "totalExpenses": null,
+      "recoups": []
+    },
+    "rawText": {
+      "notes": "[NEW DEMO] Pre-show settlement placeholder for the proposal stage.",
+      "signoffText": null
+    },
+    "extractedInsight": {
+      "positiveSummary": null,
+      "negativeSummary": null,
+      "hasSummary": false
+    }
+  },
+  {
+    "settlementId": "settlement_newdemo_juniper_cove",
+    "showId": "show_newdemo_juniper_cove",
+    "showDate": "2026-07-08",
+    "showStatus": "booked",
+    "settlementStatus": "draft",
+    "artist": {
+      "id": "artist_newdemo_juniper_cove",
+      "name": "[NEW DEMO] Juniper Cove",
+      "genre": "Americana"
+    },
+    "agent": null,
+    "deal": {
+      "id": "deal_newdemo_juniper_cove",
+      "dealType": "percentage_of_net",
+      "guaranteeAmount": null,
+      "percentage": 0.8,
+      "percentageBasis": "net",
+      "expenseCap": 1750,
+      "hospitalityCap": null,
+      "bonuses": null,
+      "notes": null
+    },
+    "settlementFinancials": {
+      "grossBoxOffice": null,
+      "totalToArtist": null,
+      "totalExpenses": null,
+      "recoups": []
+    },
+    "rawText": {
+      "notes": "[NEW DEMO] Pre-show settlement placeholder for the proposal stage.",
+      "signoffText": null
+    },
+    "extractedInsight": {
+      "positiveSummary": null,
+      "negativeSummary": null,
+      "hasSummary": false
+    }
+  },
+  {
+    "settlementId": "settlement_newdemo_kestrel_lane",
+    "showId": "show_newdemo_kestrel_lane",
+    "showDate": "2026-06-01",
+    "showStatus": "booked",
+    "settlementStatus": "submitted",
+    "artist": {
+      "id": "artist_newdemo_kestrel_lane",
+      "name": "[NEW DEMO] Kestrel Lane",
+      "genre": "Garage Rock"
+    },
+    "agent": null,
+    "deal": {
+      "id": "deal_newdemo_kestrel_lane",
+      "dealType": "door",
+      "guaranteeAmount": null,
+      "percentage": null,
+      "percentageBasis": null,
+      "expenseCap": 1700,
+      "hospitalityCap": null,
+      "bonuses": null,
+      "notes": null
+    },
+    "settlementFinancials": {
+      "grossBoxOffice": null,
+      "totalToArtist": null,
+      "totalExpenses": null,
+      "recoups": []
+    },
+    "rawText": {
+      "notes": "[NEW DEMO] Pre-show settlement placeholder for the proposal stage.",
+      "signoffText": null
+    },
+    "extractedInsight": {
+      "positiveSummary": null,
+      "negativeSummary": null,
+      "hasSummary": false
+    }
+  },
+  {
+    "settlementId": "settlement_newdemo_lantern_mile",
+    "showId": "show_newdemo_lantern_mile",
+    "showDate": "2026-06-22",
+    "showStatus": "booked",
+    "settlementStatus": "in_review",
+    "artist": {
+      "id": "artist_newdemo_lantern_mile",
+      "name": "[NEW DEMO] Lantern Mile",
+      "genre": "Punk"
+    },
+    "agent": null,
+    "deal": {
+      "id": "deal_newdemo_lantern_mile",
+      "dealType": "door",
+      "guaranteeAmount": null,
+      "percentage": null,
+      "percentageBasis": null,
+      "expenseCap": 1850,
+      "hospitalityCap": 400,
+      "bonuses": null,
+      "notes": null
+    },
+    "settlementFinancials": {
+      "grossBoxOffice": null,
+      "totalToArtist": null,
+      "totalExpenses": null,
+      "recoups": []
+    },
+    "rawText": {
+      "notes": "[NEW DEMO] Pre-show settlement placeholder for the proposal stage.",
+      "signoffText": null
+    },
+    "extractedInsight": {
+      "positiveSummary": null,
+      "negativeSummary": null,
+      "hasSummary": false
+    }
+  },
+  {
+    "settlementId": "settlement_newdemo_mast_marrow",
+    "showId": "show_newdemo_mast_marrow",
+    "showDate": "2026-07-19",
+    "showStatus": "booked",
+    "settlementStatus": "draft",
+    "artist": {
+      "id": "artist_newdemo_mast_marrow",
+      "name": "[NEW DEMO] Mast & Marrow",
+      "genre": "Indie Rock"
+    },
+    "agent": null,
+    "deal": {
+      "id": "deal_newdemo_mast_marrow",
+      "dealType": "door",
+      "guaranteeAmount": null,
+      "percentage": null,
+      "percentageBasis": null,
+      "expenseCap": 1750,
+      "hospitalityCap": null,
+      "bonuses": null,
+      "notes": null
+    },
+    "settlementFinancials": {
+      "grossBoxOffice": null,
+      "totalToArtist": null,
+      "totalExpenses": null,
+      "recoups": []
+    },
+    "rawText": {
+      "notes": "[NEW DEMO] Pre-show settlement placeholder for the proposal stage.",
+      "signoffText": null
+    },
+    "extractedInsight": {
+      "positiveSummary": null,
+      "negativeSummary": null,
+      "hasSummary": false
+    }
+  },
+  {
+    "settlementId": "settlement_newdemo_nightingale_press",
+    "showId": "show_newdemo_nightingale_press",
+    "showDate": "2026-06-14",
+    "showStatus": "booked",
+    "settlementStatus": "submitted",
+    "artist": {
+      "id": "artist_newdemo_nightingale_press",
+      "name": "[NEW DEMO] Nightingale Press",
+      "genre": "Indie Pop"
+    },
+    "agent": null,
+    "deal": {
+      "id": "deal_newdemo_nightingale_press",
+      "dealType": "percentage_of_gross",
+      "guaranteeAmount": null,
+      "percentage": 0.85,
+      "percentageBasis": "gross",
+      "expenseCap": null,
+      "hospitalityCap": null,
+      "bonuses": null,
+      "notes": null
+    },
+    "settlementFinancials": {
+      "grossBoxOffice": null,
+      "totalToArtist": null,
+      "totalExpenses": null,
+      "recoups": []
+    },
+    "rawText": {
+      "notes": "[NEW DEMO] Pre-show settlement placeholder for the proposal stage.",
+      "signoffText": null
+    },
+    "extractedInsight": {
+      "positiveSummary": null,
+      "negativeSummary": null,
+      "hasSummary": false
+    }
+  },
+  {
+    "settlementId": "settlement_newdemo_oakshade_theory",
+    "showId": "show_newdemo_oakshade_theory",
+    "showDate": "2026-07-01",
+    "showStatus": "booked",
+    "settlementStatus": "in_review",
+    "artist": {
+      "id": "artist_newdemo_oakshade_theory",
+      "name": "[NEW DEMO] Oakshade Theory",
+      "genre": "Folk"
+    },
+    "agent": null,
+    "deal": {
+      "id": "deal_newdemo_oakshade_theory",
+      "dealType": "percentage_of_gross",
+      "guaranteeAmount": null,
+      "percentage": 0.9,
+      "percentageBasis": "gross",
+      "expenseCap": 1750,
+      "hospitalityCap": 400,
+      "bonuses": null,
+      "notes": null
+    },
+    "settlementFinancials": {
+      "grossBoxOffice": null,
+      "totalToArtist": null,
+      "totalExpenses": null,
+      "recoups": []
+    },
+    "rawText": {
+      "notes": "[NEW DEMO] Pre-show settlement placeholder for the proposal stage.",
+      "signoffText": null
+    },
+    "extractedInsight": {
+      "positiveSummary": null,
+      "negativeSummary": null,
+      "hasSummary": false
+    }
+  },
+  {
+    "settlementId": "set_sgphist_atlas_court_1",
+    "showId": "show_sgphist_atlas_court_1",
+    "showDate": "2026-01-20",
+    "showStatus": "settled",
+    "settlementStatus": "signed",
+    "artist": {
+      "id": "artist_newdemo_atlas_court",
+      "name": "[NEW DEMO] Atlas Court",
+      "genre": "Indie Rock"
+    },
+    "agent": {
+      "id": "agent_jordan_wells",
+      "name": "Jordan Wells",
+      "agency": "Independent"
+    },
+    "deal": {
+      "id": "deal_sgphist_atlas_court_1",
+      "dealType": "vs",
+      "guaranteeAmount": 2000,
+      "percentage": 0.8,
+      "percentageBasis": "net",
+      "expenseCap": 1850,
+      "hospitalityCap": null,
+      "bonuses": null,
+      "notes": null
+    },
+    "settlementFinancials": {
+      "grossBoxOffice": 4700,
+      "totalToArtist": 2400,
+      "totalExpenses": 1700,
+      "recoups": []
+    },
+    "rawText": {
+      "notes": null,
+      "signoffText": "Signed off, paid in full."
+    },
+    "extractedInsight": {
+      "positiveSummary": null,
+      "negativeSummary": null,
+      "hasSummary": false
+    }
+  },
+  {
+    "settlementId": "set_sgphist_atlas_court_2",
+    "showId": "show_sgphist_atlas_court_2",
+    "showDate": "2025-10-22",
+    "showStatus": "settled",
+    "settlementStatus": "signed",
+    "artist": {
+      "id": "artist_newdemo_atlas_court",
+      "name": "[NEW DEMO] Atlas Court",
+      "genre": "Indie Rock"
+    },
+    "agent": {
+      "id": "agent_jordan_wells",
+      "name": "Jordan Wells",
+      "agency": "Independent"
+    },
+    "deal": {
+      "id": "deal_sgphist_atlas_court_2",
+      "dealType": "vs",
+      "guaranteeAmount": 2000,
+      "percentage": 0.8,
+      "percentageBasis": "net",
+      "expenseCap": 1850,
+      "hospitalityCap": null,
+      "bonuses": null,
+      "notes": null
+    },
+    "settlementFinancials": {
+      "grossBoxOffice": 5000,
+      "totalToArtist": 2640,
+      "totalExpenses": 1700,
+      "recoups": []
+    },
+    "rawText": {
+      "notes": null,
+      "signoffText": "Signed off, paid in full."
+    },
+    "extractedInsight": {
+      "positiveSummary": null,
+      "negativeSummary": null,
+      "hasSummary": false
+    }
+  },
+  {
+    "settlementId": "set_sgphist_atlas_court_3",
+    "showId": "show_sgphist_atlas_court_3",
+    "showDate": "2025-07-24",
+    "showStatus": "settled",
+    "settlementStatus": "signed",
+    "artist": {
+      "id": "artist_newdemo_atlas_court",
+      "name": "[NEW DEMO] Atlas Court",
+      "genre": "Indie Rock"
+    },
+    "agent": {
+      "id": "agent_jordan_wells",
+      "name": "Jordan Wells",
+      "agency": "Independent"
+    },
+    "deal": {
+      "id": "deal_sgphist_atlas_court_3",
+      "dealType": "vs",
+      "guaranteeAmount": 2000,
+      "percentage": 0.8,
+      "percentageBasis": "net",
+      "expenseCap": 1850,
+      "hospitalityCap": null,
+      "bonuses": null,
+      "notes": null
+    },
+    "settlementFinancials": {
+      "grossBoxOffice": 5300,
+      "totalToArtist": 2880,
+      "totalExpenses": 1700,
+      "recoups": []
+    },
+    "rawText": {
+      "notes": null,
+      "signoffText": "Signed off, paid in full."
+    },
+    "extractedInsight": {
+      "positiveSummary": null,
+      "negativeSummary": null,
+      "hasSummary": false
+    }
+  },
+  {
+    "settlementId": "set_sgphist_bramble_hollow_1",
+    "showId": "show_sgphist_bramble_hollow_1",
+    "showDate": "2026-01-20",
+    "showStatus": "settled",
+    "settlementStatus": "signed",
+    "artist": {
+      "id": "artist_newdemo_bramble_hollow",
+      "name": "[NEW DEMO] Bramble Hollow",
+      "genre": "Folk"
+    },
+    "agent": {
+      "id": "agent_jordan_wells",
+      "name": "Jordan Wells",
+      "agency": "Independent"
+    },
+    "deal": {
+      "id": "deal_sgphist_bramble_hollow_1",
+      "dealType": "vs",
+      "guaranteeAmount": 2000,
+      "percentage": 0.8,
+      "percentageBasis": "net",
+      "expenseCap": 1850,
+      "hospitalityCap": null,
+      "bonuses": null,
+      "notes": null
+    },
+    "settlementFinancials": {
+      "grossBoxOffice": 4700,
+      "totalToArtist": 2400,
+      "totalExpenses": 1700,
+      "recoups": []
+    },
+    "rawText": {
+      "notes": null,
+      "signoffText": "Signed off, paid in full."
+    },
+    "extractedInsight": {
+      "positiveSummary": null,
+      "negativeSummary": null,
+      "hasSummary": false
+    }
+  },
+  {
+    "settlementId": "set_sgphist_bramble_hollow_2",
+    "showId": "show_sgphist_bramble_hollow_2",
+    "showDate": "2025-10-22",
+    "showStatus": "settled",
+    "settlementStatus": "signed",
+    "artist": {
+      "id": "artist_newdemo_bramble_hollow",
+      "name": "[NEW DEMO] Bramble Hollow",
+      "genre": "Folk"
+    },
+    "agent": {
+      "id": "agent_jordan_wells",
+      "name": "Jordan Wells",
+      "agency": "Independent"
+    },
+    "deal": {
+      "id": "deal_sgphist_bramble_hollow_2",
+      "dealType": "vs",
+      "guaranteeAmount": 2000,
+      "percentage": 0.8,
+      "percentageBasis": "net",
+      "expenseCap": 1850,
+      "hospitalityCap": null,
+      "bonuses": null,
+      "notes": null
+    },
+    "settlementFinancials": {
+      "grossBoxOffice": 5000,
+      "totalToArtist": 2640,
+      "totalExpenses": 1700,
+      "recoups": []
+    },
+    "rawText": {
+      "notes": null,
+      "signoffText": "Signed off, paid in full."
+    },
+    "extractedInsight": {
+      "positiveSummary": null,
+      "negativeSummary": null,
+      "hasSummary": false
+    }
+  },
+  {
+    "settlementId": "set_sgphist_bramble_hollow_3",
+    "showId": "show_sgphist_bramble_hollow_3",
+    "showDate": "2025-07-24",
+    "showStatus": "settled",
+    "settlementStatus": "signed",
+    "artist": {
+      "id": "artist_newdemo_bramble_hollow",
+      "name": "[NEW DEMO] Bramble Hollow",
+      "genre": "Folk"
+    },
+    "agent": {
+      "id": "agent_jordan_wells",
+      "name": "Jordan Wells",
+      "agency": "Independent"
+    },
+    "deal": {
+      "id": "deal_sgphist_bramble_hollow_3",
+      "dealType": "vs",
+      "guaranteeAmount": 2000,
+      "percentage": 0.8,
+      "percentageBasis": "net",
+      "expenseCap": 1850,
+      "hospitalityCap": null,
+      "bonuses": null,
+      "notes": null
+    },
+    "settlementFinancials": {
+      "grossBoxOffice": 5300,
+      "totalToArtist": 2880,
+      "totalExpenses": 1700,
+      "recoups": []
+    },
+    "rawText": {
+      "notes": null,
+      "signoffText": "Signed off, paid in full."
+    },
+    "extractedInsight": {
+      "positiveSummary": null,
+      "negativeSummary": null,
+      "hasSummary": false
+    }
+  },
+  {
+    "settlementId": "set_sgphist_cinder_path_1",
+    "showId": "show_sgphist_cinder_path_1",
+    "showDate": "2026-01-20",
+    "showStatus": "settled",
+    "settlementStatus": "signed",
+    "artist": {
+      "id": "artist_newdemo_cinder_path",
+      "name": "[NEW DEMO] Cinder Path",
+      "genre": "Garage Rock"
+    },
+    "agent": null,
+    "deal": {
+      "id": "deal_sgphist_cinder_path_1",
+      "dealType": "vs",
+      "guaranteeAmount": 2000,
+      "percentage": 0.8,
+      "percentageBasis": "net",
+      "expenseCap": 1850,
+      "hospitalityCap": null,
+      "bonuses": null,
+      "notes": null
+    },
+    "settlementFinancials": {
+      "grossBoxOffice": 4700,
+      "totalToArtist": 2400,
+      "totalExpenses": 1700,
+      "recoups": []
+    },
+    "rawText": {
+      "notes": null,
+      "signoffText": "Signed off, paid in full."
     },
     "extractedInsight": {
       "positiveSummary": null,

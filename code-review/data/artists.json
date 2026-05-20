@@ -43,7 +43,7 @@
     ],
     "topPositive": "Settlement was paid out cleanly per agreed line items, with artist receiving $640.",
     "topNegative": "A $340 Instagram boost recoup (marketing) was flagged as disputed by TM two weeks after p…",
-    "attentionCount": 1
+    "attentionCount": 8
   },
   {
     "artist": {
@@ -93,7 +93,7 @@
     ],
     "topPositive": "Settlement finalized cleanly with artist receiving $3,000.",
     "topNegative": "Expenses totaled $1,056, significantly exceeding the $450 contractual cap; the overage of…",
-    "attentionCount": 1
+    "attentionCount": 9
   },
   {
     "artist": {
@@ -135,7 +135,7 @@
     ],
     "topPositive": "Settlement executed cleanly with signed agreement and clear signoff.",
     "topNegative": "Venue absorbed $1,261 in total expenses against $3,077 gross box office, resulting in a n…",
-    "attentionCount": 0
+    "attentionCount": 5
   },
   {
     "artist": {
@@ -181,7 +181,7 @@
     ],
     "topPositive": "Clean settlement with artist receiving full $513 guarantee against $648 gross box office.",
     "topNegative": "Expenses totaled $1,080 against only $648 gross revenue, creating a $432 shortfall that t…",
-    "attentionCount": 4
+    "attentionCount": 8
   },
   {
     "artist": {
@@ -227,7 +227,7 @@
     ],
     "topPositive": "Clean settlement on a flat $1,411 guarantee with no disputes.",
     "topNegative": "Settlement marked as disputed despite artist signoff; $1,405 in total expenses were incur…",
-    "attentionCount": 1
+    "attentionCount": 4
   },
   {
     "artist": {
@@ -269,7 +269,7 @@
     ],
     "topPositive": "Settlement finalized cleanly with artist signoff ('ok wire monday').",
     "topNegative": "Total expenses ($1,937) significantly exceeded the $900 cap by $1,037, and hospitality sp…",
-    "attentionCount": 1
+    "attentionCount": 9
   },
   {
     "artist": {
@@ -319,7 +319,7 @@
     ],
     "topPositive": "Settlement paid cleanly with artist receiving full $1,427 guarantee despite gross box off…",
     "topNegative": "Venue absorbed significant losses: $1,849 in total expenses against $1,140 gross revenue,…",
-    "attentionCount": 1
+    "attentionCount": 7
   },
   {
     "artist": {
@@ -365,7 +365,7 @@
     ],
     "topPositive": "Clean settlement on a weeknight show with flat guarantee of $1,483 met in full.",
     "topNegative": "Settlement notes indicate marketing recoup was pre-deducted from gross but no recoup line…",
-    "attentionCount": 0
+    "attentionCount": 4
   },
   {
     "artist": {
@@ -407,7 +407,7 @@
     ],
     "topPositive": "Settlement was paid and signed off cleanly with minimal friction.",
     "topNegative": "Gross box office of $1,268 against $1,686 in total expenses represents a significant oper…",
-    "attentionCount": 1
+    "attentionCount": 7
   },
   {
     "artist": {
@@ -449,7 +449,7 @@
     ],
     "topPositive": "Strong box office of $5,732 exceeded guarantee by $4,471, with artist receiving $3,156.",
     "topNegative": "Total expenses of $1,690 exceeded the $1,600 expense cap by $90, though the hospitality o…",
-    "attentionCount": 2
+    "attentionCount": 7
   },
   {
     "artist": {
@@ -491,7 +491,7 @@
     ],
     "topPositive": "Clean settlement with artist receiving guaranteed $1,961 on a $3,324 gross.",
     "topNegative": "Expenses totaled $1,836 against a $1,000 cap, creating a $836 overage that was apparently…",
-    "attentionCount": 0
+    "attentionCount": 5
   },
   {
     "artist": {
@@ -537,7 +537,7 @@
     ],
     "topPositive": "Clean door deal settlement with strong ticket sales ($2,927 gross) and straightforward ex…",
     "topNegative": "Gross box office of $801 fell significantly short of the $1,201 guarantee, and total expe…",
-    "attentionCount": 0
+    "attentionCount": 4
   },
   {
     "artist": {
@@ -579,7 +579,7 @@
     ],
     "topPositive": "Settlement executed cleanly with signed agreement.",
     "topNegative": "Total expenses of $1,770 significantly exceeded the $700 cap, creating a $1,070 overage t…",
-    "attentionCount": 0
+    "attentionCount": 3
   },
   {
     "artist": {
@@ -629,7 +629,7 @@
     ],
     "topPositive": "Clean settlement with flat $2,668 guarantee paid in full.",
     "topNegative": "Sellout bonus of $500 was not triggered despite strong ticket sales ($5,028 gross), and a…",
-    "attentionCount": 1
+    "attentionCount": 6
   },
   {
     "artist": {
@@ -667,7 +667,7 @@
     ],
     "topPositive": "Clean settlement with no disputes or outstanding recoups.",
     "topNegative": "Settlement marked as disputed despite artist signoff ('ok wire monday'), suggesting poten…",
-    "attentionCount": 2
+    "attentionCount": 3
   },
   {
     "artist": {
@@ -709,7 +709,7 @@
     ],
     "topPositive": "Clean settlement with artist receiving $2,852.",
     "topNegative": "Venue expenses ($1,501) exceeded gross box office revenue ($2,365) by $136, resulting in…",
-    "attentionCount": 0
+    "attentionCount": 2
   },
   {
     "artist": {
@@ -751,7 +751,7 @@
     ],
     "topPositive": "Clean settlement on a flat $1,145 guarantee for a local/regional act.",
     "topNegative": "Venue expenses of $1,437 exceeded gross box office revenue of $1,979 by a significant mar…",
-    "attentionCount": 0
+    "attentionCount": 4
   },
   {
     "artist": {
@@ -793,7 +793,7 @@
     ],
     "topPositive": "Clean settlement on a flat $540 guarantee deal with artist paid in full.",
     "topNegative": "Significant accounting red flag: $1,438 in total expenses recorded against a show with ex…",
-    "attentionCount": 1
+    "attentionCount": 5
   },
   {
     "artist": {
@@ -839,7 +839,7 @@
     ],
     "topPositive": "Clean settlement with strong sell-through: $3,202 gross box office resulted in $2,008.",
     "topNegative": "Tour advance recoup of $1,887 from March remains in 'agreed' status rather than 'paid'—fi…",
-    "attentionCount": 1
+    "attentionCount": 5
   },
   {
     "artist": {
@@ -877,7 +877,7 @@
     ],
     "topPositive": "Strong sell-through with $5,645 gross box office resulted in artist receiving $3,544 (wel…",
     "topNegative": "Expense total of $1,833 significantly exceeds the stated $950 expense cap, suggesting eit…",
-    "attentionCount": 0
+    "attentionCount": 5
   },
   {
     "artist": {
@@ -919,7 +919,7 @@
     ],
     "topPositive": "Clean settlement with no guarantee required.",
     "topNegative": "Settlement remains in_review status with no artist signoff yet, creating final-payment un…",
-    "attentionCount": 1
+    "attentionCount": 2
   },
   {
     "artist": {
@@ -1015,7 +1015,7 @@
     ],
     "topPositive": "Clean settlement with smooth execution: flat guarantee of $846 was paid in full, gross bo…",
     "topNegative": "Total expenses of $1,758 exceeded gross box office of $2,342 by $416, indicating the venu…",
-    "attentionCount": 1
+    "attentionCount": 4
   },
   {
     "artist": {
@@ -1061,7 +1061,7 @@
     ],
     "topPositive": "Clean settlement with no guarantee required; artist received $5,410.",
     "topNegative": "Expenses totaled $1,937, significantly exceeding the $650 cap—a $1,287 overage that shoul…",
-    "attentionCount": 0
+    "attentionCount": 5
   },
   {
     "artist": {
@@ -1107,7 +1107,7 @@
     ],
     "topPositive": "Settlement executed cleanly with artist receiving $4,979.",
     "topNegative": "Expenses totalled $1,991, significantly exceeding the $800 cap by $1,191; no detail provi…",
-    "attentionCount": 0
+    "attentionCount": 1
   },
   {
     "artist": {
@@ -1153,7 +1153,7 @@
     ],
     "topPositive": "Clean settlement with no disputes or outstanding recoups.",
     "topNegative": "Expenses of $1,901 significantly exceeded gross box office of $1,177, creating a $724 los…",
-    "attentionCount": 1
+    "attentionCount": 6
   },
   {
     "artist": {
@@ -1191,7 +1191,7 @@
     ],
     "topPositive": "Venue successfully collected full $1,292 guarantee on a flat-deal structure with no upsid…",
     "topNegative": "Settlement marked as 'disputed' despite signoff emoji and agreed recoup statuses, creatin…",
-    "attentionCount": 0
+    "attentionCount": 1
   },
   {
     "artist": {
@@ -1237,7 +1237,7 @@
     ],
     "topPositive": "Clean settlement with strong sell-through: $7,741 gross box office exceeded the $1,424 gu…",
     "topNegative": "Expenses of $1,617 exceeded the $700 cap by $917, which likely compressed the artist's pe…",
-    "attentionCount": 0
+    "attentionCount": 8
   },
   {
     "artist": {
@@ -1279,7 +1279,7 @@
     ],
     "topPositive": "Clean settlement on a weeknight flat-deal show.",
     "topNegative": "Settlement is marked as disputed despite sign-off; total expenses of $1,692 substantially…",
-    "attentionCount": 1
+    "attentionCount": 6
   },
   {
     "artist": {
@@ -1367,7 +1367,7 @@
     ],
     "topPositive": "Strong box office of $6,840 exceeded the $1,275 guarantee significantly, and the escalato…",
     "topNegative": "Settlement status is marked as 'disputed' despite signoff; total expenses of $1,320 excee…",
-    "attentionCount": 0
+    "attentionCount": 3
   },
   {
     "artist": {
@@ -1409,7 +1409,7 @@
     ],
     "topPositive": "Venue met its $1,120 guarantee obligation despite modest gross box office of $1,075, and…",
     "topNegative": "Total documented expenses ($1,205) exceeded gross revenue ($1,075) by $130, creating a lo…",
-    "attentionCount": 0
+    "attentionCount": 2
   },
   {
     "artist": {
@@ -1455,7 +1455,7 @@
     ],
     "topPositive": "Clean flat-deal settlement with no disputes.",
     "topNegative": "Total documented expenses of $1,571 far exceed the $150 expense cap and $200 hospitality…",
-    "attentionCount": 1
+    "attentionCount": 8
   },
   {
     "artist": {
@@ -1497,7 +1497,7 @@
     ],
     "topPositive": "Settlement paid in full with clean deal structure.",
     "topNegative": "Expenses totaling $1,982 significantly exceeded the $900 cap, creating a recoup situation…",
-    "attentionCount": 0
+    "attentionCount": 5
   },
   {
     "artist": {
@@ -1539,7 +1539,7 @@
     ],
     "topPositive": "Strong box office of $5,307 with healthy sell-through exceeded the $1,446 guarantee, and…",
     "topNegative": "Settlement remains disputed despite signoff; total expenses of $1,658 significantly excee…",
-    "attentionCount": 3
+    "attentionCount": 7
   },
   {
     "artist": {
@@ -1627,7 +1627,7 @@
     ],
     "topPositive": "Venue met flat guarantee of $767 and settled cleanly with artist sign-off.",
     "topNegative": "Sellout bonus of $200 was not paid despite deal terms stating '$767 + $200 on sellout'—no…",
-    "attentionCount": 0
+    "attentionCount": 2
   },
   {
     "artist": {
@@ -1719,7 +1719,7 @@
     ],
     "topPositive": "Settlement completed smoothly with artist receiving $1,053.",
     "topNegative": "Total expenses reported at $1,730 far exceed the $350 contractual cap, creating a substan…",
-    "attentionCount": 0
+    "attentionCount": 3
   },
   {
     "artist": {
@@ -1803,7 +1803,7 @@
     ],
     "topPositive": "Strong ticket sales of $7,528 gross with no guaranteed minimum required.",
     "topNegative": "Total expenses of $1,540 exceeded the $950 cap by $590, and marketing recoup was pre-dedu…",
-    "attentionCount": 0
+    "attentionCount": 3
   },
   {
     "artist": {
@@ -1841,7 +1841,7 @@
     ],
     "topPositive": "Clean settlement with flat guarantee of $1,865 fully paid to artist.",
     "topNegative": "Total expenses of $1,761 exceeded the $900 cap by $861, creating a significant overage th…",
-    "attentionCount": 0
+    "attentionCount": 5
   },
   {
     "artist": {
@@ -1883,7 +1883,7 @@
     ],
     "topPositive": "Settlement completed cleanly with artist paid $3,331.",
     "topNegative": "Actual expenses of $1,452 exceeded the $1,300 cap by $152, creating a recoup overage that…",
-    "attentionCount": 0
+    "attentionCount": 3
   },
   {
     "artist": {
@@ -1971,7 +1971,7 @@
     ],
     "topPositive": "Clean settlement with gross box office of $5,673 yielding $2,734.",
     "topNegative": "Settlement marked as 'disputed' despite signoff emoji; total expenses of $1,839 significa…",
-    "attentionCount": 1
+    "attentionCount": 6
   },
   {
     "artist": {
@@ -2043,7 +2043,7 @@
     ],
     "topPositive": "Venue met the $2,713 guarantee and achieved clean settlement with artist signoff.",
     "topNegative": "Total expenses of $1,524 exceeded the $1,350 cap by $174, creating a $174 overage that wa…",
-    "attentionCount": 0
+    "attentionCount": 4
   },
   {
     "artist": {
@@ -2211,7 +2211,7 @@
     ],
     "topPositive": "Clean settlement on a weeknight show with gross box office of $4,976 against a $2,136 fla…",
     "topNegative": "Expenses totaled $1,363, significantly exceeding the $650 cap by $713.",
-    "attentionCount": 0
+    "attentionCount": 1
   },
   {
     "artist": {
@@ -2587,6 +2587,98 @@
   },
   {
     "artist": {
+      "id": "artist_newdemo_atlas_court",
+      "name": "[NEW DEMO] Atlas Court",
+      "agentId": "agent_jordan_wells",
+      "managerEmail": null,
+      "genre": "Indie Rock",
+      "priorShowCount": 3
+    },
+    "agent": {
+      "id": "agent_jordan_wells",
+      "name": "Jordan Wells",
+      "agencyId": "agcy_independent",
+      "email": "jordan@wellstalent.com",
+      "phone": null,
+      "preferencesNotes": null
+    },
+    "agency": {
+      "id": "agcy_independent",
+      "name": "Independent"
+    },
+    "showCount": 4,
+    "lastShowDate": "2026-06-11",
+    "topDealType": "vs",
+    "dealTypes": [
+      {
+        "dealType": "vs",
+        "count": 4
+      }
+    ],
+    "topPositive": null,
+    "topNegative": null,
+    "attentionCount": 0
+  },
+  {
+    "artist": {
+      "id": "artist_newdemo_bramble_hollow",
+      "name": "[NEW DEMO] Bramble Hollow",
+      "agentId": "agent_jordan_wells",
+      "managerEmail": null,
+      "genre": "Folk",
+      "priorShowCount": 3
+    },
+    "agent": {
+      "id": "agent_jordan_wells",
+      "name": "Jordan Wells",
+      "agencyId": "agcy_independent",
+      "email": "jordan@wellstalent.com",
+      "phone": null,
+      "preferencesNotes": null
+    },
+    "agency": {
+      "id": "agcy_independent",
+      "name": "Independent"
+    },
+    "showCount": 4,
+    "lastShowDate": "2026-06-20",
+    "topDealType": "vs",
+    "dealTypes": [
+      {
+        "dealType": "vs",
+        "count": 4
+      }
+    ],
+    "topPositive": null,
+    "topNegative": null,
+    "attentionCount": 0
+  },
+  {
+    "artist": {
+      "id": "artist_newdemo_cinder_path",
+      "name": "[NEW DEMO] Cinder Path",
+      "agentId": null,
+      "managerEmail": null,
+      "genre": "Garage Rock",
+      "priorShowCount": 1
+    },
+    "agent": null,
+    "agency": null,
+    "showCount": 2,
+    "lastShowDate": "2026-07-04",
+    "topDealType": "vs",
+    "dealTypes": [
+      {
+        "dealType": "vs",
+        "count": 2
+      }
+    ],
+    "topPositive": null,
+    "topNegative": null,
+    "attentionCount": 0
+  },
+  {
+    "artist": {
       "id": "artist_demo_drowsy_beacon",
       "name": "Drowsy Beacon",
       "agentId": null,
@@ -2659,78 +2751,6 @@
   },
   {
     "artist": {
-      "id": "artist_newdemo_atlas_court",
-      "name": "[NEW DEMO] Atlas Court",
-      "agentId": null,
-      "managerEmail": null,
-      "genre": "Indie Rock",
-      "priorShowCount": 0
-    },
-    "agent": null,
-    "agency": null,
-    "showCount": 1,
-    "lastShowDate": "2026-06-04",
-    "topDealType": "vs",
-    "dealTypes": [
-      {
-        "dealType": "vs",
-        "count": 1
-      }
-    ],
-    "topPositive": null,
-    "topNegative": null,
-    "attentionCount": 0
-  },
-  {
-    "artist": {
-      "id": "artist_newdemo_bramble_hollow",
-      "name": "[NEW DEMO] Bramble Hollow",
-      "agentId": null,
-      "managerEmail": null,
-      "genre": "Folk",
-      "priorShowCount": 0
-    },
-    "agent": null,
-    "agency": null,
-    "showCount": 1,
-    "lastShowDate": "2026-06-13",
-    "topDealType": "vs",
-    "dealTypes": [
-      {
-        "dealType": "vs",
-        "count": 1
-      }
-    ],
-    "topPositive": null,
-    "topNegative": null,
-    "attentionCount": 0
-  },
-  {
-    "artist": {
-      "id": "artist_newdemo_cinder_path",
-      "name": "[NEW DEMO] Cinder Path",
-      "agentId": null,
-      "managerEmail": null,
-      "genre": "Garage Rock",
-      "priorShowCount": 0
-    },
-    "agent": null,
-    "agency": null,
-    "showCount": 1,
-    "lastShowDate": "2026-06-27",
-    "topDealType": "vs",
-    "dealTypes": [
-      {
-        "dealType": "vs",
-        "count": 1
-      }
-    ],
-    "topPositive": null,
-    "topNegative": null,
-    "attentionCount": 0
-  },
-  {
-    "artist": {
       "id": "artist_newdemo_driftline",
       "name": "[NEW DEMO] Driftline",
       "agentId": null,
@@ -2741,7 +2761,7 @@
     "agent": null,
     "agency": null,
     "showCount": 1,
-    "lastShowDate": "2026-05-31",
+    "lastShowDate": "2026-06-07",
     "topDealType": "vs",
     "dealTypes": [
       {
@@ -2765,7 +2785,7 @@
     "agent": null,
     "agency": null,
     "showCount": 1,
-    "lastShowDate": "2026-07-08",
+    "lastShowDate": "2026-07-15",
     "topDealType": "vs",
     "dealTypes": [
       {
@@ -2789,7 +2809,7 @@
     "agent": null,
     "agency": null,
     "showCount": 1,
-    "lastShowDate": "2026-07-23",
+    "lastShowDate": "2026-07-30",
     "topDealType": "vs",
     "dealTypes": [
       {
@@ -2813,7 +2833,7 @@
     "agent": null,
     "agency": null,
     "showCount": 1,
-    "lastShowDate": "2026-06-09",
+    "lastShowDate": "2026-06-16",
     "topDealType": "percentage_of_net",
     "dealTypes": [
       {
@@ -2831,13 +2851,13 @@
       "name": "[NEW DEMO] Hollow Bay",
       "agentId": null,
       "managerEmail": null,
-      "genre": "Indie Pop",
+      "genre": "Experimental Drone",
       "priorShowCount": 0
     },
     "agent": null,
     "agency": null,
     "showCount": 1,
-    "lastShowDate": "2026-06-20",
+    "lastShowDate": "2026-06-27",
     "topDealType": "percentage_of_net",
     "dealTypes": [
       {
@@ -2861,7 +2881,7 @@
     "agent": null,
     "agency": null,
     "showCount": 1,
-    "lastShowDate": "2026-05-27",
+    "lastShowDate": "2026-06-03",
     "topDealType": "percentage_of_net",
     "dealTypes": [
       {
@@ -2885,7 +2905,7 @@
     "agent": null,
     "agency": null,
     "showCount": 1,
-    "lastShowDate": "2026-07-01",
+    "lastShowDate": "2026-07-08",
     "topDealType": "percentage_of_net",
     "dealTypes": [
       {
@@ -2909,7 +2929,7 @@
     "agent": null,
     "agency": null,
     "showCount": 1,
-    "lastShowDate": "2026-05-25",
+    "lastShowDate": "2026-06-01",
     "topDealType": "door",
     "dealTypes": [
       {
@@ -2933,7 +2953,7 @@
     "agent": null,
     "agency": null,
     "showCount": 1,
-    "lastShowDate": "2026-06-15",
+    "lastShowDate": "2026-06-22",
     "topDealType": "door",
     "dealTypes": [
       {
@@ -2957,7 +2977,7 @@
     "agent": null,
     "agency": null,
     "showCount": 1,
-    "lastShowDate": "2026-07-12",
+    "lastShowDate": "2026-07-19",
     "topDealType": "door",
     "dealTypes": [
       {
@@ -2981,7 +3001,7 @@
     "agent": null,
     "agency": null,
     "showCount": 1,
-    "lastShowDate": "2026-06-07",
+    "lastShowDate": "2026-06-14",
     "topDealType": "percentage_of_gross",
     "dealTypes": [
       {
@@ -3005,7 +3025,7 @@
     "agent": null,
     "agency": null,
     "showCount": 1,
-    "lastShowDate": "2026-06-24",
+    "lastShowDate": "2026-07-01",
     "topDealType": "percentage_of_gross",
     "dealTypes": [
       {
