@@ -31,11 +31,11 @@
  *   pnpm --filter @workspace/api-server exec tsx scripts/seedSgpRangeDemo.ts
  */
 import { db } from "../src/db";
-import { artists, shows, deals, settlements, switchSuggestions } from "../src/db/schema";
+import { artists, shows, deals, settlements, switchSuggestions, guaranteeSuggestions } from "../src/db/schema";
 import { eq, like, and, inArray } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { generateAndPersist } from "../src/lib/smartSwitch";
-import { clearGuaranteeCache } from "../src/lib/smartGuarantee";
+import { clearGuaranteeCache, generateAndPersistGuarantee } from "../src/lib/smartGuarantee";
 
 const VENUE_ID = "venue_crescent";
 const ESTABLISHED_AGENT = "agent_jordan_wells";
@@ -94,6 +94,7 @@ async function clearOldHistory(): Promise<void> {
   if (old.length === 0) return;
   const ids = old.map((s) => s.id);
   await db.delete(switchSuggestions).where(inArray(switchSuggestions.showId, ids));
+  await db.delete(guaranteeSuggestions).where(inArray(guaranteeSuggestions.showId, ids));
   await db.delete(settlements).where(inArray(settlements.showId, ids));
   await db.delete(deals).where(inArray(deals.showId, ids));
   await db.delete(shows).where(inArray(shows.id, ids));
@@ -205,9 +206,14 @@ async function main() {
       });
     }
 
-    // 3) Invalidate the persisted Smart Switch suggestion for this show so
-    //    we regenerate against the new context.
+    // 3) Invalidate BOTH persisted suggestions for this show so they
+    //    regenerate against the new context. The Smart Switch row and the
+    //    Smart Guaranteed Price row come from the same engine
+    //    (`generateGuarantee`) but are written into two tables — wiping
+    //    only one of them is what caused the "two different projections
+    //    on the same deal" drift the team flagged in May-2026.
     await db.delete(switchSuggestions).where(eq(switchSuggestions.showId, p.showId));
+    await db.delete(guaranteeSuggestions).where(eq(guaranteeSuggestions.showId, p.showId));
 
     console.log(
       `  ${p.artistId.padEnd(38)} agent=${p.setAgent ?? "—".padEnd(20)}` +
@@ -219,21 +225,31 @@ async function main() {
   //    new artist→agent links and synthetic past settlements.
   clearGuaranteeCache();
 
-  // 5) Re-generate Smart Switch suggestions for the 5 demo shows.
-  console.log("\nRegenerating Smart Switch suggestions:");
+  // 5) Re-generate BOTH suggestions for each demo show. The SGP row is
+  //    regenerated first so that Smart Switch — which reads from the SGP
+  //    engine internally at tier A/B — has the freshest cached engine
+  //    output to anchor on. Without this both-tables refresh the persisted
+  //    SGP row stays stuck on whatever was computed at boot before any
+  //    demo history existed.
+  console.log("\nRegenerating Smart Guaranteed Price + Smart Switch:");
   for (const p of PLANS) {
+    const sgp = await generateAndPersistGuarantee(p.showId);
     const { suggestion, reason } = await generateAndPersist(p.showId, { force: true });
     if (!suggestion) {
-      console.log(`  ${p.showId.padEnd(34)} (no suggestion: ${reason})`);
+      console.log(`  ${p.showId.padEnd(34)} switch=(no suggestion: ${reason})  sgp=${sgp.suggestion?.confidenceTier ?? "—"}`);
       continue;
     }
     const flat = suggestion.suggestedFlat != null
       ? `$${suggestion.suggestedFlat.toLocaleString()}`
       : "(door hybrid)";
+    const sgpFlat = sgp.suggestion?.suggestedPrice != null
+      ? `$${sgp.suggestion.suggestedPrice.toLocaleString()}`
+      : "—";
     console.log(
-      `  ${p.showId.padEnd(34)} tier=${suggestion.confidenceTier}` +
+      `  ${p.showId.padEnd(34)} switch tier=${suggestion.confidenceTier}` +
       ` source=${suggestion.source.padEnd(18)} flat=${flat}` +
-      ` n=${suggestion.sampleSize}`,
+      `  ·  sgp tier=${sgp.suggestion?.confidenceTier ?? "—"} flat=${sgpFlat}` +
+      `  n=${suggestion.sampleSize}`,
     );
   }
   console.log("\nDone.");

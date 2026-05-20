@@ -198,6 +198,7 @@ export default function ShowDetailPage() {
               deal={deal}
               settlement={settlement}
               initial={data.switchSuggestion}
+              sgp={data.guaranteeSuggestion}
               onApplied={reload}
             />
           )}
@@ -234,7 +235,7 @@ export default function ShowDetailPage() {
                 <>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     <Field
-                      label="Guarantee" mono
+                      label="Agent guarantee" mono
                       value={deal.guaranteeAmount != null ? formatMoney(deal.guaranteeAmount) : "—"}
                     />
                     <Field
@@ -550,12 +551,19 @@ function friendlySwitchError(raw: string): string {
 }
 
 function SmartSwitchPanel({
-  showId, deal, settlement, initial, onApplied,
+  showId, deal, settlement, initial, sgp, onApplied,
 }: {
   showId: string;
   deal: Deal;
   settlement: Settlement | null;
   initial: SwitchSuggestion | null;
+  // Same engine output as `initial.suggestedFlat` for tier A/B — passed
+  // through so the card can show the math breakdown (expected gross,
+  // capped expenses, breakeven, projected venue net) without rendering a
+  // second card. Previously we rendered two cards reading two separately
+  // persisted rows, which drifted whenever only one was regenerated and
+  // looked like "two different projections on the same deal."
+  sgp: GuaranteeSuggestion | null;
   onApplied: () => void;
 }) {
   const [sug, setSug] = useState<SwitchSuggestion | null>(initial);
@@ -658,7 +666,7 @@ function SmartSwitchPanel({
                       ) : (
                         <div className="grid grid-cols-2 gap-3">
                           <div className="rounded-lg bg-white/60 ring-1 ring-ink-200/50 p-3">
-                            <div className="eyebrow text-[10px] text-ink-500 mb-1">Agent's guarantee</div>
+                            <div className="eyebrow text-[10px] text-ink-500 mb-1">Agent guarantee</div>
                             <div className="text-[28px] font-mono tabular font-semibold text-ink-900 leading-none">
                               {formatMoney(agentG)}
                             </div>
@@ -739,6 +747,70 @@ function SmartSwitchPanel({
                         Projected artist payout <span className="font-mono tabular">~{formatMoney(sug.bandLow ?? 0)}</span> – <span className="font-mono tabular">{formatMoney(sug.bandHigh)}</span>
                       </div>
                     )}
+                  </div>
+                )}
+
+                {/* How we got there — math from the same SGP engine that
+                    produced the suggested flat above. Only shown when the
+                    Smart Switch suggestion is data-backed by SGP (sgp_engine
+                    source at tier A/B) AND we have a fresh SGP row to read
+                    from. At the conservative `guarantee_amount` fallback
+                    the breakdown isn't meaningful (the flat just mirrors
+                    the contract guarantee), so we hide it to avoid the
+                    impression that a different number is being projected. */}
+                {sug.source === "sgp_engine" && sug.suggestedFlat != null && sgp && (
+                  <div className="pt-3 border-t border-ink-200/40 space-y-2">
+                    <div className="eyebrow text-[10px] text-ink-500">
+                      How we got there
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      <div className="rounded-lg bg-white/60 ring-1 ring-ink-200/50 p-2.5">
+                        <div className="eyebrow text-[10px] text-ink-500 mb-1">Expected gross</div>
+                        <div className="font-mono tabular text-[14px] text-ink-900">{formatMoney(sgp.expectedGross)}</div>
+                      </div>
+                      <div className="rounded-lg bg-white/60 ring-1 ring-ink-200/50 p-2.5">
+                        <div className="eyebrow text-[10px] text-ink-500 mb-1">Capped expenses</div>
+                        <div className="font-mono tabular text-[14px] text-ink-900">{formatMoney(sgp.expenseEstimate)}</div>
+                      </div>
+                      <div className="rounded-lg bg-white/60 ring-1 ring-ink-200/50 p-2.5">
+                        <div className="eyebrow text-[10px] text-ink-500 mb-1">Breakeven gross</div>
+                        <div className="font-mono tabular text-[14px] text-ink-900">{formatMoney(sgp.breakevenGross)}</div>
+                      </div>
+                      {(() => {
+                        // Projected venue net = (gross − fees) − expenses − flat.
+                        // Same cushion math as `computeInsuranceTier`. We
+                        // anchor the flat to the Smart Switch suggestion
+                        // (`sug.suggestedFlat`), not to `sgp.suggestedPrice`,
+                        // so the tile always reflects the headline number
+                        // shown at the top of the card — even in the rare
+                        // race where the two persisted rows haven't been
+                        // refreshed against the exact same context yet.
+                        const flat = sug.suggestedFlat as number;
+                        const projected = sgp.netAfterFees - sgp.expenseEstimate - flat;
+                        const positive = projected >= 0;
+                        return (
+                          <div
+                            className={`rounded-lg p-2.5 ring-1 ${
+                              positive
+                                ? "bg-emerald-50/70 ring-emerald-200/70"
+                                : "bg-rose-50/70 ring-rose-200/70"
+                            }`}
+                          >
+                            <div className="eyebrow text-[10px] text-ink-500 mb-1">
+                              Projected venue net
+                            </div>
+                            <div
+                              className={`font-mono tabular text-[14px] font-semibold ${
+                                positive ? "text-emerald-800" : "text-rose-800"
+                              }`}
+                            >
+                              {positive ? "" : "−"}
+                              {formatMoney(Math.abs(projected))}
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
                   </div>
                 )}
 
@@ -854,6 +926,14 @@ function SmartSwitchPanel({
 }
 
 
+
+// Lean SGP-only panel for non-flat deals that fall outside the Smart Switch
+// window (e.g. vs/%net deals outside the $1–5K bucket, where switching to a
+// flat isn't supported but the SGP benchmark is still useful). Renders the
+// same "How we got there" math + projected-venue-net tile as the Smart
+// Switch card so the booker sees a single coherent set of numbers across
+// both surfaces — they're both reading the same `generateGuarantee` engine,
+// just at different deal sizes.
 function SmartGuaranteedPricePanel({
   showId, deal, settlement, initial,
 }: {
@@ -882,7 +962,7 @@ function SmartGuaranteedPricePanel({
         <div>
           <CardTitle className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-sky-700" />
-            Smart Guaranteed Price <span className="text-[10px] uppercase tracking-wider font-mono text-ink-400 ml-1">insight</span>
+            Smart Guaranteed Price
           </CardTitle>
           <CardDescription>
             {settlement
@@ -910,7 +990,7 @@ function SmartGuaranteedPricePanel({
             <div className="md:col-span-2 space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-lg bg-white/60 ring-1 ring-ink-200/50 p-3">
-                  <div className="eyebrow text-[10px] text-ink-500 mb-1">Agent's guarantee</div>
+                  <div className="eyebrow text-[10px] text-ink-500 mb-1">Agent guarantee</div>
                   <div className="text-[28px] font-mono tabular font-semibold text-ink-900 leading-none">
                     {formatMoney(agentG)}
                   </div>
@@ -939,18 +1019,8 @@ function SmartGuaranteedPricePanel({
                   <div className="font-mono tabular text-[14px] text-ink-900">{formatMoney(sug.breakevenGross)}</div>
                 </div>
                 {(() => {
-                  // Projected venue net at the suggested flat. Uses the same
-                  // cushion math as `computeInsuranceTier`: net-of-fees minus
-                  // expense estimate minus the SGP-suggested payout. Only
-                  // shown for Tier A / B (the data-safe tiers) — at C / D
-                  // the projection rests on too-thin samples to publish.
-                  const projected =
-                    sug.netAfterFees != null
-                      ? sug.netAfterFees - sug.expenseEstimate - sug.suggestedPrice
-                      : null;
-                  const isConfident =
-                    sug.confidenceTier === "A" || sug.confidenceTier === "B";
-                  if (projected == null) return null;
+                  const projected = sug.netAfterFees - sug.expenseEstimate - sug.suggestedPrice;
+                  const isConfident = sug.confidenceTier === "A" || sug.confidenceTier === "B";
                   const positive = projected >= 0;
                   return (
                     <div
@@ -1017,32 +1087,6 @@ function SmartGuaranteedPricePanel({
                   Reflects historical-data backing — winner margin and cell sample size.
                 </div>
               </div>
-              <div>
-                <div className="eyebrow text-[10px] text-ink-500 mb-2">Artist familiarity</div>
-                {(() => {
-                  const f = familiarityLabel(sug.artistShowCount);
-                  return (
-                    <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg ring-1 text-[12px] font-medium ${FAMILIARITY_COLOR[f.tone]}`}>
-                      <span>{f.label}</span>
-                    </div>
-                  );
-                })()}
-                <div className="text-[11px] text-ink-500 mt-2">
-                  {sug.agentShowCount > 0
-                    ? <>Agent has <span className="font-mono tabular">{sug.agentShowCount}</span> other show{sug.agentShowCount === 1 ? "" : "s"} here.</>
-                    : <>No prior agent history at this venue.</>}
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={generate}
-                disabled={busy}
-                className="text-[11px] text-ink-500 hover:text-sky-700 underline-offset-2 hover:underline inline-flex items-center gap-1 disabled:opacity-50"
-                title="Recompute against the latest pricing engine"
-              >
-                {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
-                {busy ? "Recomputing…" : "Recompute"}
-              </button>
             </div>
           </div>
         )}

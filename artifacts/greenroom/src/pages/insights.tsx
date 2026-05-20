@@ -2104,7 +2104,7 @@ function BacktestBreakdown({ item }: { item: GuaranteeBacktestItem }) {
 
       <div className="grid grid-cols-3 gap-3">
         <div className="rounded ring-1 ring-ink-200/60 bg-white p-2.5">
-          <div className="eyebrow text-[10px] text-ink-500 mb-1">Agent's guarantee</div>
+          <div className="eyebrow text-[10px] text-ink-500 mb-1">Agent guarantee</div>
           <div className="text-[15px] font-mono tabular text-ink-900">
             ${item.agentGuarantee.toLocaleString()}
           </div>
