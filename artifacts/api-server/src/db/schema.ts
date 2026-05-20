@@ -174,16 +174,26 @@ export const switchSuggestions = sqliteTable("switch_suggestions", {
     .notNull().default("suggested"),
   decidedAt: integer("decided_at", { mode: "timestamp" }),
   // Provenance of suggestedFlat / projection:
-  //   sgp_engine        — Smart Guaranteed Price 7-step calc
-  //   guarantee_amount  — fell back to the contract guarantee (vs/pn $1–5K)
-  //   cell_mean         — historical avg payout from comparable cell
-  //   door_hybrid_calc  — door hybrid projection from cell stats
-  //   door_dead_pool    — door deal where avail ≤ floor (artist gets floor)
-  //   suppressed        — cell has too little data (e.g. door $15K+, n=1)
+  //   sgp_engine               — Smart Guaranteed Price 7-step calc
+  //   guarantee_amount         — DEPRECATED. Legacy rows that mirrored the
+  //                              contract guarantee back as the suggested
+  //                              flat for vs/pn $1–5K when SGP was low
+  //                              confidence. Removed May 2026 because it
+  //                              mixed agreement data into a module that's
+  //                              meant to be pure history + projection.
+  //                              New rows use `insufficient_confidence`.
+  //   insufficient_confidence  — SGP returned tier C/D or couldn't compute.
+  //                              No suggested flat is emitted; the UI shows
+  //                              a "not enough data" message instead.
+  //   cell_mean                — historical avg payout from comparable cell
+  //   door_hybrid_calc         — door hybrid projection from cell stats
+  //   door_dead_pool           — door deal where avail ≤ floor (artist gets floor)
+  //   suppressed               — cell has too little data (e.g. door $15K+, n=1)
   source: text("source", {
     enum: [
       "sgp_engine",
       "guarantee_amount",
+      "insufficient_confidence",
       "cell_mean",
       "door_hybrid_calc",
       "door_dead_pool",

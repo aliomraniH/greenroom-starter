@@ -76,35 +76,45 @@ async function seedPastVsDeals(count: number, payout: number, gross: number, exp
 }
 
 describe("smartSwitch — audit fixes", () => {
-  it("vs/$1–5K returns source=guarantee_amount and matches deal.guaranteeAmount", async () => {
-    // Seed enough comparable history that the cell exists, but the suggestion
-    // should still come from the contract guarantee (audit's key finding).
+  it("vs/$1–5K returns source=insufficient_confidence with null flat when SGP can't run", async () => {
+    // Without showId we skip the SGP path entirely. Previously this branch
+    // mirrored deal.guaranteeAmount back as the suggested flat (source=
+    // guarantee_amount). That was rejected as data mixing — the contract
+    // guarantee is agreement-side data and has no place in a module that
+    // is supposed to be pure history + projection. New behavior: emit a
+    // shape=flat row with suggestedFlat=null and source=
+    // insufficient_confidence so the UI can render a "discuss with agent"
+    // message.
     await seedPastVsDeals(5, 1466, 4000, 1500);
     clearSmartSwitchCache();
 
-    const dealGuarantee = 2200;
     const sug = await generateSuggestion(
       {
         id: "d-target", showId: "s-target", dealType: "vs",
-        guaranteeAmount: dealGuarantee, percentage: 80, percentageBasis: null,
+        guaranteeAmount: 2200, percentage: 80, percentageBasis: null,
         expenseCap: null, hospitalityCap: null, bonusesJson: null,
         dealNotesFreetext: null, createdAt: new Date(),
       },
       0,
-      // no showId → skip SGP path, force guarantee/cell-mean fallback
+      // no showId → skip SGP path, exercise insufficient-confidence path
     );
     expect(sug).not.toBeNull();
     expect(sug!.shape).toBe("flat");
-    expect(sug!.source).toBe("guarantee_amount");
-    expect(sug!.suggestedFlat).toBe(dealGuarantee);
+    expect(sug!.source).toBe("insufficient_confidence");
+    expect(sug!.suggestedFlat).toBeNull();
+    // Basis copy should NOT reference the contract guarantee.
+    expect(sug!.basis).not.toMatch(/\$2,?200/);
+    expect(sug!.basis).toMatch(/Not enough confidence or prior data/);
   });
 
-  it("guarantee_amount source preserves non-$50-aligned values exactly", async () => {
-    // Audit acceptance: anchored to the contract number, no rounding.
+  it("insufficient_confidence source does not leak the contract guarantee into basis copy", async () => {
+    // Audit acceptance: the suggestion module is pure history + projection.
+    // An odd contract guarantee must not appear anywhere in the response
+    // body, because doing so would imply we're using it as an anchor.
     await seedPastVsDeals(3, 2000, 5000, 1500);
     clearSmartSwitchCache();
 
-    const oddGuarantee = 2237; // not a multiple of 50
+    const oddGuarantee = 2237; // distinctive non-round number
     const sug = await generateSuggestion(
       {
         id: "d-odd", showId: "s-odd", dealType: "vs",
@@ -114,21 +124,16 @@ describe("smartSwitch — audit fixes", () => {
       },
       0,
     );
-    expect(sug!.source).toBe("guarantee_amount");
-    expect(sug!.suggestedFlat).toBe(2237);
+    expect(sug!.source).toBe("insufficient_confidence");
+    expect(sug!.suggestedFlat).toBeNull();
+    expect(sug!.basis).not.toContain("2237");
+    expect(sug!.basis).not.toContain("2,237");
   });
 
-  it("guarantee_amount source computes confidenceTier honestly from cell + familiarity", async () => {
-    // The guarantee_amount fallback used to hard-code tier="A" on the
-    // grounds that "the flat equals the contract number" is a structurally
-    // certain claim. That conflated two different uncertainties: the
-    // contract-equals-contract claim (always certain) vs. the data backing
-    // for this artist + cell (often thin). The UI now renders those as two
-    // separate chips — Confidence (data backing) and Familiarity (prior
-    // shows at venue) — so the backend tier must reflect ONLY the data
-    // dimension, computed by the same computeTier formula every other
-    // branch uses. For a first-time artist with no seeded history,
-    // cell.n=0 + artistShowsAtVenue=0 → tier D.
+  it("insufficient_confidence source falls back to tier D for first-time artists with no SGP", async () => {
+    // Without an SGP run we don't have a tier to copy through, so the
+    // insufficient-confidence response defaults to D — the most honest
+    // signal we have for "no data backing here".
     clearSmartSwitchCache();
     const sug = await generateSuggestion(
       {
@@ -139,11 +144,10 @@ describe("smartSwitch — audit fixes", () => {
       },
       0, // first-time artist
     );
-    expect(sug!.source).toBe("guarantee_amount");
+    expect(sug!.source).toBe("insufficient_confidence");
     expect(sug!.confidenceTier).toBe("D");
     expect(sug!.artistShowsAtVenue).toBe(0);
-    // Basis copy no longer bundles familiarity into the tier sentence.
-    expect(sug!.basis).not.toMatch(/Confidence tier .* \(first-time/);
+    expect(sug!.suggestedFlat).toBeNull();
   });
 
   it("door at $15K+ returns source=suppressed (not enough history)", async () => {

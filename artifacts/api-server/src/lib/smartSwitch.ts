@@ -133,6 +133,7 @@ export function clearSmartSwitchCache(): void {
 export type SwitchSource =
   | "sgp_engine"
   | "guarantee_amount"
+  | "insufficient_confidence"
   | "cell_mean"
   | "door_hybrid_calc"
   | "door_dead_pool"
@@ -213,14 +214,16 @@ export async function generateSuggestion(
     // (artist→agent→genre→venue waterfall, capped expense, % payout vs.
     // guarantee winner). This unifies "Smart Switch flat" and "Smart
     // Guaranteed Price" into one number for $1–5K vs / % of net deals.
+    let sgpTierIfLowConfidence: ConfidenceTier | null = null;
     if (showId) {
       const sgp = await generateGuarantee(showId, { allowPast: true, preloaded });
       if (sgp.suggestion) {
         const g = sgp.suggestion;
         const sgpTier = g.confidenceTier as ConfidenceTier;
         // Audit safety rule: SGP is only authoritative at tier A or B. When
-        // SGP itself is uncertain (C/D), prefer the contract guarantee — a
-        // known number on paper beats a low-confidence estimate.
+        // SGP itself is uncertain (C/D), fall through to the insufficient-
+        // confidence path below — we don't anchor to the contract guarantee
+        // because that would mix agreement data into the suggestion.
         const sgpIsConfident = sgpTier === "A" || sgpTier === "B";
         if (sgpIsConfident) {
           return {
@@ -243,87 +246,56 @@ export async function generateSuggestion(
             artistShowsAtVenue,
           };
         }
-        // SGP returned tier C/D — fall through to guarantee_amount fallback.
+        // SGP returned tier C/D — remember the tier so the insufficient-
+        // confidence response below can carry it through truthfully
+        // (booker sees "tier C, low data" rather than a blanket "D").
+        sgpTierIfLowConfidence = sgpTier;
       }
-      // fall through to guarantee/cell-mean path if SGP couldn't compute
-      // OR returned a low-confidence (C/D) suggestion.
+      // fall through to insufficient-confidence path if SGP couldn't
+      // compute OR returned a low-confidence (C/D) suggestion.
     }
 
-    // Conservative fallback (active only when SGP returned tier C/D):
-    // anchor the flat to the contract guarantee instead of the cell mean.
-    // Rationale: at low SGP confidence we don't know how THIS artist + agent
-    // will behave on settlement night, so the safest move is to mirror the
-    // number on the signed contract — a known dollar figure both sides
-    // already agreed to — and drop the percentage clause that drives
-    // recoup-line arithmetic.
+    // Insufficient-confidence path: surface an explicit "we don't have
+    // enough history or projection backing to recommend a number" state
+    // instead of silently returning null or mirroring the contract
+    // guarantee. The previous behavior reused `deal.guaranteeAmount` as
+    // the suggested flat at $1–5K, which leaked agreement data into a
+    // module that is supposed to be pure history + projection. The
+    // contract guarantee belongs to the current-deal calc, not to the
+    // suggestion.
     //
-    // Reality check the booker should be aware of (and that the basis
-    // string surfaces): across the venue's 137 historical vs/$1–5K
-    // settlements, the percentage clause out-paid the guarantee 87.6%
-    // of the time, with mean overshoot ~$2,338/show. So this fallback is
-    // a CONSERVATIVE floor — predictable for the venue, but the agent may
-    // push back because the artist historically gets more than the
-    // guarantee on most nights. The data-driven path (sgp_engine, used
-    // when SGP returns tier A/B above) is the one that emits a confident
-    // single number; this branch only fires when that data isn't there.
-    if (
-      bucket === "$1–5K" &&
-      deal.guaranteeAmount != null &&
-      deal.guaranteeAmount > 0
-    ) {
-      // Match the contract guarantee EXACTLY (no $50 rounding) — the
-      // suggestion is anchored to the real number on the contract, not a
-      // synthesized average.
-      const flat = deal.guaranteeAmount;
-      // Confidence tier is computed honestly from the cell sample size and
-      // artist familiarity — same formula as every other Smart Switch
-      // branch. The "flat equals the contract number" claim is a
-      // structural fact that's documented in the basis copy and made
-      // visible in the source enum (`guarantee_amount`); it is NOT a
-      // reason to override the data-backed confidence tier. Previously
-      // this branch hard-coded tier="A", which conflated structural
-      // certainty with statistical certainty and produced the
-      // contradictory "Tier A (first-time)" label the team flagged.
-      const sampleSize = cell?.n ?? 0;
-      const tier = computeTier(sampleSize, artistShowsAtVenue);
-      const dealName = deal.dealType === "vs" ? "vs" : "percentage-of-net";
-      return {
-        shape: "flat",
-        dealTypeFrom: deal.dealType,
-        suggestedFlat: flat,
-        doorFloor: null,
-        doorSplitPct: null,
-        doorExpenseCap: null,
-        confidenceTier: tier,
-        bandLow: cell ? roundTo50(cell.p10Payout) : null,
-        bandHigh: cell ? roundTo50(cell.p90Payout) : null,
-        bandWidth: cellBandWidth,
-        source: "guarantee_amount",
-        sampleSize,
-        basis:
-          `Smart Guaranteed Price didn't have enough comparable deals to ` +
-          `project a confident number for this artist + agent, so Smart ` +
-          `Switch fell back to the contract guarantee. The flat ` +
-          `(${formatMoney(flat)}) mirrors the signed number exactly — ` +
-          `same dollar value, no settlement-night recoup math. ` +
-          `Artist familiarity at this venue: ${familiarity}` +
-          `${artistShowsAtVenue < 2 ? " — tier ceiling demoted accordingly" : ""}. ` +
-          `Heads-up before sending: historically at this venue, ${dealName} ` +
-          `deals in the ${bucket} bucket had the percentage clause out-pay ` +
-          `the guarantee on most nights, so the agent may push back on ` +
-          `freezing the upside. Treat this as a conservative floor for the ` +
-          `negotiation, not a payout prediction.`,
-        isDeadPool: false,
-        artistShowsAtVenue,
-      };
-    }
-
-    // When neither SGP nor a contract guarantee gives us an anchor, do NOT
-    // emit a cell-mean. At low SGP confidence we don't have a defensible
-    // single number for THIS artist + agent; pretending we do is worse
-    // than staying silent. The booker simply sees no Smart Switch
-    // suggestion and continues with the original deal.
-    return null;
+    // We still emit a row (shape="flat", suggestedFlat=null) so the UI
+    // can render a clear "not enough data" message with the same
+    // structure the door-$15K+ suppressed branch uses below.
+    const sampleSize = cell?.n ?? 0;
+    const tier: ConfidenceTier = sgpTierIfLowConfidence ?? "D";
+    const dealName = deal.dealType === "vs" ? "vs" : "percentage-of-net";
+    return {
+      shape: "flat",
+      dealTypeFrom: deal.dealType,
+      suggestedFlat: null,
+      doorFloor: null,
+      doorSplitPct: null,
+      doorExpenseCap: null,
+      confidenceTier: tier,
+      bandLow: cell ? roundTo50(cell.p10Payout) : null,
+      bandHigh: cell ? roundTo50(cell.p90Payout) : null,
+      bandWidth: cellBandWidth,
+      source: "insufficient_confidence",
+      sampleSize,
+      basis:
+        `Not enough confidence or prior data to recommend a flat for this ` +
+        `${dealName} deal at ${bucket}. The Smart Guaranteed Price engine ` +
+        `${cell ? `had ${sampleSize} comparable settled show${sampleSize === 1 ? "" : "s"} in this cell, but` : "couldn't find comparable history, and"} ` +
+        `couldn't project a tier A/B number for this artist + agent ` +
+        `(artist familiarity at this venue: ${familiarity}). ` +
+        `Discuss the structure directly with the agent — Smart Switch ` +
+        `intentionally does not anchor to the contract guarantee here, ` +
+        `because mirroring the negotiated number is an agreement-side ` +
+        `fact, not a history-backed recommendation.`,
+      isDeadPool: false,
+      artistShowsAtVenue,
+    };
   }
 
   if (deal.dealType === "door") {

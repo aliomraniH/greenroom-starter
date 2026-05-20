@@ -732,6 +732,19 @@ function SmartSwitchPanel({
                   </div>
                 )}
 
+                {sug.shape === "flat" && sug.source === "insufficient_confidence" && (
+                  <div>
+                    <div className="eyebrow text-[10px] text-ink-500 mb-1.5">Suggested structure</div>
+                    <div className="text-[15px] text-ink-700 leading-snug">
+                      Not enough confidence or prior data to recommend a flat
+                      here. Smart Switch intentionally does not mirror the
+                      contract guarantee — that's an agreement-side number,
+                      not a history-backed recommendation. Discuss the
+                      structure directly with the agent.
+                    </div>
+                  </div>
+                )}
+
                 {sug.shape === "door_hybrid" && sug.source !== "suppressed" && (
                   <div>
                     <div className="eyebrow text-[10px] text-ink-500 mb-1.5">Suggested structure</div>

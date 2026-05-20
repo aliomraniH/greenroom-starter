@@ -161,6 +161,7 @@ export type ConfidenceTier = "A" | "B" | "C" | "D";
 export type SwitchSource =
   | "sgp_engine"
   | "guarantee_amount"
+  | "insufficient_confidence"
   | "cell_mean"
   | "door_hybrid_calc"
   | "door_dead_pool"
